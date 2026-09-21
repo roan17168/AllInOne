@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Tele-Sketch | PartyDeck</title>
+  <title>Tele-Sketch | PartyDeck Arcade</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../css/themes.css" />
   <link rel="stylesheet" href="../../css/base.css" />
   <link rel="stylesheet" href="style.css" />
@@ -15,10 +15,12 @@
 
   <!-- Header -->
   <header class="game-nav-header">
-    <button id="btnExit" class="icon-nav-btn" aria-label="Exit to Hub">✕ Hub</button>
+    <button id="btnExit" class="icon-nav-btn" aria-label="Exit to Hub">
+      <span id="exitIconSlot"></span> Hub
+    </button>
     <div class="status-indicator">
-      <span class="game-step-badge" id="stepBadge">SETUP</span>
-      <span class="step-player" id="activePlayerIndicator">Players Setup</span>
+      <span class="game-step-badge" id="stepBadge">SETUP // PHASE</span>
+      <span class="step-player" id="activePlayerIndicator">Roster Initialization</span>
     </div>
     <div class="turn-timer" id="turnTimer">45s</div>
   </header>
@@ -26,26 +28,29 @@
   <main class="game-container">
     <!-- PHASE 0: SETUP SCREEN -->
     <section id="phaseSetup" class="game-phase-card">
-      <h2 class="phase-title">🎨 Tele-Sketch Setup</h2>
-      <p class="phase-desc">Pass the phone in a circle. Draw what you read, guess what you see!</p>
+      <div class="phase-hero-icon" id="setupHeroIcon"></div>
+      <h2 class="phase-title">Tele-Sketch Setup</h2>
+      <p class="phase-desc">Pass the device in turn order. Draw what you read, guess what you see.</p>
       
       <div class="setup-roster-box">
         <h3>Turn Passing Order:</h3>
         <ol id="orderList" class="order-list"></ol>
         
         <form id="setupAddForm" class="player-input-row">
-          <input type="text" id="setupPlayerInput" placeholder="Add player name..." maxlength="16" />
+          <input type="text" id="setupPlayerInput" placeholder="ADD_PLAYER..." maxlength="16" />
           <button type="submit" class="btn-accent">+ Add</button>
         </form>
       </div>
 
-      <button id="btnStartGame" class="btn-primary btn-block">🚀 Start Tele-Sketch</button>
+      <button id="btnStartGame" class="btn-primary btn-block">
+        <span id="startIconSlot"></span> Start Sequence
+      </button>
     </section>
 
     <!-- PHASE 1: DRAWING STAGE -->
     <section id="phaseDraw" class="game-phase-card hidden">
       <div class="prompt-display-banner">
-        <span class="prompt-sub">YOUR SECRET PROMPT:</span>
+        <span class="prompt-sub">CURRENT SECRET PROMPT:</span>
         <h3 id="currentPromptText" class="prompt-text">A Dancing Cactus</h3>
       </div>
 
@@ -58,19 +63,21 @@
         <div class="palette-ribbon" id="paletteRibbon"></div>
         <div class="tools-actions-row">
           <input type="range" id="brushSize" min="2" max="24" value="5" aria-label="Brush size" />
-          <button id="btnUndo" class="tool-btn" title="Undo">↩️ Undo</button>
-          <button id="btnClearCanvas" class="tool-btn" title="Clear">🗑️ Clear</button>
+          <button id="btnUndo" class="tool-btn"><span id="undoIconSlot"></span> Undo</button>
+          <button id="btnClearCanvas" class="tool-btn"><span id="trashIconSlot"></span> Clear</button>
         </div>
       </div>
 
-      <button id="btnFinishDrawing" class="btn-primary btn-block">Done Drawing (Pass Phone) ➔</button>
+      <button id="btnFinishDrawing" class="btn-primary btn-block">
+        Confirm & Pass <span id="passDrawIconSlot"></span>
+      </button>
     </section>
 
     <!-- PHASE 2: GUESSING STAGE -->
     <section id="phaseGuess" class="game-phase-card hidden">
       <div class="guess-instruction">
-        <h3>🤔 What is this drawing?</h3>
-        <p>Look at the sketch below and enter your best guess!</p>
+        <h3>Identify The Sketch</h3>
+        <p>Inspect the canvas input and register your prediction.</p>
       </div>
 
       <div class="preview-drawing-box">
@@ -78,20 +85,22 @@
       </div>
 
       <div class="guess-input-box">
-        <input type="text" id="guessInput" placeholder="Enter your guess here..." maxlength="35" autocomplete="off" />
-        <button id="btnSubmitGuess" class="btn-primary btn-block">Submit Guess & Pass ➔</button>
+        <input type="text" id="guessInput" placeholder="ENTER_PREDICTION..." maxlength="35" autocomplete="off" />
+        <button id="btnSubmitGuess" class="btn-primary btn-block">
+          Submit & Pass <span id="passGuessIconSlot"></span>
+        </button>
       </div>
     </section>
 
     <!-- PHASE 3: FINALE SLIDESHOW -->
     <section id="phaseFinale" class="game-phase-card hidden">
-      <h2 class="phase-title">🎉 The Grand Reveal!</h2>
-      <p class="phase-desc">Watch how the original prompt evolved through the telephone chain.</p>
+      <h2 class="phase-title">Chain Declassification</h2>
+      <p class="phase-desc">Review the full mutation logs from initial seed to final guess.</p>
       
       <div id="chainsContainer" class="chains-container"></div>
 
       <div class="finale-actions">
-        <button id="btnRestart" class="btn-primary">🔄 Play Again</button>
+        <button id="btnRestart" class="btn-primary"><span id="restartIconSlot"></span> Play Again</button>
         <button id="btnFinaleExit" class="btn-ghost">Exit to Hub</button>
       </div>
     </section>
@@ -100,14 +109,17 @@
   <!-- PRIVACY CURTAIN / PASS SHIELD -->
   <div id="privacyShield" class="privacy-overlay hidden">
     <div class="shield-card">
-      <div class="shield-lock-icon">🔒</div>
-      <span class="shield-tag">NEXT UP</span>
-      <h2 id="nextPlayerPrompt">Pass phone to Alex</h2>
-      <p class="shield-warning">Do not reveal the screen until the phone is in your hands!</p>
-      <button id="btnUnlockShield" class="btn-primary pulse-btn">I am Ready (Tap to Open)</button>
+      <div class="shield-lock-icon" id="shieldLockIconSlot"></div>
+      <span class="shield-tag">SECURITY // HOLD</span>
+      <h2 id="nextPlayerPrompt">Pass to Alex</h2>
+      <p class="shield-warning">Do not unveil the terminal until device handover is complete.</p>
+      <button id="btnUnlockShield" class="btn-primary pulse-btn">
+        <span id="unlockIconSlot"></span> I Am Ready (Unveil)
+      </button>
     </div>
   </div>
 
+  <script src="../../js/utils/icons.js"></script>
   <script src="../../js/partydeck-sdk.js"></script>
   <script src="canvas-engine.js"></script>
   <script src="game-controller.js"></script>

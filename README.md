@@ -1,17 +1,11 @@
-# PartyDeck 🎮
+# PartyDeck (Arcade Edition) 🕹️
 
-> Zero-friction, offline-first party game hub designed for mobile browsers and tabletop group play.
+A zero-backend, 100% static party game hub engineered for offline mobile browsers and tabletop group play. Features a custom SVG vector HUD aesthetic with zero system emojis.
 
 ## 🚀 Instant Deployment (GitHub Pages)
 
 1. Push this repository to GitHub.
-2. Navigate to **Settings** > **Pages**.
-3. Under **Build and deployment** > **Source**, select `Deploy from a branch`.
-4. Choose `main` branch and `/ (root)` folder, then click **Save**.
-5. Your party hub is live at `https://<your-username>.github.io/<repo-name>/`!
-
-## 🧩 Adding New Games (Modular Architecture)
-
-Adding a game requires zero build steps:
-1. Create a folder in `games/<your-game-slug>/` containing `index.html`, `style.css`, and your game controller logic.
-2. Register the metadata in `js/games.config.js`.
+2. Go to **Settings** > **Pages**.
+3. Under **Build and deployment** > **Source**, choose `Deploy from a branch`.
+4. Select `main` branch and `/ (root)` folder, then click **Save**.
+5. Your arcade portal is live immediately!

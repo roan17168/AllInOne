@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#0b0c10" id="metaThemeColor" />
-  <title>PartyDeck | Zero-Friction Offline Party Games</title>
+  <meta name="theme-color" content="#08090c" id="metaThemeColor" />
+  <title>PartyDeck | Zero-Friction Offline Party Hub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/themes.css" />
   <link rel="stylesheet" href="css/base.css" />
 </head>
@@ -15,14 +15,14 @@
   <header class="hub-header">
     <div class="header-container">
       <div class="brand">
-        <span class="brand-badge">OFFLINE READY</span>
+        <span class="brand-badge">OFFLINE_SYSTEM // READY</span>
         <h1 class="brand-title">PARTY<span>DECK</span></h1>
       </div>
       
       <div class="theme-selector-wrap">
         <label for="themeSelect" class="sr-only">Choose Visual Theme</label>
         <div class="select-styled">
-          <span class="palette-icon">🎨</span>
+          <span id="themeIconSlot"></span>
           <select id="themeSelect" aria-label="Select Theme">
             <option value="cyber-neon">Cyber Neon</option>
             <option value="sunset-rave">Sunset Rave</option>
@@ -33,46 +33,44 @@
       </div>
     </div>
 
-    <!-- Quick Player Roster Ribbon -->
+    <!-- Quick Player Roster HUD Bar -->
     <section class="roster-bar">
       <div class="roster-summary">
-        <span class="roster-icon">👥</span>
-        <span id="rosterLabel">Active Players: <strong>None set</strong></span>
+        <span id="rosterIconSlot"></span>
+        <span id="rosterLabel">Active Roster: <strong>None set</strong></span>
       </div>
-      <button id="btnEditRoster" class="btn-ghost-sm">Manage Players</button>
+      <button id="btnEditRoster" class="btn-ghost-sm">Manage Roster</button>
     </section>
   </header>
 
   <main class="hub-main">
     <!-- Category Filter Bar -->
-    <nav class="filter-nav" aria-label="Game Categories">
-      <button class="filter-pill active" data-category="all">All Games <span class="badge-count" id="countAll">20</span></button>
-      <button class="filter-pill" data-category="creative">🎨 Creative</button>
-      <button class="filter-pill" data-category="deduction">🕵️ Deduction</button>
-      <button class="filter-pill" data-category="drinking">🍻 Drinking</button>
-      <button class="filter-pill" data-category="social">🗣️ Social</button>
-      <button class="filter-pill" data-category="action">⚡ Action</button>
-      <button class="filter-pill" data-category="bluffing">🃏 Bluffing</button>
-      <button class="filter-pill" data-category="trivia">🧠 Trivia</button>
+    <nav class="filter-nav" aria-label="Game Categories" id="filterNav">
+      <button class="filter-pill active" data-category="all">All Modules <span class="badge-count" id="countAll">20</span></button>
+      <button class="filter-pill" data-category="creative">Creative</button>
+      <button class="filter-pill" data-category="deduction">Deduction</button>
+      <button class="filter-pill" data-category="drinking">Drinking</button>
+      <button class="filter-pill" data-category="social">Social</button>
+      <button class="filter-pill" data-category="action">Action</button>
+      <button class="filter-pill" data-category="bluffing">Bluffing</button>
+      <button class="filter-pill" data-category="trivia">Trivia</button>
     </nav>
 
     <!-- Games Grid -->
-    <section class="games-grid" id="gamesGrid" aria-live="polite">
-      <!-- Injected dynamically via hub-ui.js -->
-    </section>
+    <section class="games-grid" id="gamesGrid" aria-live="polite"></section>
   </main>
 
   <!-- Player Roster Modal -->
   <dialog id="rosterModal" class="party-modal">
     <div class="modal-card">
       <header class="modal-header">
-        <h2>👥 Manage Party Roster</h2>
-        <button class="btn-close" id="btnCloseRoster" aria-label="Close modal">✕</button>
+        <h2 id="rosterModalTitle">Party Roster</h2>
+        <button class="btn-close" id="btnCloseRoster" aria-label="Close modal"></button>
       </header>
       <div class="modal-body">
-        <p class="modal-subtitle">Names entered here automatically pass turns in supported games.</p>
+        <p class="modal-subtitle">Registered players are automatically injected into turn sequences across all games.</p>
         <form id="addPlayerForm" class="player-input-row">
-          <input type="text" id="newPlayerName" placeholder="Enter player name..." maxlength="20" required autocomplete="off" />
+          <input type="text" id="newPlayerName" placeholder="PLAYER_NAME..." maxlength="18" required autocomplete="off" />
           <button type="submit" class="btn-accent">+ Add</button>
         </form>
         <ul id="rosterList" class="roster-tags-list"></ul>
@@ -88,12 +86,12 @@
   <dialog id="gameModal" class="party-modal">
     <div class="modal-card game-preview-card">
       <header class="modal-header modal-hero">
-        <span class="preview-icon" id="previewIcon">🎮</span>
+        <div class="preview-icon-box" id="previewIconBox"></div>
         <div>
-          <span class="preview-cat" id="previewCategory">CATEGORY</span>
+          <span class="preview-cat" id="previewCategory">MODULE // DEDUCTION</span>
           <h2 id="previewTitle">Game Title</h2>
         </div>
-        <button class="btn-close" id="btnCloseGameModal" aria-label="Close modal">✕</button>
+        <button class="btn-close" id="btnCloseGameModal" aria-label="Close modal"></button>
       </header>
       <div class="modal-body">
         <p class="preview-tagline" id="previewTagline"></p>
@@ -106,7 +104,7 @@
           </div>
           <div class="meta-item">
             <span class="meta-label">Est. Time</span>
-            <span class="meta-val" id="previewTime">15 min</span>
+            <span class="meta-val" id="previewTime">15m</span>
           </div>
           <div class="meta-item">
             <span class="meta-label">Drinking Mode</span>
@@ -118,15 +116,16 @@
       </div>
       <footer class="modal-footer">
         <button class="btn-ghost" id="btnCancelLaunch">Back</button>
-        <a id="btnLaunchGame" href="#" class="btn-primary btn-launch">🚀 Play Now</a>
+        <a id="btnLaunchGame" href="#" class="btn-primary btn-launch">Launch Module</a>
       </footer>
     </div>
   </dialog>
 
   <footer class="hub-footer">
-    <p>PartyDeck • 100% Client-Side • Pass-and-Play Hub</p>
+    <p>PARTYDECK // CLIENT-SIDE DISCONNECTED CONTROLLER ENGINE</p>
   </footer>
 
+  <script src="js/utils/icons.js"></script>
   <script src="js/games.config.js"></script>
   <script src="js/theme-engine.js"></script>
   <script src="js/partydeck-sdk.js"></script>

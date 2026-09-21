@@ -1,6 +1,6 @@
 /**
  * PARTYDECK Master Game Catalog Configuration
- * Complete registry of 20 games ready for plug-and-play expansion.
+ * Zero-emoji vector metadata configuration.
  */
 const PARTY_GAMES = [
   {
@@ -12,10 +12,10 @@ const PARTY_GAMES = [
     minPlayers: 4,
     maxPlayers: 12,
     drinkingMode: false,
-    estimatedTime: "15-25 min",
-    icon: "🎨",
+    estimatedTime: "15-25m",
+    iconKey: "palette",
     entryPath: "games/tele-sketch/index.html",
-    description: "The classic telephone game turned visual. Draw secret prompts, pass the phone, guess what you see, and watch the chain turn into absurd comedy."
+    description: "The classic telephone game turned visual. Draw secret prompts, pass the device, guess what you see, and watch the chain turn into absurd comedy."
   },
   {
     id: "infiltrator",
@@ -26,24 +26,24 @@ const PARTY_GAMES = [
     minPlayers: 3,
     maxPlayers: 10,
     drinkingMode: true,
-    estimatedTime: "10-15 min",
-    icon: "🕵️",
+    estimatedTime: "10-15m",
+    iconKey: "spy",
     entryPath: "games/infiltrator/index.html",
     description: "Everyone gets the secret location except the Infiltrator. Ask clever questions without giving the location away!"
   },
   {
     id: "kings-chalice",
     title: "King's Chalice",
-    tagline: "The Ultimate Digital Drinking Deck",
+    tagline: "The Digital Ring of Fire Deck",
     category: "drinking",
     tags: ["Party Classic", "Card Game", "Custom Rules"],
     minPlayers: 2,
     maxPlayers: 12,
     drinkingMode: true,
-    estimatedTime: "20-40 min",
-    icon: "🍻",
+    estimatedTime: "20-40m",
+    iconKey: "chalice",
     entryPath: "games/kings-chalice/index.html",
-    description: "Draw cards from the ring of fire. Includes interactive mini-games for Heaven, Categories, and Thumb Master."
+    description: "Draw cards from the ring of fire. Includes interactive helpers for Heaven, Categories, and Thumb Master."
   },
   {
     id: "social-roulette",
@@ -54,8 +54,8 @@ const PARTY_GAMES = [
     minPlayers: 3,
     maxPlayers: 15,
     drinkingMode: true,
-    estimatedTime: "15-30 min",
-    icon: "🔥",
+    estimatedTime: "15-30m",
+    iconKey: "flame",
     entryPath: "games/social-roulette/index.html",
     description: "An algorithmic party companion that injects player names into wild prompts, spicy questions, and party dares."
   },
@@ -68,8 +68,8 @@ const PARTY_GAMES = [
     minPlayers: 3,
     maxPlayers: 8,
     drinkingMode: false,
-    estimatedTime: "10 min",
-    icon: "🦎",
+    estimatedTime: "10m",
+    iconKey: "eye",
     entryPath: "games/chameleon-word/index.html",
     description: "Everyone knows the secret word on the coordinate grid except the Chameleon. Say single-word clues and hunt the impostor."
   },
@@ -82,8 +82,8 @@ const PARTY_GAMES = [
     minPlayers: 3,
     maxPlayers: 12,
     drinkingMode: true,
-    estimatedTime: "15-20 min",
-    icon: "🗳️",
+    estimatedTime: "15-20m",
+    iconKey: "vote",
     entryPath: "games/most-likely-to/index.html",
     description: "Vote on who in the room is most likely to end up in absurd situations. Real-time voting reveals the truth."
   },
@@ -96,8 +96,8 @@ const PARTY_GAMES = [
     minPlayers: 2,
     maxPlayers: 6,
     drinkingMode: false,
-    estimatedTime: "15-25 min",
-    icon: "🎲",
+    estimatedTime: "15-25m",
+    iconKey: "dice",
     entryPath: "games/liars-dice/index.html",
     description: "Roll secret virtual dice under your cup, bid on the total number of dice in the room, and call your friends liars."
   },
@@ -110,8 +110,8 @@ const PARTY_GAMES = [
     minPlayers: 4,
     maxPlayers: 12,
     drinkingMode: true,
-    estimatedTime: "10-15 min",
-    icon: "💣",
+    estimatedTime: "10-15m",
+    iconKey: "bomb",
     entryPath: "games/rapid-buzzer/index.html",
     description: "Get your team to guess the clue and pass the phone before the unpredictable ticking countdown explodes."
   },
@@ -124,8 +124,8 @@ const PARTY_GAMES = [
     minPlayers: 2,
     maxPlayers: 10,
     drinkingMode: false,
-    estimatedTime: "5-15 min",
-    icon: "📱",
+    estimatedTime: "5-15m",
+    iconKey: "device",
     entryPath: "games/sound-bites/index.html",
     description: "Hold the phone to your forehead. Guess the word from your friends' clues and tilt down for correct or up to pass."
   },
@@ -138,8 +138,8 @@ const PARTY_GAMES = [
     minPlayers: 4,
     maxPlayers: 10,
     drinkingMode: false,
-    estimatedTime: "15 min",
-    icon: "🖌️",
+    estimatedTime: "15m",
+    iconKey: "brush",
     entryPath: "games/fake-artist/index.html",
     description: "Everyone draws one single continuous line on the same canvas. The Fake Artist has no idea what is being drawn!"
   },
@@ -152,8 +152,8 @@ const PARTY_GAMES = [
     minPlayers: 5,
     maxPlayers: 10,
     drinkingMode: false,
-    estimatedTime: "20-30 min",
-    icon: "🛡️",
+    estimatedTime: "20-30m",
+    iconKey: "shield",
     entryPath: "games/resistance-cell/index.html",
     description: "Send teams on secret missions. Spies try to covertly fail them while operatives try to pass them."
   },
@@ -166,8 +166,8 @@ const PARTY_GAMES = [
     minPlayers: 3,
     maxPlayers: 10,
     drinkingMode: false,
-    estimatedTime: "10 min",
-    icon: "🐺",
+    estimatedTime: "10m",
+    iconKey: "moon",
     entryPath: "games/one-night-wolf/index.html",
     description: "Get secret night roles. Follow the digital voice narration, then wake up and vote to eliminate the werewolf."
   },
@@ -180,8 +180,8 @@ const PARTY_GAMES = [
     minPlayers: 2,
     maxPlayers: 10,
     drinkingMode: true,
-    estimatedTime: "20-40 min",
-    icon: "🍹",
+    estimatedTime: "20-40m",
+    iconKey: "warning",
     entryPath: "games/do-or-drink/index.html",
     description: "Hilarious and outrageous dares. Complete the challenge to earn points or take your punishment sips."
   },
@@ -194,8 +194,8 @@ const PARTY_GAMES = [
     minPlayers: 3,
     maxPlayers: 10,
     drinkingMode: false,
-    estimatedTime: "15-25 min",
-    icon: "🏆",
+    estimatedTime: "15-25m",
+    iconKey: "trophy",
     entryPath: "games/wits-wagers/index.html",
     description: "You don't need to know the exact answer. Guess any number, then bet your chips on who is closest without going over."
   },
@@ -208,8 +208,8 @@ const PARTY_GAMES = [
     minPlayers: 4,
     maxPlayers: 8,
     drinkingMode: false,
-    estimatedTime: "20-35 min",
-    icon: "🔐",
+    estimatedTime: "20-35m",
+    iconKey: "terminal",
     entryPath: "games/decrypto-blitz/index.html",
     description: "Transmit 3-digit secret codes to your teammates without letting the opposing team intercept the meaning."
   },
@@ -222,8 +222,8 @@ const PARTY_GAMES = [
     minPlayers: 2,
     maxPlayers: 6,
     drinkingMode: false,
-    estimatedTime: "15 min",
-    icon: "👑",
+    estimatedTime: "15m",
+    iconKey: "crown",
     entryPath: "games/coup-pocket/index.html",
     description: "Claim any role you want to gain wealth and eliminate rivals. Just ensure nobody calls your bluff!"
   },
@@ -236,10 +236,10 @@ const PARTY_GAMES = [
     minPlayers: 3,
     maxPlayers: 10,
     drinkingMode: true,
-    estimatedTime: "10-20 min",
-    icon: "⏱️",
+    estimatedTime: "10-20m",
+    iconKey: "clock",
     entryPath: "games/five-second-rule/index.html",
-    description: "Name 3 items in your category before the 5-second countdown finishes. Quick thinking guaranteed to cause laughter."
+    description: "Name 3 items in your category before the 5-second countdown finishes. Quick thinking guaranteed."
   },
   {
     id: "two-rooms-lite",
@@ -250,8 +250,8 @@ const PARTY_GAMES = [
     minPlayers: 6,
     maxPlayers: 16,
     drinkingMode: false,
-    estimatedTime: "15-20 min",
-    icon: "⚡",
+    estimatedTime: "15-20m",
+    iconKey: "zap",
     entryPath: "games/two-rooms-lite/index.html",
     description: "Split your party into two rooms. Blue protects the President; Red brings the Bomber. Trade hostages before time expires."
   },
@@ -264,8 +264,8 @@ const PARTY_GAMES = [
     minPlayers: 3,
     maxPlayers: 6,
     drinkingMode: false,
-    estimatedTime: "15-20 min",
-    icon: "💀",
+    estimatedTime: "15-20m",
+    iconKey: "skull",
     entryPath: "games/skull-digital/index.html",
     description: "Play cards face down. Bid on how many roses you can turn over across the room without revealing a fatal skull."
   },
@@ -278,8 +278,8 @@ const PARTY_GAMES = [
     minPlayers: 4,
     maxPlayers: 12,
     drinkingMode: true,
-    estimatedTime: "5-10 min",
-    icon: "👁️",
+    estimatedTime: "5-10m",
+    iconKey: "target",
     entryPath: "games/medusa-eye/index.html",
     description: "Put the phone in the middle of the table. Look up on 3! If you make eye contact with someone looking back, tap fast!"
   }

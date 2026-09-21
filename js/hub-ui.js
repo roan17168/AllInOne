@@ -1,17 +1,33 @@
 /**
  * PARTYDECK Hub UI Controller
- * Handles grid rendering, filtering, modals, and player roster management.
+ * Vector icon binding, filtering, and modal launchers.
  */
 document.addEventListener("DOMContentLoaded", () => {
+  // Inject Static Icons
+  const themeIconSlot = document.getElementById("themeIconSlot");
+  if (themeIconSlot) themeIconSlot.innerHTML = Icons.get("palette");
+
+  const rosterIconSlot = document.getElementById("rosterIconSlot");
+  if (rosterIconSlot) rosterIconSlot.innerHTML = Icons.get("users");
+
+  const btnCloseRoster = document.getElementById("btnCloseRoster");
+  if (btnCloseRoster) btnCloseRoster.innerHTML = Icons.get("close");
+
+  const btnCloseGameModal = document.getElementById("btnCloseGameModal");
+  if (btnCloseGameModal) btnCloseGameModal.innerHTML = Icons.get("close");
+
+  const rosterModalTitle = document.getElementById("rosterModalTitle");
+  if (rosterModalTitle) {
+    rosterModalTitle.innerHTML = `${Icons.get("users")} <span>PARTY ROSTER</span>`;
+  }
+
   const gamesGrid = document.getElementById("gamesGrid");
   const filterPills = document.querySelectorAll(".filter-pill");
   const countAll = document.getElementById("countAll");
 
-  // Modals
   const rosterModal = document.getElementById("rosterModal");
   const gameModal = document.getElementById("gameModal");
   const btnEditRoster = document.getElementById("btnEditRoster");
-  const btnCloseRoster = document.getElementById("btnCloseRoster");
   const btnSaveRoster = document.getElementById("btnSaveRoster");
   const btnClearRoster = document.getElementById("btnClearRoster");
   const addPlayerForm = document.getElementById("addPlayerForm");
@@ -19,12 +35,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const rosterList = document.getElementById("rosterList");
   const rosterLabel = document.getElementById("rosterLabel");
 
-  const btnCloseGameModal = document.getElementById("btnCloseGameModal");
   const btnCancelLaunch = document.getElementById("btnCancelLaunch");
   const btnLaunchGame = document.getElementById("btnLaunchGame");
 
-  // Preview elements
-  const previewIcon = document.getElementById("previewIcon");
+  const previewIconBox = document.getElementById("previewIconBox");
   const previewCategory = document.getElementById("previewCategory");
   const previewTitle = document.getElementById("previewTitle");
   const previewTagline = document.getElementById("previewTagline");
@@ -37,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let activeCategory = "all";
   let activeRoster = PartyDeck.getPlayers();
 
-  // 1. Render Games Grid
   function renderGames(category = "all") {
     if (countAll) countAll.textContent = PARTY_GAMES.length;
     gamesGrid.innerHTML = "";
@@ -55,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       card.innerHTML = `
         <div class="card-top">
-          <span class="card-icon">${game.icon}</span>
+          <div class="card-icon-box">${Icons.get(game.iconKey)}</div>
           <span class="card-badge">${game.category}</span>
         </div>
         <div>
@@ -63,9 +76,9 @@ document.addEventListener("DOMContentLoaded", () => {
           <p class="game-tagline">${game.tagline}</p>
         </div>
         <div class="card-meta">
-          <span>👥 ${game.minPlayers}–${game.maxPlayers} players</span>
-          <span>⏱️ ${game.estimatedTime}</span>
-          ${game.drinkingMode ? '<span class="drink-indicator">🍻 Drinking</span>' : ''}
+          <span class="meta-indicator">${Icons.get('users')} ${game.minPlayers}–${game.maxPlayers}P</span>
+          <span class="meta-indicator">${Icons.get('clock')} ${game.estimatedTime}</span>
+          ${game.drinkingMode ? `<span class="meta-indicator drink-pill">${Icons.get('beer')} DRINK</span>` : ''}
         </div>
       `;
 
@@ -81,27 +94,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 2. Open Game Details Modal
   function openGameModal(game) {
     PartyDeck.playSound("click");
-    previewIcon.textContent = game.icon;
-    previewCategory.textContent = game.category.toUpperCase();
+    previewIconBox.innerHTML = Icons.get(game.iconKey);
+    previewCategory.textContent = `MODULE // ${game.category.toUpperCase()}`;
     previewTitle.textContent = game.title;
     previewTagline.textContent = game.tagline;
     previewDescription.textContent = game.description;
-    previewPlayers.textContent = `${game.minPlayers}–${game.maxPlayers}`;
+    previewPlayers.textContent = `${game.minPlayers}–${game.maxPlayers}P`;
     previewTime.textContent = game.estimatedTime;
-    previewDrink.textContent = game.drinkingMode ? "Yes (Optional)" : "No";
+    previewDrink.textContent = game.drinkingMode ? "Enabled" : "Disabled";
 
     previewTags.innerHTML = game.tags
       .map(t => `<span class="game-tag-badge">#${t}</span>`)
       .join("");
 
     btnLaunchGame.href = game.entryPath;
+    btnLaunchGame.innerHTML = `${Icons.get('play')} Launch Module`;
     gameModal.showModal();
   }
 
-  // 3. Category Filter Handlers
   filterPills.forEach(pill => {
     pill.addEventListener("click", () => {
       PartyDeck.playSound("click");
@@ -112,13 +124,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 4. Player Roster Management
   function updateRosterUI() {
     rosterList.innerHTML = "";
     if (activeRoster.length === 0) {
-      rosterLabel.innerHTML = `Active Players: <strong>None set</strong>`;
+      rosterLabel.innerHTML = `Active Roster: <strong>None set</strong>`;
     } else {
-      rosterLabel.innerHTML = `Active Players: <strong>${activeRoster.length} (${activeRoster.join(", ")})</strong>`;
+      rosterLabel.innerHTML = `Active Roster: <strong>${activeRoster.length} (${activeRoster.join(", ")})</strong>`;
     }
 
     activeRoster.forEach((name, idx) => {
@@ -126,7 +137,9 @@ document.addEventListener("DOMContentLoaded", () => {
       li.className = "roster-tag";
       li.innerHTML = `
         <span>${name}</span>
-        <button type="button" class="roster-tag-remove" data-idx="${idx}" aria-label="Remove ${name}">✕</button>
+        <button type="button" class="roster-tag-remove" data-idx="${idx}" aria-label="Remove ${name}">
+          ${Icons.get('close')}
+        </button>
       `;
       rosterList.appendChild(li);
     });
@@ -146,8 +159,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   rosterList.addEventListener("click", (e) => {
-    if (e.target.classList.contains("roster-tag-remove")) {
-      const idx = parseInt(e.target.dataset.idx, 10);
+    const btn = e.target.closest(".roster-tag-remove");
+    if (btn) {
+      const idx = parseInt(btn.dataset.idx, 10);
       activeRoster.splice(idx, 1);
       PartyDeck.playSound("click");
       updateRosterUI();
@@ -167,11 +181,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   btnCloseRoster.addEventListener("click", () => rosterModal.close());
   btnSaveRoster.addEventListener("click", () => rosterModal.close());
-
   btnCloseGameModal.addEventListener("click", () => gameModal.close());
   btnCancelLaunch.addEventListener("click", () => gameModal.close());
 
-  // Initialize
   renderGames();
   updateRosterUI();
 });

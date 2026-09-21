@@ -1,22 +1,31 @@
 /**
- * TELE-SKETCH Game State Machine & Turn Controller
+ * TELE-SKETCH Controller (Arcade & Vector Icon Edition)
  */
 document.addEventListener("DOMContentLoaded", () => {
-  // Preset Prompts Bank
+  // Bind Vector Icons into Tele-Sketch UI
+  document.getElementById("exitIconSlot").innerHTML = Icons.get("arrowRight");
+  document.getElementById("setupHeroIcon").innerHTML = Icons.get("palette");
+  document.getElementById("startIconSlot").innerHTML = Icons.get("play");
+  document.getElementById("undoIconSlot").innerHTML = Icons.get("undo");
+  document.getElementById("trashIconSlot").innerHTML = Icons.get("trash");
+  document.getElementById("passDrawIconSlot").innerHTML = Icons.get("arrowRight");
+  document.getElementById("passGuessIconSlot").innerHTML = Icons.get("arrowRight");
+  document.getElementById("restartIconSlot").innerHTML = Icons.get("refresh");
+  document.getElementById("shieldLockIconSlot").innerHTML = Icons.get("lock");
+  document.getElementById("unlockIconSlot").innerHTML = Icons.get("unlock");
+
   const PROMPTS = [
     "Dancing Cactus", "Astronaut on a Donkey", "Laser Cat", "Exploding Pizza", 
     "Penguin in Sunglasses", "Haunted Toaster", "Dinosaur Ballet", "Ninja Turtle at Dentist",
-    "SpongeBob at Job Interview", "Zombie Eating Ice Cream", "Robot Walking a Dog", 
-    "Grandma Doing a Backflip", "Unicorn in Traffic", "Pirate at a Car Wash",
+    "Robot Walking a Dog", "Grandma Doing a Backflip", "Unicorn in Traffic", "Pirate at a Car Wash",
     "Shark Riding a Bicycle", "Taco Playing Guitar", "Superhero Misses Bus"
   ];
 
   const PALETTE = [
     "#000000", "#555555", "#e94560", "#ff3366", "#ff9933", 
-    "#f6d860", "#00ff88", "#00b4d8", "#6366f1", "#9d4edd", "#8d5b4c", "#ffffff"
+    "#ffcc00", "#00ff66", "#0099ff", "#6366f1", "#9d4edd", "#8d5b4c", "#ffffff"
   ];
 
-  // DOM Elements
   const phaseSetup = document.getElementById("phaseSetup");
   const phaseDraw = document.getElementById("phaseDraw");
   const phaseGuess = document.getElementById("phaseGuess");
@@ -49,22 +58,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnSubmitGuess = document.getElementById("btnSubmitGuess");
   const chainsContainer = document.getElementById("chainsContainer");
 
-  // Game State Variables
   let players = PartyDeck.getPlayers();
   if (players.length < 3) players = ["Player 1", "Player 2", "Player 3", "Player 4"];
 
-  let chains = []; // [{ owner: "Name", steps: [{ type: "prompt"|"draw"|"guess", author: "Name", value: "..." }] }]
+  let chains = [];
   let currentRound = 0;
   let totalRounds = 0;
   let canvasEngine = null;
   let timerInterval = null;
   let timeLeft = 45;
 
-  // Initialize Canvas
   const canvasEl = document.getElementById("paintCanvas");
   canvasEngine = new CanvasEngine(canvasEl);
 
-  // 1. Build Palette
   PALETTE.forEach((color, i) => {
     const swatch = document.createElement("button");
     swatch.className = `color-swatch ${i === 0 ? "active" : ""}`;
@@ -93,9 +99,8 @@ document.addEventListener("DOMContentLoaded", () => {
     canvasEngine.clear(true);
   });
 
-  // 2. Setup Screen Management
   function renderSetupList() {
-    orderList.innerHTML = players.map((p, i) => `<li>${p}</li>`).join("");
+    orderList.innerHTML = players.map(p => `<li>${p}</li>`).join("");
     PartyDeck.setPlayers(players);
   }
 
@@ -112,17 +117,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderSetupList();
 
-  // 3. Start Game
   btnStartGame.addEventListener("click", () => {
     if (players.length < 3) {
-      alert("Please add at least 3 players to play Tele-Sketch!");
+      alert("Please add at least 3 players to start Tele-Sketch.");
       return;
     }
 
     PartyDeck.playSound("success");
     PartyDeck.vibrate([100, 50, 100]);
 
-    // Initialize Chains (one chain starts for each player)
     chains = players.map(player => {
       const randomPrompt = PROMPTS[Math.floor(Math.random() * PROMPTS.length)];
       return {
@@ -134,25 +137,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     currentRound = 0;
-    totalRounds = players.length; // Complete when chain returns around
+    totalRounds = players.length;
     startTurnSequence();
   });
 
-  // 4. Turn Sequence & State Transitions
   function startTurnSequence() {
     if (currentRound >= totalRounds) {
       showFinale();
       return;
     }
 
-    // Determine current chain and active player
-    // Chain rotates: in round R, player i works on chain (i - R + N) % N
     const N = players.length;
     const activePlayerIndex = currentRound % N;
     const activePlayer = players[activePlayerIndex];
     
-    // Privacy Shield before turn starts
-    nextPlayerPrompt.textContent = `Pass phone to ${activePlayer}`;
+    nextPlayerPrompt.textContent = `Pass terminal to ${activePlayer}`;
     privacyShield.classList.remove("hidden");
     PartyDeck.vibrate([60]);
 
@@ -169,20 +168,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentChain = chains[chainIdx];
     const lastStep = currentChain.steps[currentChain.steps.length - 1];
 
-    stepBadge.textContent = `ROUND ${currentRound + 1}/${totalRounds}`;
-    activePlayerIndicator.textContent = `${players[playerIdx]}'s Turn`;
+    stepBadge.textContent = `ROUND // ${currentRound + 1} OF ${totalRounds}`;
+    activePlayerIndicator.textContent = `${players[playerIdx]}`;
 
-    // Hide all phases
     phaseSetup.classList.add("hidden");
     phaseDraw.classList.add("hidden");
     phaseGuess.classList.add("hidden");
     phaseFinale.classList.add("hidden");
 
-    // Start Timer
     startTimer(45);
 
     if (lastStep.type === "prompt" || lastStep.type === "guess") {
-      // TURN TYPE: DRAW
       phaseDraw.classList.remove("hidden");
       currentPromptText.textContent = lastStep.value;
       canvasEngine.clear(false);
@@ -201,14 +197,13 @@ document.addEventListener("DOMContentLoaded", () => {
         startTurnSequence();
       };
     } else if (lastStep.type === "draw") {
-      // TURN TYPE: GUESS
       phaseGuess.classList.remove("hidden");
       imgToGuess.src = lastStep.value;
       guessInput.value = "";
       guessInput.focus();
 
       btnSubmitGuess.onclick = () => {
-        const guess = guessInput.value.trim() || "Something strange";
+        const guess = guessInput.value.trim() || "Unidentified Sketch";
         clearInterval(timerInterval);
         currentChain.steps.push({
           type: "guess",
@@ -242,7 +237,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 1000);
   }
 
-  // 5. Finale Slideshow
   function showFinale() {
     clearInterval(timerInterval);
     phaseSetup.classList.add("hidden");
@@ -250,15 +244,15 @@ document.addEventListener("DOMContentLoaded", () => {
     phaseGuess.classList.add("hidden");
     phaseFinale.classList.remove("hidden");
 
-    stepBadge.textContent = "GAME OVER";
-    activePlayerIndicator.textContent = "All Chains Complete!";
-    turnTimer.textContent = "🎉";
+    stepBadge.textContent = "COMPLETE";
+    activePlayerIndicator.textContent = "All Chains Resolved";
+    turnTimer.textContent = "DONE";
 
     PartyDeck.playSound("success");
 
     chainsContainer.innerHTML = chains.map((chain, cIdx) => `
       <div class="chain-card">
-        <div class="chain-header">CHAIN #${cIdx + 1} (Started by ${chain.owner})</div>
+        <div class="chain-header">LOG // CHAIN #${cIdx + 1} (ORIGIN: ${chain.owner.toUpperCase()})</div>
         <div class="chain-steps">
           ${chain.steps.map(s => `
             <div class="step-row">
@@ -273,13 +267,12 @@ document.addEventListener("DOMContentLoaded", () => {
     `).join("");
   }
 
-  // Navigation Handlers
   btnExit.addEventListener("click", () => PartyDeck.exitToHub());
   btnFinaleExit.addEventListener("click", () => PartyDeck.exitToHub());
   btnRestart.addEventListener("click", () => {
     phaseFinale.classList.add("hidden");
     phaseSetup.classList.remove("hidden");
-    stepBadge.textContent = "SETUP";
-    activePlayerIndicator.textContent = "Players Setup";
+    stepBadge.textContent = "SETUP // PHASE";
+    activePlayerIndicator.textContent = "Roster Initialization";
   });
 });

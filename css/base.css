@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PARTYDECK BASE STYLES & RESPONSIVE LAYOUT
+   PARTYDECK ARCADE HUD BASE STYLES
    ========================================================================== */
 
 *, *::before, *::after {
@@ -11,12 +11,13 @@
 
 :root {
   --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Space Mono', monospace, ui-monospace;
   --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
   --radius-pill: 9999px;
-  --transition-fast: 0.15s ease;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-smooth: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -28,8 +29,23 @@ body {
   display: flex;
   flex-direction: column;
   line-height: 1.5;
-  transition: background-color var(--transition-smooth), color var(--transition-smooth);
+  position: relative;
   overflow-x: hidden;
+}
+
+/* Subtle CRT scanline overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 50%,
+    var(--scanline-color) 51%
+  );
+  background-size: 100% 4px;
+  pointer-events: none;
+  z-index: 999;
 }
 
 .sr-only {
@@ -43,15 +59,15 @@ body {
   border: 0;
 }
 
-/* Top Header */
+/* Header & HUD Bar */
 .hub-header {
   background: var(--bg-surface);
-  border-bottom: 1px solid var(--border-color);
-  padding: 1rem;
+  border-bottom: 2px solid var(--border-color);
+  padding: 0.85rem 1rem;
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
 }
 
 .header-container {
@@ -63,73 +79,89 @@ body {
   gap: 1rem;
 }
 
+.brand {
+  display: flex;
+  flex-direction: column;
+}
+
 .brand-badge {
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
   padding: 2px 6px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   background: var(--accent-glow);
   color: var(--accent);
+  border: 1px solid var(--accent);
   display: inline-block;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
+  width: fit-content;
 }
 
 .brand-title {
   font-family: var(--font-display);
   font-size: 1.4rem;
   font-weight: 900;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
   line-height: 1;
 }
 
 .brand-title span {
   color: var(--accent);
+  text-shadow: 0 0 10px var(--accent-glow);
 }
 
 .select-styled {
-  position: relative;
   display: flex;
   align-items: center;
   background: var(--bg-elevated);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-pill);
-  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
+  gap: 6px;
 }
 
-.palette-icon {
-  margin-right: 6px;
-  font-size: 0.9rem;
+.select-styled svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
 }
 
 .select-styled select {
   background: transparent;
   color: var(--text-primary);
   border: none;
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
   cursor: pointer;
   outline: none;
 }
 
-/* Roster Ribbon */
+/* Roster HUD Bar */
 .roster-bar {
   max-width: 1200px;
-  margin: 0.75rem auto 0 auto;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 0.6rem auto 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .roster-summary {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: var(--text-secondary);
+}
+
+.roster-summary svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
 }
 
 .roster-summary strong {
@@ -140,7 +172,7 @@ body {
 .filter-nav {
   max-width: 1200px;
   margin: 1rem auto 0;
-  padding: 0.5rem 1rem;
+  padding: 0.25rem 1rem;
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
@@ -155,34 +187,40 @@ body {
   white-space: nowrap;
   background: var(--bg-surface);
   color: var(--text-secondary);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
   cursor: pointer;
   transition: var(--transition-fast);
   display: flex;
   align-items: center;
   gap: 6px;
+  text-transform: uppercase;
+}
+
+.filter-pill svg {
+  width: 14px;
+  height: 14px;
 }
 
 .filter-pill.active {
   background: var(--accent);
   color: var(--bg-primary);
   border-color: var(--accent);
-  box-shadow: 0 0 12px var(--accent-glow);
+  box-shadow: 0 0 14px var(--accent-glow);
 }
 
 .badge-count {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 1px 6px;
-  border-radius: var(--radius-pill);
-  font-size: 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
 }
 
-/* Main Hub & Game Grid */
+/* Games Grid */
 .hub-main {
   flex: 1;
   max-width: 1200px;
@@ -195,22 +233,20 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.25rem;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 /* Game Card */
 .game-card {
   background: var(--bg-surface);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   cursor: pointer;
   transition: transform var(--transition-smooth), border-color var(--transition-smooth), box-shadow var(--transition-smooth);
   position: relative;
-  overflow: hidden;
 }
 
 .game-card:hover {
@@ -226,35 +262,46 @@ body {
   margin-bottom: 0.75rem;
 }
 
-.card-icon {
-  font-size: 2rem;
+.card-icon-box {
+  width: 44px;
+  height: 44px;
   background: var(--bg-elevated);
-  padding: 0.5rem;
-  border-radius: var(--radius-md);
-  line-height: 1;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.card-icon-box svg {
+  width: 24px;
+  height: 24px;
 }
 
 .card-badge {
-  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
   background: var(--bg-elevated);
   color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .game-title {
   font-family: var(--font-display);
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 800;
   margin-bottom: 0.25rem;
 }
 
 .game-tagline {
   font-size: 0.85rem;
   color: var(--text-secondary);
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
   line-height: 1.4;
 }
 
@@ -263,40 +310,59 @@ body {
   align-items: center;
   justify-content: space-between;
   font-size: 0.75rem;
+  font-family: var(--font-mono);
   color: var(--text-muted);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   padding-top: 0.75rem;
   margin-top: auto;
 }
 
-.drink-indicator {
+.meta-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-indicator svg {
+  width: 14px;
+  height: 14px;
+}
+
+.drink-pill {
   color: var(--accent);
   font-weight: 700;
 }
 
-/* Buttons */
+/* Button UI */
 button, .btn-primary, .btn-accent, .btn-ghost {
-  font-family: var(--font-body);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   cursor: pointer;
-  border-radius: var(--radius-md);
-  font-weight: 700;
+  border-radius: var(--radius-sm);
   text-decoration: none;
   transition: var(--transition-fast);
   border: none;
+}
+
+button svg, .btn-primary svg {
+  width: 16px;
+  height: 16px;
 }
 
 .btn-primary {
   background: var(--accent);
   color: var(--bg-primary);
   padding: 0.75rem 1.25rem;
-  box-shadow: 0 4px 14px var(--accent-glow);
+  box-shadow: 0 0 16px var(--accent-glow);
 }
 
 .btn-primary:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.15);
 }
 
 .btn-accent {
@@ -308,7 +374,7 @@ button, .btn-primary, .btn-accent, .btn-ghost {
 .btn-ghost {
   background: transparent;
   color: var(--text-secondary);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   padding: 0.75rem 1.25rem;
 }
 
@@ -316,9 +382,9 @@ button, .btn-primary, .btn-accent, .btn-ghost {
   background: transparent;
   color: var(--accent);
   border: 1px solid var(--border-color);
-  padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
-  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+  border-radius: var(--radius-sm);
 }
 
 .btn-close {
@@ -326,8 +392,15 @@ button, .btn-primary, .btn-accent, .btn-ghost {
   color: var(--text-primary);
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  font-size: 1rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* Modals */
@@ -338,20 +411,20 @@ button, .btn-primary, .btn-accent, .btn-ghost {
   width: 90%;
   margin: auto;
   padding: 0;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   outline: none;
 }
 
 .party-modal::backdrop {
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
 }
 
 .modal-card {
   background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -363,12 +436,21 @@ button, .btn-primary, .btn-accent, .btn-ghost {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .modal-header h2 {
   font-family: var(--font-display);
   font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-header h2 svg {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
 }
 
 .modal-hero {
@@ -376,18 +458,29 @@ button, .btn-primary, .btn-accent, .btn-ghost {
   justify-content: flex-start;
 }
 
-.preview-icon {
-  font-size: 2.2rem;
+.preview-icon-box {
+  width: 52px;
+  height: 52px;
   background: var(--bg-elevated);
-  padding: 0.5rem;
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.preview-icon-box svg {
+  width: 30px;
+  height: 30px;
 }
 
 .preview-cat {
-  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   font-weight: 800;
   color: var(--accent);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
 }
 
 .modal-body {
@@ -409,12 +502,12 @@ button, .btn-primary, .btn-accent, .btn-ghost {
 .player-input-row input {
   flex: 1;
   background: var(--bg-elevated);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: var(--text-primary);
   padding: 0.6rem 0.85rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   outline: none;
-  font-family: var(--font-body);
+  font-family: var(--font-mono);
 }
 
 .player-input-row input:focus {
@@ -434,8 +527,9 @@ button, .btn-primary, .btn-accent, .btn-ghost {
   background: var(--bg-elevated);
   border: 1px solid var(--border-color);
   padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -445,9 +539,13 @@ button, .btn-primary, .btn-accent, .btn-ghost {
   background: transparent;
   color: var(--danger);
   cursor: pointer;
-  font-size: 0.8rem;
-  line-height: 1;
-  padding: 0 2px;
+  display: flex;
+  align-items: center;
+}
+
+.roster-tag-remove svg {
+  width: 14px;
+  height: 14px;
 }
 
 .meta-pills-row {
@@ -459,6 +557,7 @@ button, .btn-primary, .btn-accent, .btn-ghost {
 
 .meta-item {
   background: var(--bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 0.5rem;
   border-radius: var(--radius-sm);
   text-align: center;
@@ -466,7 +565,8 @@ button, .btn-primary, .btn-accent, .btn-ghost {
 
 .meta-label {
   display: block;
-  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
   text-transform: uppercase;
   color: var(--text-muted);
 }
@@ -475,6 +575,7 @@ button, .btn-primary, .btn-accent, .btn-ghost {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-primary);
+  font-family: var(--font-mono);
 }
 
 .tags-row {
@@ -486,14 +587,16 @@ button, .btn-primary, .btn-accent, .btn-ghost {
 .game-tag-badge {
   background: var(--bg-elevated);
   color: var(--text-secondary);
-  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
   padding: 2px 8px;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .modal-footer {
   padding: 1rem 1.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -504,8 +607,9 @@ button, .btn-primary, .btn-accent, .btn-ghost {
 .hub-footer {
   text-align: center;
   padding: 1.5rem;
-  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
   color: var(--text-muted);
-  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   margin-top: auto;
 }

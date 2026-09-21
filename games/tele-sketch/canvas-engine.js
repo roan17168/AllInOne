@@ -1,6 +1,6 @@
 /**
  * TELE-SKETCH Canvas Engine
- * High-performance, touch-optimized HTML5 drawing engine with retina scaling & Bézier smoothing.
+ * High-performance HTML5 retina touch drawing engine.
  */
 class CanvasEngine {
   constructor(canvasElement) {
@@ -20,11 +20,9 @@ class CanvasEngine {
     const rect = this.canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
     
-    // Set actual canvas bitmap resolution scaled by DPR
     this.canvas.width = rect.width * dpr;
     this.canvas.height = rect.height * dpr;
     
-    // Scale all drawing operations to match CSS pixels
     this.ctx.scale(dpr, dpr);
     this.ctx.lineCap = "round";
     this.ctx.lineJoin = "round";
@@ -33,18 +31,15 @@ class CanvasEngine {
   }
 
   bindEvents() {
-    // Touch Handlers
     this.canvas.addEventListener("touchstart", (e) => this.handleStart(e), { passive: false });
     this.canvas.addEventListener("touchmove", (e) => this.handleMove(e), { passive: false });
     this.canvas.addEventListener("touchend", () => this.handleEnd());
 
-    // Mouse Handlers
     this.canvas.addEventListener("mousedown", (e) => this.handleStart(e));
     this.canvas.addEventListener("mousemove", (e) => this.handleMove(e));
     this.canvas.addEventListener("mouseup", () => this.handleEnd());
     this.canvas.addEventListener("mouseleave", () => this.handleEnd());
 
-    // Resize handling
     window.addEventListener("resize", () => {
       const state = this.getImageData();
       this.initCanvas();
@@ -87,7 +82,6 @@ class CanvasEngine {
       this.ctx.strokeStyle = this.currentColor;
       this.ctx.lineWidth = this.brushSize;
 
-      // Quadratic curve interpolation for smooth strokes
       const p1 = this.points[this.points.length - 2];
       const p2 = this.points[this.points.length - 1];
       const midPoint = {

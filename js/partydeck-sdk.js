@@ -1,12 +1,10 @@
 /**
- * PARTYDECK SDK
- * Lightweight shared bridge for standalone games.
+ * PARTYDECK SDK Bridge
+ * Web Audio synth sound generator, haptics, and theme bridge.
  */
 const PartyDeck = {
-  // Theme helpers
   getTheme: () => localStorage.getItem("partydeck_theme") || "cyber-neon",
   
-  // Player roster helpers
   getPlayers: () => {
     try {
       return JSON.parse(localStorage.getItem("partydeck_players") || "[]");
@@ -19,16 +17,12 @@ const PartyDeck = {
     localStorage.setItem("partydeck_players", JSON.stringify(playersArray));
   },
 
-  // Haptic feedback
   vibrate: (pattern = [40]) => {
     if ("vibrate" in navigator) {
-      try {
-        navigator.vibrate(pattern);
-      } catch (err) {}
+      try { navigator.vibrate(pattern); } catch (err) {}
     }
   },
 
-  // Audio helper using Web Audio API (zero external asset files needed)
   playSound: (type = "click") => {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -40,37 +34,39 @@ const PartyDeck = {
       const now = ctx.currentTime;
 
       if (type === "click") {
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.04);
         gain.gain.setValueAtTime(0.2, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.05);
+        gain.gain.linearRampToValueAtTime(0, now + 0.04);
         osc.start(now);
-        osc.stop(now + 0.05);
+        osc.stop(now + 0.04);
       } else if (type === "success") {
-        osc.frequency.setValueAtTime(523.25, now); // C5
-        osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(523.25, now);
+        osc.frequency.setValueAtTime(659.25, now + 0.08);
+        osc.frequency.setValueAtTime(783.99, now + 0.16);
         gain.gain.setValueAtTime(0.25, now);
         gain.gain.linearRampToValueAtTime(0, now + 0.25);
         osc.start(now);
         osc.stop(now + 0.25);
       } else if (type === "alert") {
         osc.type = "sawtooth";
-        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.setValueAtTime(240, now + 0.08);
         gain.gain.setValueAtTime(0.3, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.15);
+        gain.gain.linearRampToValueAtTime(0, now + 0.16);
         osc.start(now);
-        osc.stop(now + 0.15);
+        osc.stop(now + 0.16);
       }
     } catch (e) {}
   },
 
-  // Navigation
   exitToHub: () => {
     window.location.href = "../../index.html";
   }
 };
 
-// Auto-sync theme on load for standalone pages
 (function() {
   const currentTheme = PartyDeck.getTheme();
   document.documentElement.setAttribute("data-theme", currentTheme);
