@@ -1,127 +1,170 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="cyber-neon">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Tele-Sketch | PartyDeck Arcade</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../../css/themes.css" />
-  <link rel="stylesheet" href="../../css/base.css" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" id="metaThemeColor" />
+<title>Tele-Sketch | PartyDeck</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- Global tokens (optional — style.css carries fallbacks if these 404) -->
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<!-- Module styles: fully self-sufficient -->
+<link rel="stylesheet" href="style.css" />
 </head>
-<body class="game-body">
 
-  <!-- Header -->
-  <header class="game-nav-header">
-    <button id="btnExit" class="icon-nav-btn" aria-label="Exit to Hub">
-      <span id="exitIconSlot"></span> Hub
-    </button>
-    <div class="status-indicator">
-      <span class="game-step-badge" id="stepBadge">SETUP // PHASE</span>
-      <span class="step-player" id="activePlayerIndicator">Roster Initialization</span>
-    </div>
-    <div class="turn-timer" id="turnTimer">45s</div>
-  </header>
+<body class="ts-body">
 
-  <main class="game-container">
-    <!-- PHASE 0: SETUP SCREEN -->
-    <section id="phaseSetup" class="game-phase-card">
-      <div class="phase-hero-icon" id="setupHeroIcon"></div>
-      <h2 class="phase-title">Tele-Sketch Setup</h2>
-      <p class="phase-desc">Pass the device in turn order. Draw what you read, guess what you see.</p>
-      
-      <div class="setup-roster-box">
-        <h3>Turn Passing Order:</h3>
-        <ol id="orderList" class="order-list"></ol>
-        
-        <form id="setupAddForm" class="player-input-row">
-          <input type="text" id="setupPlayerInput" placeholder="ADD_PLAYER..." maxlength="16" />
-          <button type="submit" class="btn-accent">+ Add</button>
-        </form>
-      </div>
+<!-- ================= HUD HEADER ================= -->
+<header class="ts-hud">
+  <button class="hud-exit" id="btnExit" type="button" aria-label="Exit to hub">
+    <span class="ico" data-icon="home"></span><span class="hud-exit-txt">HUB</span>
+  </button>
 
-      <button id="btnStartGame" class="btn-primary btn-block">
-        <span id="startIconSlot"></span> Start Sequence
-      </button>
-    </section>
-
-    <!-- PHASE 1: DRAWING STAGE -->
-    <section id="phaseDraw" class="game-phase-card hidden">
-      <div class="prompt-display-banner">
-        <span class="prompt-sub">CURRENT SECRET PROMPT:</span>
-        <h3 id="currentPromptText" class="prompt-text">A Dancing Cactus</h3>
-      </div>
-
-      <div class="canvas-wrapper">
-        <canvas id="paintCanvas"></canvas>
-      </div>
-
-      <!-- Drawing Toolbar -->
-      <div class="drawing-tools">
-        <div class="palette-ribbon" id="paletteRibbon"></div>
-        <div class="tools-actions-row">
-          <input type="range" id="brushSize" min="2" max="24" value="5" aria-label="Brush size" />
-          <button id="btnUndo" class="tool-btn"><span id="undoIconSlot"></span> Undo</button>
-          <button id="btnClearCanvas" class="tool-btn"><span id="trashIconSlot"></span> Clear</button>
-        </div>
-      </div>
-
-      <button id="btnFinishDrawing" class="btn-primary btn-block">
-        Confirm & Pass <span id="passDrawIconSlot"></span>
-      </button>
-    </section>
-
-    <!-- PHASE 2: GUESSING STAGE -->
-    <section id="phaseGuess" class="game-phase-card hidden">
-      <div class="guess-instruction">
-        <h3>Identify The Sketch</h3>
-        <p>Inspect the canvas input and register your prediction.</p>
-      </div>
-
-      <div class="preview-drawing-box">
-        <img id="imgToGuess" src="" alt="Drawing to guess" />
-      </div>
-
-      <div class="guess-input-box">
-        <input type="text" id="guessInput" placeholder="ENTER_PREDICTION..." maxlength="35" autocomplete="off" />
-        <button id="btnSubmitGuess" class="btn-primary btn-block">
-          Submit & Pass <span id="passGuessIconSlot"></span>
-        </button>
-      </div>
-    </section>
-
-    <!-- PHASE 3: FINALE SLIDESHOW -->
-    <section id="phaseFinale" class="game-phase-card hidden">
-      <h2 class="phase-title">Chain Declassification</h2>
-      <p class="phase-desc">Review the full mutation logs from initial seed to final guess.</p>
-      
-      <div id="chainsContainer" class="chains-container"></div>
-
-      <div class="finale-actions">
-        <button id="btnRestart" class="btn-primary"><span id="restartIconSlot"></span> Play Again</button>
-        <button id="btnFinaleExit" class="btn-ghost">Exit to Hub</button>
-      </div>
-    </section>
-  </main>
-
-  <!-- PRIVACY CURTAIN / PASS SHIELD -->
-  <div id="privacyShield" class="privacy-overlay hidden">
-    <div class="shield-card">
-      <div class="shield-lock-icon" id="shieldLockIconSlot"></div>
-      <span class="shield-tag">SECURITY // HOLD</span>
-      <h2 id="nextPlayerPrompt">Pass to Alex</h2>
-      <p class="shield-warning">Do not unveil the terminal until device handover is complete.</p>
-      <button id="btnUnlockShield" class="btn-primary pulse-btn">
-        <span id="unlockIconSlot"></span> I Am Ready (Unveil)
-      </button>
-    </div>
+  <div class="hud-status">
+    <span class="hud-badge" id="hudBadge">SETUP // PHASE</span>
+    <span class="hud-label" id="hudLabel">Roster</span>
   </div>
 
-  <script src="../../js/utils/icons.js"></script>
-  <script src="../../js/partydeck-sdk.js"></script>
-  <script src="canvas-engine.js"></script>
-  <script src="game-controller.js"></script>
+  <div class="hud-timer" id="hudTimer">--</div>
+</header>
+
+<main class="ts-main">
+
+  <!-- ================= PHASE 1 · SETUP ================= -->
+  <section class="phase is-active" id="phSetup">
+    <div class="hero-ico"><span class="ico ico-lg" data-icon="palette"></span></div>
+    <h1 class="phase-title">Tele-Sketch</h1>
+    <p class="phase-sub">
+      Draw your secret prompt. Pass the device. The next player only sees the drawing
+      and has to guess it — then the chain mutates into beautiful nonsense.
+    </p>
+
+    <div class="panel">
+      <p class="panel-title">Game length</p>
+      <div class="chip-row" id="modeRow">
+        <button class="chip is-on" type="button" data-mode="full">Every player gets a prompt</button>
+        <button class="chip" type="button" data-mode="quick">Quick — one shared chain</button>
+      </div>
+      <p class="panel-note" id="modeNote">Longest and funniest. Turn count scales with the group.</p>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">Seconds per turn</p>
+      <div class="chip-row" id="timeRow">
+        <button class="chip" type="button" data-time="30">30s</button>
+        <button class="chip is-on" type="button" data-time="60">60s</button>
+        <button class="chip" type="button" data-time="90">90s</button>
+        <button class="chip" type="button" data-time="0">No timer</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <p class="panel-title">Turn order · 3 to 10 players</p>
+      <form class="roster-add" id="rosterForm">
+        <input type="text" id="rosterInput" placeholder="ADD_PLAYER..." maxlength="14" autocomplete="off" />
+        <button type="submit" aria-label="Add player"><span class="ico" data-icon="plus"></span></button>
+      </form>
+      <ol class="roster-list" id="rosterList"></ol>
+      <p class="roster-warn is-hidden" id="rosterWarn"></p>
+      <p class="panel-note" id="turnForecast"></p>
+    </div>
+
+    <button class="btn-primary btn-push" id="btnStart" type="button">
+      <span class="ico" data-icon="play"></span> Start sequence
+    </button>
+  </section>
+
+  <!-- ================= PHASE 2 · DRAW ================= -->
+  <section class="phase" id="phDraw">
+    <div class="prompt-banner">
+      <span class="prompt-kicker" id="drawKicker">Your secret prompt</span>
+      <h2 class="prompt-value" id="drawPrompt">&mdash;</h2>
+    </div>
+
+    <div class="canvas-shell" id="canvasShell">
+      <canvas id="sketchCanvas" aria-label="Drawing surface"></canvas>
+    </div>
+
+    <div class="toolbar">
+      <div class="swatch-grid" id="swatchGrid"></div>
+      <div class="tool-row">
+        <span class="brush-preview" id="brushPreview" aria-hidden="true"></span>
+        <input type="range" id="brushRange" min="2" max="30" value="7" aria-label="Brush size" />
+        <button class="tool-btn" id="btnUndo" type="button" aria-label="Undo" disabled><span class="ico" data-icon="undo"></span></button>
+        <button class="tool-btn" id="btnRedo" type="button" aria-label="Redo" disabled><span class="ico" data-icon="redo"></span></button>
+        <button class="tool-btn" id="btnClear" type="button" aria-label="Clear canvas"><span class="ico" data-icon="trash"></span></button>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btnDoneDraw" type="button">
+      Lock sketch &amp; pass <span class="ico" data-icon="arrowRight"></span>
+    </button>
+  </section>
+
+  <!-- ================= PHASE 3 · GUESS ================= -->
+  <section class="phase" id="phGuess">
+    <div class="prompt-banner">
+      <span class="prompt-kicker">Decode the sketch</span>
+      <h2 class="prompt-value">What is this?</h2>
+    </div>
+
+    <div class="guess-frame">
+      <img id="guessImg" alt="Sketch drawn by the previous player" />
+    </div>
+
+    <input type="text" class="guess-field" id="guessField" placeholder="ENTER_GUESS..." maxlength="40" autocomplete="off" />
+
+    <button class="btn-primary btn-push" id="btnDoneGuess" type="button">
+      Submit &amp; pass <span class="ico" data-icon="arrowRight"></span>
+    </button>
+  </section>
+
+  <!-- ================= PHASE 4 · FINALE ================= -->
+  <section class="phase" id="phFinale">
+    <h1 class="phase-title">Chain Declassified</h1>
+    <p class="phase-sub">Step through each chain to watch the original prompt mutate.</p>
+
+    <div class="chain-nav">
+      <button class="nav-btn" id="chainPrev" type="button" aria-label="Previous chain"><span class="ico" data-icon="arrowLeft"></span></button>
+      <span class="chain-count" id="chainCount">1 / 1</span>
+      <button class="nav-btn" id="chainNext" type="button" aria-label="Next chain"><span class="ico" data-icon="arrowRight"></span></button>
+    </div>
+
+    <div class="strip" id="strip"></div>
+
+    <div class="btn-row">
+      <button class="btn-ghost" id="btnExport" type="button"><span class="ico" data-icon="download"></span> Save strip</button>
+      <button class="btn-ghost" id="btnAgain" type="button"><span class="ico" data-icon="refresh"></span> Play again</button>
+    </div>
+
+    <canvas id="exportCanvas" class="is-hidden"></canvas>
+  </section>
+
+</main>
+
+<!-- ================= PRIVACY CURTAIN ================= -->
+<div class="curtain" id="curtain" aria-hidden="true">
+  <div class="curtain-card">
+    <div class="curtain-ico"><span class="ico ico-lg" data-icon="lock"></span></div>
+    <span class="curtain-tag" id="curtainTag">SECURE HANDOVER</span>
+    <h2 class="curtain-name" id="curtainName">Pass the device</h2>
+    <p class="curtain-warn">Nobody else may look at the screen. Take the device, then unlock.</p>
+    <button class="btn-primary is-pulsing" id="btnUnlock" type="button">
+      <span class="ico" data-icon="unlock"></span> <span id="unlockTxt">I am ready</span>
+    </button>
+  </div>
+</div>
+
+<!-- Optional shared libs: used if present, safely stubbed if not -->
+<script src="../../js/utils/icons.js"></script>
+<script src="../../js/partydeck-sdk.js"></script>
+<!-- Module code -->
+<script src="canvas-engine.js"></script>
+<script src="game-controller.js"></script>
 </body>
 </html>
