@@ -1,0 +1,72 @@
+/* ==========================================================================
+   PARTYDECK GLOBAL THEME SPECIFICATION
+   4 Distinct visual palettes with shared CSS Custom Property tokens
+   ========================================================================== */
+
+/* Theme 1: Cyber Neon (Default) */
+[data-theme="cyber-neon"] {
+  --bg-primary: #0b0c10;
+  --bg-surface: #171d25;
+  --bg-elevated: #232c37;
+  --text-primary: #ffffff;
+  --text-secondary: #a0aec0;
+  --text-muted: #64748b;
+  --accent: #66fcf1;
+  --accent-glow: rgba(102, 252, 241, 0.35);
+  --accent-secondary: #45a29e;
+  --danger: #ff0055;
+  --success: #00ff88;
+  --border-color: rgba(102, 252, 241, 0.2);
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6), 0 0 15px -2px rgba(102, 252, 241, 0.15);
+}
+
+/* Theme 2: Sunset Rave */
+[data-theme="sunset-rave"] {
+  --bg-primary: #120924;
+  --bg-surface: #261447;
+  --bg-elevated: #3b1d6e;
+  --text-primary: #fff2fc;
+  --text-secondary: #d8b8e8;
+  --text-muted: #9f75b8;
+  --accent: #ff3366;
+  --accent-glow: rgba(255, 51, 102, 0.4);
+  --accent-secondary: #ff9933;
+  --danger: #ff0044;
+  --success: #00f0b5;
+  --border-color: rgba(255, 51, 102, 0.25);
+  --card-shadow: 0 10px 25px -5px rgba(18, 9, 36, 0.8), 0 0 20px rgba(255, 51, 102, 0.2);
+}
+
+/* Theme 3: Retro Arcade */
+[data-theme="retro-arcade"] {
+  --bg-primary: #1a1a2e;
+  --bg-surface: #16213e;
+  --bg-elevated: #0f3460;
+  --text-primary: #f5f5f5;
+  --text-secondary: #a2a8d3;
+  --text-muted: #6873a8;
+  --accent: #e94560;
+  --accent-glow: rgba(233, 69, 96, 0.4);
+  --accent-secondary: #fcdab7;
+  --danger: #e94560;
+  --success: #4ecca3;
+  --border-color: rgba(233, 69, 96, 0.3);
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7), 0 0 15px rgba(233, 69, 96, 0.25);
+}
+
+/* Theme 4: Minimal Light */
+[data-theme="minimal-light"] {
+  --bg-primary: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --accent: #6366f1;
+  --accent-glow: rgba(99, 102, 241, 0.25);
+  --accent-secondary: #8b5cf6;
+  --danger: #ef4444;
+  --success: #10b981;
+  --border-color: rgba(99, 102, 241, 0.2);
+  --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}

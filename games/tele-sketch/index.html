@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tele-Sketch | PartyDeck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/themes.css" />
+  <link rel="stylesheet" href="../../css/base.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="game-body">
+
+  <!-- Header -->
+  <header class="game-nav-header">
+    <button id="btnExit" class="icon-nav-btn" aria-label="Exit to Hub">✕ Hub</button>
+    <div class="status-indicator">
+      <span class="game-step-badge" id="stepBadge">SETUP</span>
+      <span class="step-player" id="activePlayerIndicator">Players Setup</span>
+    </div>
+    <div class="turn-timer" id="turnTimer">45s</div>
+  </header>
+
+  <main class="game-container">
+    <!-- PHASE 0: SETUP SCREEN -->
+    <section id="phaseSetup" class="game-phase-card">
+      <h2 class="phase-title">🎨 Tele-Sketch Setup</h2>
+      <p class="phase-desc">Pass the phone in a circle. Draw what you read, guess what you see!</p>
+      
+      <div class="setup-roster-box">
+        <h3>Turn Passing Order:</h3>
+        <ol id="orderList" class="order-list"></ol>
+        
+        <form id="setupAddForm" class="player-input-row">
+          <input type="text" id="setupPlayerInput" placeholder="Add player name..." maxlength="16" />
+          <button type="submit" class="btn-accent">+ Add</button>
+        </form>
+      </div>
+
+      <button id="btnStartGame" class="btn-primary btn-block">🚀 Start Tele-Sketch</button>
+    </section>
+
+    <!-- PHASE 1: DRAWING STAGE -->
+    <section id="phaseDraw" class="game-phase-card hidden">
+      <div class="prompt-display-banner">
+        <span class="prompt-sub">YOUR SECRET PROMPT:</span>
+        <h3 id="currentPromptText" class="prompt-text">A Dancing Cactus</h3>
+      </div>
+
+      <div class="canvas-wrapper">
+        <canvas id="paintCanvas"></canvas>
+      </div>
+
+      <!-- Drawing Toolbar -->
+      <div class="drawing-tools">
+        <div class="palette-ribbon" id="paletteRibbon"></div>
+        <div class="tools-actions-row">
+          <input type="range" id="brushSize" min="2" max="24" value="5" aria-label="Brush size" />
+          <button id="btnUndo" class="tool-btn" title="Undo">↩️ Undo</button>
+          <button id="btnClearCanvas" class="tool-btn" title="Clear">🗑️ Clear</button>
+        </div>
+      </div>
+
+      <button id="btnFinishDrawing" class="btn-primary btn-block">Done Drawing (Pass Phone) ➔</button>
+    </section>
+
+    <!-- PHASE 2: GUESSING STAGE -->
+    <section id="phaseGuess" class="game-phase-card hidden">
+      <div class="guess-instruction">
+        <h3>🤔 What is this drawing?</h3>
+        <p>Look at the sketch below and enter your best guess!</p>
+      </div>
+
+      <div class="preview-drawing-box">
+        <img id="imgToGuess" src="" alt="Drawing to guess" />
+      </div>
+
+      <div class="guess-input-box">
+        <input type="text" id="guessInput" placeholder="Enter your guess here..." maxlength="35" autocomplete="off" />
+        <button id="btnSubmitGuess" class="btn-primary btn-block">Submit Guess & Pass ➔</button>
+      </div>
+    </section>
+
+    <!-- PHASE 3: FINALE SLIDESHOW -->
+    <section id="phaseFinale" class="game-phase-card hidden">
+      <h2 class="phase-title">🎉 The Grand Reveal!</h2>
+      <p class="phase-desc">Watch how the original prompt evolved through the telephone chain.</p>
+      
+      <div id="chainsContainer" class="chains-container"></div>
+
+      <div class="finale-actions">
+        <button id="btnRestart" class="btn-primary">🔄 Play Again</button>
+        <button id="btnFinaleExit" class="btn-ghost">Exit to Hub</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- PRIVACY CURTAIN / PASS SHIELD -->
+  <div id="privacyShield" class="privacy-overlay hidden">
+    <div class="shield-card">
+      <div class="shield-lock-icon">🔒</div>
+      <span class="shield-tag">NEXT UP</span>
+      <h2 id="nextPlayerPrompt">Pass phone to Alex</h2>
+      <p class="shield-warning">Do not reveal the screen until the phone is in your hands!</p>
+      <button id="btnUnlockShield" class="btn-primary pulse-btn">I am Ready (Tap to Open)</button>
+    </div>
+  </div>
+
+  <script src="../../js/partydeck-sdk.js"></script>
+  <script src="canvas-engine.js"></script>
+  <script src="game-controller.js"></script>
+</body>
+</html>
