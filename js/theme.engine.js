@@ -1,11 +1,13 @@
 /**
- * PARTYDECK Theme Engine
+ * PARTYDECK Universal Theme Engine
+ * Syncs and persists 4 arcade themes across Hub & all 20 game modules.
  */
 (function () {
+  "use strict";
+
   const THEME_KEY = "partydeck_theme";
   const DEFAULT_THEME = "cyber-neon";
-
-  const themeMetaColors = {
+  const THEME_COLORS = {
     "cyber-neon": "#08090c",
     "sunset-rave": "#0f071d",
     "retro-arcade": "#12131c",
@@ -13,43 +15,47 @@
   };
 
   function applyTheme(themeName) {
-    const validTheme = themeMetaColors[themeName] ? themeName : DEFAULT_THEME;
-    document.documentElement.setAttribute("data-theme", validTheme);
-    
-    const metaTag = document.getElementById("metaThemeColor");
-    if (metaTag) {
-      metaTag.setAttribute("content", themeMetaColors[validTheme]);
+    const theme = THEME_COLORS[themeName] ? themeName : DEFAULT_THEME;
+    document.documentElement.setAttribute("data-theme", theme);
+    try {
+      localStorage.setItem(THEME_KEY, theme);
+    } catch (e) {}
+
+    // Update browser status bar / notch color
+    const metaTheme = document.getElementById("metaThemeColor") || document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute("content", THEME_COLORS[theme]);
     }
 
-    const select = document.getElementById("themeSelect");
-    if (select && select.value !== validTheme) {
-      select.value = validTheme;
+    // Sync any theme select dropdown on page
+    const themeSelector = document.getElementById("themeSelect") || document.getElementById("themeSelector");
+    if (themeSelector && themeSelector.value !== theme) {
+      themeSelector.value = theme;
     }
   }
 
-  function initTheme() {
-    const savedTheme = localStorage.getItem(THEME_KEY) || DEFAULT_THEME;
-    applyTheme(savedTheme);
+  // Load saved theme immediately on script execution
+  let savedTheme = DEFAULT_THEME;
+  try {
+    savedTheme = localStorage.getItem(THEME_KEY) || DEFAULT_THEME;
+  } catch (e) {}
+  applyTheme(savedTheme);
 
-    const select = document.getElementById("themeSelect");
-    if (select) {
-      select.addEventListener("change", (e) => {
-        const newTheme = e.target.value;
-        localStorage.setItem(THEME_KEY, newTheme);
-        applyTheme(newTheme);
+  // Bind change event when DOM is ready
+  document.addEventListener("DOMContentLoaded", () => {
+    applyTheme(savedTheme);
+    const themeSelector = document.getElementById("themeSelect") || document.getElementById("themeSelector");
+    if (themeSelector) {
+      themeSelector.value = savedTheme;
+      themeSelector.addEventListener("change", (e) => {
+        applyTheme(e.target.value);
+        if (window.PartyDeck && PartyDeck.playSound) {
+          PartyDeck.playSound("click");
+        }
       });
     }
+  });
 
-    window.addEventListener("storage", (e) => {
-      if (e.key === THEME_KEY && e.newValue) {
-        applyTheme(e.newValue);
-      }
-    });
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initTheme);
-  } else {
-    initTheme();
-  }
+  // Export to global scope
+  window.ThemeEngine = { applyTheme, getTheme: () => localStorage.getItem(THEME_KEY) || DEFAULT_THEME };
 })();
