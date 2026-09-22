@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" id="metaThemeColor" />
+<title>Do or Drink | PartyDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  --ease: cubic-bezier(.2,.8,.3,1);
+}
+[data-theme="cyber-neon"] {
+  --bg-primary: #08090c; --bg-surface: #10141b; --bg-elevated: #181e29;
+  --text-primary: #ffffff; --text-secondary: #9ba3b4; --text-muted: #5c6577;
+  --accent: #00ffcc; --accent-glow: rgba(0,255,204,0.35); --accent-secondary: #ff007f;
+  --danger: #ff0055; --success: #00ff66; --border-color: rgba(0,255,204,0.22);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(0,255,204,0.12);
+}
+[data-theme="sunset-rave"] {
+  --bg-primary: #0f071d; --bg-surface: #1e0f38; --bg-elevated: #321659;
+  --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+  --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-secondary: #ff8800;
+  --danger: #ff0044; --success: #00ffaa; --border-color: rgba(255,0,127,0.3);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,0,127,0.2);
+}
+[data-theme="retro-arcade"] {
+  --bg-primary: #12131c; --bg-surface: #1a1b28; --bg-elevated: #26273b;
+  --text-primary: #f5f5f5; --text-secondary: #a2a8d3; --text-muted: #6873a8;
+  --accent: #ffd400; --accent-glow: rgba(255,212,0,0.35); --accent-secondary: #ff3860;
+  --danger: #ff3860; --success: #42e2b8; --border-color: rgba(255,212,0,0.25);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,212,0,0.15);
+}
+[data-theme="minimal-light"] {
+  --bg-primary: #f4f6f9; --bg-surface: #ffffff; --bg-elevated: #e8ecf2;
+  --text-primary: #101828; --text-secondary: #475467; --text-muted: #98a2b3;
+  --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2); --accent-secondary: #7c3aed;
+  --danger: #d92d20; --success: #0f9d58; --border-color: rgba(16,24,40,0.15);
+  --card-shadow: 0 8px 24px rgba(16,24,40,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
+
+.pd-hud {
+  position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);
+  padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+}
+.hud-exit {
+  display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);
+  border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;
+  padding:.42rem .65rem;cursor:pointer;text-decoration:none;
+}
+.hud-exit:active{transform:scale(.96);}
+.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
+.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);white-space:nowrap;text-transform:uppercase;}
+.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:62px;text-align:center;}
+
+main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
+.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
+.phase.on{display:flex;animation:pFade .2s var(--ease);}
+@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
+.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
+h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
+p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
+.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
+.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
+
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;}
+.chip{background:var(--bg-elevated);color:var(--text-secondary);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:.5rem .75rem;min-height:38px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.chip.is-on{background:var(--accent);color:var(--bg-primary);border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow);}
+
+.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
+.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
+.btn.danger{background:var(--danger);color:#fff;box-shadow:0 0 16px rgba(255,0,85,.35);}
+.btn.push{margin-top:auto;}
+.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
+
+.dare-card{position:relative;background:var(--bg-elevated);border:2px solid var(--border-color);border-radius:var(--r-lg);padding:1.4rem;min-height:220px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 12px 30px rgba(0,0,0,.5);}
+.dare-tier{display:flex;justify-content:space-between;align-items:center;}
+.d-tier-tag{font-family:var(--font-mono);font-size:.68rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);}
+.d-pts{font-family:var(--font-mono);font-size:.72rem;font-weight:800;color:var(--bg-primary);background:var(--accent);border-radius:999px;padding:.25rem .6rem;}
+.d-text{font-family:var(--font-display);font-size:1.35rem;font-weight:800;line-height:1.4;margin:1rem 0;}
+.d-penalty{font-family:var(--font-mono);font-size:.82rem;color:var(--danger);font-weight:700;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.tile{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.7rem .5rem;color:var(--text-primary);font-family:var(--font-mono);font-size:.8rem;font-weight:700;text-align:center;cursor:pointer;}
+.tile.is-on{background:var(--accent);color:var(--bg-primary);box-shadow:0 0 10px var(--accent-glow);}
+
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:30vh;overflow-y:auto;}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
+.ritem .seat{color:var(--accent);font-weight:700;}
+.ritem .nm{flex:1;font-weight:700;}
+.ritem .pts{color:var(--accent);font-weight:800;}
+.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;display:grid;place-items:center;}
+
+.curtain{position:fixed;inset:0;z-index:90;background:rgba(8,9,12,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.4rem;}
+.curtain.on{display:flex;}
+.cur-card{background:var(--bg-surface);border:2px solid var(--border-color);border-radius:var(--r-lg);padding:1.6rem 1.2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 0 30px var(--accent-glow);}
+.cur-tag{font-family:var(--font-mono);font-size:.6rem;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
+.cur-name{font-family:var(--font-display);font-size:1.5rem;font-weight:900;margin:.4rem 0 .65rem;}
+.pulse{animation:ring 2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 var(--accent-glow)}70%{box-shadow:0 0 0 16px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+
+.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
+.ico svg{width:100%;height:100%;display:block;}
+</style>
+</head>
+<body>
+<header class="pd-hud">
+  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
+  <div class="hud-mid">
+    <span class="hud-badge" id="hudBadge">SETUP // PHASE</span>
+    <span class="hud-label" id="hudLabel">Do or Drink</span>
+  </div>
+  <div class="hud-count" id="hudCount">CARD 0</div>
+</header>
+
+<main>
+  <!-- SETUP -->
+  <section class="phase on" id="phSetup">
+    <div class="hero"><span class="ico" data-ic="flame"></span></div>
+    <h1 class="title">Do or Drink</h1>
+    <p class="sub">Tiered dares worth points, or take the penalty. Configure your unit before you start.</p>
+    <div class="panel">
+      <p class="ptitle">Roster</p>
+      <ul class="rlist" id="rList"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="rInput" placeholder="Add player..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
+        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Penalty Unit</p>
+      <div class="chips" id="unitChips">
+        <button class="chip is-on" type="button" data-u="Sip">Sips</button>
+        <button class="chip" type="button" data-u="Shot">Shots</button>
+        <button class="chip" type="button" data-u="Push-up">Push-ups</button>
+        <button class="chip" type="button" data-u="Truth">Truths</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnStart" type="button">Deal First Card</button>
+  </section>
+
+  <!-- PLAY -->
+  <section class="phase" id="phPlay">
+    <div class="panel" style="text-align:center;padding:.7rem;">
+      <p class="ptitle" id="turnLabel" style="margin:0;">CURRENT PLAYER: —</p>
+    </div>
+    <div class="dare-card" id="dareCard">
+      <div class="dare-tier">
+        <span class="d-tier-tag" id="dTier">TIER 1</span>
+        <span class="d-pts" id="dPts">+1 PT</span>
+      </div>
+      <div class="d-text" id="dText">Tap Next Card to draw a dare.</div>
+      <div class="d-penalty" id="dPenalty">OR TAKE 1 SIP</div>
+    </div>
+    <div class="btn-row push">
+      <button class="btn danger" id="btnTook" type="button">Took Penalty</button>
+      <button class="btn" id="btnDid" type="button">Did the Dare</button>
+    </div>
+    <button class="btn ghost" id="btnBoard" type="button">View Leaderboard</button>
+  </section>
+
+  <!-- BOARD -->
+  <section class="phase" id="phBoard">
+    <h1 class="title">Leaderboard</h1>
+    <div class="panel">
+      <ul class="rlist" id="boardList" style="max-height:none;"></ul>
+    </div>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
+      <button class="btn" id="btnBack" type="button">Back to Game</button>
+    </div>
+  </section>
+</main>
+
+<!-- PASS CURTAIN -->
+<div class="curtain" id="curtain" aria-hidden="true">
+  <div class="cur-card">
+    <div class="hero" style="margin-bottom:.5rem;"><span class="ico" data-ic="flame" style="width:36px;height:36px;"></span></div>
+    <span class="cur-tag">NEXT UP</span>
+    <h2 class="cur-name" id="curWho">Pass Phone</h2>
+    <p class="sub" style="margin-bottom:1.2rem;">Hand the device over. Tap when ready to see your card.</p>
+    <button class="btn pulse" id="btnCurtainUnlock" type="button">I'm ready</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const LOCAL={
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+ flame:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0"/></svg>',
+ close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+};
+function ICO(k){ return LOCAL[k]||''; }
+document.querySelectorAll('[data-ic]').forEach(el=> el.innerHTML=ICO(el.getAttribute('data-ic')));
+
+const PD={
+ getPlayers:()=>{ try{ return JSON.parse(localStorage.getItem("partydeck_players")||"[]"); }catch(e){return[];} },
+ setPlayers:(a)=>{ try{ localStorage.setItem("partydeck_players",JSON.stringify(a)); }catch(e){} },
+ exitToHub:()=>{ window.location.href="../../index.html"; },
+ vibrate:(p)=>{ if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){} }
+};
+(function(){
+ let t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
+ document.documentElement.setAttribute("data-theme",t);
+})();
+
+const Sfx={
+ ctx:null,
+ ok(){ if(!this.ctx)try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume(); return !!this.ctx; },
+ t(f,d,type,vol,slide,delay){
+  if(!this.ok())return; const c=this.ctx, t0=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
+  o.type=type||"square"; o.frequency.setValueAtTime(f,t0);
+  if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+d);
+  g.gain.setValueAtTime(vol||.14,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+d);
+ },
+ play(n){
+  switch(n){
+   case"click": this.t(880,.045,"square",.1); break;
+   case"success": this.t(523,.08,"triangle",.15); this.t(659,.08,"triangle",.15,null,.07); this.t(784,.14,"triangle",.15,null,.14); break;
+   case"drink": this.t(240,.2,"sawtooth",.15); break;
+  }
+ }
+};
+
+const DARES=[
+ {t:1,p:1,d:"Let the player to your right send an emoji-free text to any contact in your phone."},
+ {t:1,p:1,d:"Show the last 3 photos in your camera roll to the group."},
+ {t:1,p:1,d:"Do 10 push-ups right now."},
+ {t:1,p:1,d:"Let someone else pick your ringtone for the rest of the game."},
+ {t:1,p:1,d:"Speak only in questions for the next 3 minutes."},
+ {t:1,p:1,d:"Do your best red-carpet walk across the room."},
+ {t:1,p:1,d:"Attempt to lick your elbow in front of everyone."},
+ {t:1,p:1,d:"Let the group pick a new nickname for you for the rest of the night."},
+ {t:1,p:1,d:"Hold a plank for 30 seconds."},
+ {t:1,p:1,d:"Sing the chorus of your most-played song, no music."},
+ {t:2,p:2,d:"Do your best impression of another player at the table."},
+ {t:2,p:2,d:"Trade an item of clothing with the player across from you."},
+ {t:2,p:2,d:"Let the group draw a mustache on your face with a washable marker."},
+ {t:2,p:2,d:"Reveal your phone's screen time for this week to the group."},
+ {t:2,p:2,d:"Call a random contact and sing 'Happy Birthday' before hanging up."},
+ {t:2,p:2,d:"Let the person to your left post a status on your social media."},
+ {t:2,p:2,d:"Speak in an accent of the group's choosing until your next turn."},
+ {t:2,p:2,d:"Do a dramatic reading of a random text in your messages."},
+ {t:2,p:2,d:"Balance a full cup on your head for 60 seconds."},
+ {t:2,p:2,d:"Let the table rearrange your seating and you must comply."},
+ {t:4,p:4,d:"Eat a spoonful of whatever condiment mix the group creates."},
+ {t:4,p:4,d:"Let the group write and send a text from your phone to anyone."},
+ {t:4,p:4,d:"Reveal the most embarrassing thing on your phone that you're willing to share."},
+ {t:4,p:4,d:"Do a 60-second stand-up comedy bit — no repeats, no pausing."},
+ {t:4,p:4,d:"Let the group choose your profile picture for the next 24 hours."},
+ {t:4,p:4,d:"Attempt a cartwheel in front of the entire group."},
+ {t:4,p:4,d:"Reveal your search history from the last hour."},
+ {t:4,p:4,d:"Let the player to your right style your hair however they want."},
+ {t:4,p:4,d:"Do your best dramatic villain monologue for 30 seconds."},
+ {t:4,p:4,d:"Wear an article of clothing inside out for the rest of the game."}
+];
+
+let roster=PD.getPlayers().slice(0,12);
+if(roster.length<2) roster=["Player 1","Player 2","Player 3"];
+const scores={}; roster.forEach(p=>scores[p]=0);
+const S={unit:'Sip',pool:[...DARES].sort(()=>Math.random()-.5),turnIdx:0,cardCount:0,currentDare:null};
+
+const $=id=>document.getElementById(id);
+function hud(b,l,c){ $('hudBadge').textContent=b; $('hudLabel').textContent=l; if(c)$('hudCount').textContent=c; }
+function go(id){ document.querySelectorAll('.phase').forEach(p=>p.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); }
+
+function renderRoster(){
+ $('rList').innerHTML=roster.map((p,i)=>`<li class="ritem"><span class="seat">#${i+1}</span><span class="nm">${p}</span><button type="button" data-del="${i}">${ICO('close')}</button></li>`).join('');
+ $('btnStart').disabled=roster.length<2;
+ PD.setPlayers(roster);
+}
+$('rAdd').onclick=()=>{ const v=$('rInput').value.trim(); if(v&&roster.indexOf(v)===-1){ roster.push(v); scores[v]=0; $('rInput').value=''; renderRoster(); Sfx.play('click'); } };
+$('rList').onclick=e=>{ const b=e.target.closest('[data-del]'); if(b){ const nm=roster[+b.dataset.del]; delete scores[nm]; roster.splice(+b.dataset.del,1); renderRoster(); Sfx.play('click'); } };
+
+$('unitChips').onclick=e=>{
+ const b=e.target.closest('[data-u]');
+ if(b){ $('unitChips').querySelectorAll('.chip').forEach(c=>c.classList.remove('is-on')); b.classList.add('is-on'); S.unit=b.dataset.u; Sfx.play('click'); }
+};
+
+$('btnStart').onclick=()=>{
+ S.turnIdx=0; S.cardCount=0;
+ hud("IN PLAY",roster[0],"CARD 1");
+ promptTurn();
+};
+
+function promptTurn(){
+ const who=roster[S.turnIdx % roster.length];
+ $('curWho').textContent=who;
+ $('curtain').classList.add('on');
+ $('btnCurtainUnlock').onclick=()=>{
+  $('curtain').classList.remove('on');
+  Sfx.play('click');
+  dealCard(who);
+ };
+}
+
+function dealCard(who){
+ $('turnLabel').textContent=`CURRENT PLAYER: ${who.toUpperCase()}`;
+ if(S.pool.length===0) S.pool=[...DARES].sort(()=>Math.random()-.5);
+ const card=S.pool.pop();
+ S.currentDare=card;
+ S.cardCount++;
+ $('dTier').textContent=`TIER ${card.t}`;
+ $('dPts').textContent=`+${card.p} PT${card.p===1?'':'S'}`;
+ $('dText').textContent=card.d;
+ $('dPenalty').textContent=`OR TAKE ${card.p} ${S.unit.toUpperCase()}${card.p===1?'':'S'}`;
+ hud("IN PLAY",who,`CARD ${S.cardCount}`);
+ go('phPlay');
+}
+
+$('btnDid').onclick=()=>{
+ const who=roster[S.turnIdx % roster.length];
+ scores[who]=(scores[who]||0)+S.currentDare.p;
+ Sfx.play('success'); PD.vibrate(25);
+ nextTurn();
+};
+$('btnTook').onclick=()=>{
+ Sfx.play('drink'); PD.vibrate(40);
+ nextTurn();
+};
+function nextTurn(){
+ S.turnIdx++;
+ promptTurn();
+}
+
+function renderBoard(){
+ const sorted=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+ $('boardList').innerHTML=sorted.map(([p,pt],i)=>`<li class="ritem"><span class="seat">#${i+1}</span><span class="nm">${p}</span><span class="pts">${pt} pts</span></li>`).join('') || '<li class="ritem">No scores yet.</li>';
+}
+$('btnBoard').onclick=()=>{ renderBoard(); go('phBoard'); Sfx.play('click'); };
+$('btnBack').onclick=()=>{ go('phPlay'); Sfx.play('click'); };
+$('btnHub').onclick=()=>PD.exitToHub();
+$('btnExit').onclick=()=>PD.exitToHub();
+
+renderRoster();
+})();
+</script>
+</body>
+</html>

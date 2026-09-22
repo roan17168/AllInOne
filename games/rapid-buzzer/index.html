@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" id="metaThemeColor" />
+<title>Rapid Buzzer | PartyDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  --ease: cubic-bezier(.2,.8,.3,1);
+}
+[data-theme="cyber-neon"] {
+  --bg-primary: #08090c; --bg-surface: #10141b; --bg-elevated: #181e29;
+  --text-primary: #ffffff; --text-secondary: #9ba3b4; --text-muted: #5c6577;
+  --accent: #00ffcc; --accent-glow: rgba(0,255,204,0.35); --accent-secondary: #ff007f;
+  --danger: #ff0055; --success: #00ff66; --border-color: rgba(0,255,204,0.22);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(0,255,204,0.12);
+}
+[data-theme="sunset-rave"] {
+  --bg-primary: #0f071d; --bg-surface: #1e0f38; --bg-elevated: #321659;
+  --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+  --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-secondary: #ff8800;
+  --danger: #ff0044; --success: #00ffaa; --border-color: rgba(255,0,127,0.3);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,0,127,0.2);
+}
+[data-theme="retro-arcade"] {
+  --bg-primary: #12131c; --bg-surface: #1a1b28; --bg-elevated: #26273b;
+  --text-primary: #f5f5f5; --text-secondary: #a2a8d3; --text-muted: #6873a8;
+  --accent: #ffd400; --accent-glow: rgba(255,212,0,0.35); --accent-secondary: #ff3860;
+  --danger: #ff3860; --success: #42e2b8; --border-color: rgba(255,212,0,0.25);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,212,0,0.15);
+}
+[data-theme="minimal-light"] {
+  --bg-primary: #f4f6f9; --bg-surface: #ffffff; --bg-elevated: #e8ecf2;
+  --text-primary: #101828; --text-secondary: #475467; --text-muted: #98a2b3;
+  --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2); --accent-secondary: #7c3aed;
+  --danger: #d92d20; --success: #0f9d58; --border-color: rgba(16,24,40,0.15);
+  --card-shadow: 0 8px 24px rgba(16,24,40,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
+
+.pd-hud {
+  position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);
+  padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+}
+.hud-exit {
+  display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);
+  border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;
+  padding:.42rem .65rem;cursor:pointer;text-decoration:none;
+}
+.hud-exit:active{transform:scale(.96);}
+.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
+.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);white-space:nowrap;text-transform:uppercase;}
+.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:62px;text-align:center;}
+
+main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
+.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
+.phase.on{display:flex;animation:pFade .2s var(--ease);}
+@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
+.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
+h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
+p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
+.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
+.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
+
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;}
+.chip{background:var(--bg-elevated);color:var(--text-secondary);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:.5rem .75rem;min-height:38px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.chip.is-on{background:var(--accent);color:var(--bg-primary);border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow);}
+
+.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
+.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
+.btn.danger{background:var(--danger);color:#fff;box-shadow:0 0 16px rgba(255,0,85,.35);}
+.btn.push{margin-top:auto;}
+.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
+
+.score-row{display:flex;gap:.6rem;}
+.team-card{flex:1;background:var(--bg-elevated);border:2px solid transparent;border-radius:var(--r-md);padding:.8rem;text-align:center;cursor:pointer;}
+.team-card.active{border-color:var(--accent);box-shadow:0 0 14px var(--accent-glow);}
+.team-name{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);}
+.team-score{font-family:var(--font-display);font-size:1.7rem;font-weight:900;color:var(--accent);margin-top:2px;}
+
+.bomb-card{position:relative;width:100%;min-height:190px;background:var(--bg-elevated);border:2px solid var(--border-color);border-radius:var(--r-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;padding:1.4rem;text-align:center;transition:border-color .15s;}
+.bomb-card.danger-pulse{border-color:var(--danger);animation:bshake .18s infinite;}
+@keyframes bshake{0%{transform:translate(1px,0)}50%{transform:translate(-1px,0)}100%{transform:translate(1px,0)}}
+.b-cat{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
+.b-word{font-family:var(--font-display);font-size:1.7rem;font-weight:900;line-height:1.25;}
+
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:32vh;overflow-y:auto;}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
+.ritem .seat{color:var(--accent);font-weight:700;}
+.ritem .nm{flex:1;font-weight:700;}
+.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;display:grid;place-items:center;}
+
+.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
+.ico svg{width:100%;height:100%;display:block;}
+</style>
+</head>
+<body>
+<header class="pd-hud">
+  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
+  <div class="hud-mid">
+    <span class="hud-badge" id="hudBadge">SETUP // PHASE</span>
+    <span class="hud-label" id="hudLabel">Rapid Buzzer</span>
+  </div>
+  <div class="hud-count" id="hudCount">0-0</div>
+</header>
+
+<main>
+  <!-- SETUP -->
+  <section class="phase on" id="phSetup">
+    <div class="hero"><span class="ico" data-ic="bomb"></span></div>
+    <h1 class="title">Rapid Buzzer</h1>
+    <p class="sub">Pass the device around your team while naming anything on the card. The bomb explodes at random — don't be holding it.</p>
+    <div class="panel">
+      <p class="ptitle">Team A Roster</p>
+      <ul class="rlist" id="rListA"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="inputA" placeholder="Add to Team A..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
+        <button class="btn" id="addA" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Team B Roster</p>
+      <ul class="rlist" id="rListB"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="inputB" placeholder="Add to Team B..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
+        <button class="btn" id="addB" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Fuse Length</p>
+      <div class="chips" id="fuseChips">
+        <button class="chip" type="button" data-f="20-40">SHORT (20-40s)</button>
+        <button class="chip is-on" type="button" data-f="20-60">STANDARD (20-60s)</button>
+        <button class="chip" type="button" data-f="40-80">LONG (40-80s)</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnStart" type="button">Arm the Bomb</button>
+  </section>
+
+  <!-- PLAY -->
+  <section class="phase" id="phPlay">
+    <div class="score-row">
+      <div class="team-card active" id="cardA"><div class="team-name">TEAM A</div><div class="team-score" id="scoreA">0</div></div>
+      <div class="team-card" id="cardB"><div class="team-name">TEAM B</div><div class="team-score" id="scoreB">0</div></div>
+    </div>
+    <div class="bomb-card" id="bombCard">
+      <span class="b-cat" id="bCat">READY</span>
+      <span class="b-word" id="bWord">Tap Start to Arm</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn ghost" id="btnPause" type="button">Pause</button>
+      <button class="btn" id="btnAction" type="button">Start Round</button>
+    </div>
+  </section>
+
+  <!-- BOOM -->
+  <section class="phase" id="phBoom">
+    <div class="hero"><span class="ico" data-ic="bomb"></span></div>
+    <h1 class="title" style="color:var(--danger);">BOOM!</h1>
+    <p class="sub" id="boomSub">—</p>
+    <div class="score-row">
+      <div class="team-card" id="boomCardA"><div class="team-name">TEAM A</div><div class="team-score" id="boomScoreA">0</div></div>
+      <div class="team-card" id="boomCardB"><div class="team-name">TEAM B</div><div class="team-score" id="boomScoreB">0</div></div>
+    </div>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
+      <button class="btn" id="btnNext" type="button">Next Round</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+const LOCAL={
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+ bomb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="13" r="8"/><path d="M11 5V3m0 0 3 2m-3-2-3 2M17 8l2-2m0 0 2 1m-2-1-1 2"/></svg>',
+ close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+};
+function ICO(k){ return LOCAL[k]||''; }
+document.querySelectorAll('[data-ic]').forEach(el=> el.innerHTML=ICO(el.getAttribute('data-ic')));
+
+const PD={
+ getPlayers:()=>{ try{ return JSON.parse(localStorage.getItem("partydeck_players")||"[]"); }catch(e){return[];} },
+ exitToHub:()=>{ window.location.href="../../index.html"; },
+ vibrate:(p)=>{ if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){} }
+};
+(function(){
+ let t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
+ document.documentElement.setAttribute("data-theme",t);
+})();
+
+const Sfx={
+ ctx:null,
+ ok(){ if(!this.ctx)try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume(); return !!this.ctx; },
+ t(f,d,type,vol,slide,delay){
+  if(!this.ok())return; const c=this.ctx, t0=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
+  o.type=type||"square"; o.frequency.setValueAtTime(f,t0);
+  if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+d);
+  g.gain.setValueAtTime(vol||.14,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+d);
+ },
+ play(n){
+  switch(n){
+   case"click": this.t(880,.045,"square",.1); break;
+   case"tick": this.t(1000,.04,"square",.09); break;
+   case"boom": this.t(140,.5,"sawtooth",.3); this.t(90,.6,"sawtooth",.25,null,.08); break;
+   case"success": this.t(523,.08,"triangle",.15); this.t(659,.08,"triangle",.15,null,.07); this.t(784,.14,"triangle",.15,null,.14); break;
+  }
+ }
+};
+
+const CATEGORIES=[
+ {c:"Object",items:["Electric Guitar","Rollercoaster","Boomerang","Pocket Watch","Submarine","Disco Ball","Umbrella","Kaleidoscope"]},
+ {c:"Action",items:["Moonwalking","Scuba Diving","Juggling Flaming Torches","Parallel Parking","Tightrope Walking","Speed Reading","Rock Climbing"]},
+ {c:"Movie",items:["Jurassic Park","The Matrix","Titanic","Jaws","Back to the Future","Inception","Shrek"]},
+ {c:"Place",items:["Haunted Lighthouse","Space Station","Ancient Pyramid","Underwater Cave","Rooftop Garden","Abandoned Carnival"]},
+ {c:"Food",items:["Spicy Burrito","Cotton Candy","Pineapple Pizza","Sushi Platter","Giant Pretzel","Chocolate Fondue"]},
+ {c:"Person",items:["Mad Scientist","Time Traveler","Secret Agent","Circus Ringmaster","Deep Sea Diver","Royal Chef"]},
+ {c:"Nature",items:["Volcanic Eruption","Northern Lights","Coral Reef","Desert Mirage","Thunderstorm","Meteor Shower"]}
+];
+function flatPool(){ const out=[]; CATEGORIES.forEach(g=> g.items.forEach(i=> out.push({c:g.c,w:i}))); return out; }
+
+let teams={A:[],B:[]};
+const stored=PD.getPlayers();
+if(stored.length>=2){ const half=Math.ceil(stored.length/2); teams.A=stored.slice(0,half); teams.B=stored.slice(half); }
+else { teams.A=["Alex","Sam"]; teams.B=["Jordan","Casey"]; }
+
+const S={fuseRange:[20,60],pool:flatPool().sort(()=>Math.random()-.5),active:'A',playing:false,paused:false,tick:null,scores:{A:0,B:0}};
+
+const $=id=>document.getElementById(id);
+function hud(b,l,c){ $('hudBadge').textContent=b; $('hudLabel').textContent=l; if(c)$('hudCount').textContent=c; }
+function go(id){ document.querySelectorAll('.phase').forEach(p=>p.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); }
+
+function renderTeamList(sel,arr){
+ $(sel).innerHTML=arr.map((p,i)=>`<li class="ritem"><span class="seat">#${i+1}</span><span class="nm">${p}</span><button type="button" data-t="${sel}" data-i="${i}">${ICO('close')}</button></li>`).join('');
+}
+function renderAll(){ renderTeamList('rListA',teams.A); renderTeamList('rListB',teams.B); }
+$('addA').onclick=()=>{ const v=$('inputA').value.trim(); if(v){ teams.A.push(v); $('inputA').value=''; renderAll(); Sfx.play('click'); } };
+$('addB').onclick=()=>{ const v=$('inputB').value.trim(); if(v){ teams.B.push(v); $('inputB').value=''; renderAll(); Sfx.play('click'); } };
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-t]');
+ if(b){ const arr=b.dataset.t==='rListA'?teams.A:teams.B; arr.splice(+b.dataset.i,1); renderAll(); Sfx.play('click'); }
+});
+
+$('fuseChips').onclick=e=>{
+ const b=e.target.closest('[data-f]');
+ if(b){
+  $('fuseChips').querySelectorAll('.chip').forEach(c=>c.classList.remove('is-on'));
+  b.classList.add('is-on');
+  S.fuseRange=b.dataset.f.split('-').map(Number);
+  Sfx.play('click');
+ }
+};
+
+$('btnStart').onclick=()=>{
+ S.scores={A:0,B:0};
+ $('scoreA').textContent='0'; $('scoreB').textContent='0';
+ hud("BUZZER LIVE","Round 1","0-0");
+ go('phPlay');
+ Sfx.play('success');
+};
+
+function nextWord(){
+ if(S.pool.length===0) S.pool=flatPool().sort(()=>Math.random()-.5);
+ const item=S.pool.pop();
+ $('bCat').textContent=item.c.toUpperCase();
+ $('bWord').textContent=item.w;
+}
+function setActive(team){
+ S.active=team;
+ $('cardA').classList.toggle('active',team==='A');
+ $('cardB').classList.toggle('active',team==='B');
+}
+
+$('btnAction').onclick=()=>{
+ if(!S.playing){ startRound(); }
+ else { Sfx.play('tick'); setActive(S.active==='A'?'B':'A'); nextWord(); }
+};
+
+function startRound(){
+ S.playing=true; S.paused=false;
+ $('btnAction').textContent='Correct / Pass';
+ $('btnPause').textContent='Pause';
+ $('bombCard').classList.remove('danger-pulse');
+ nextWord();
+ const duration=(S.fuseRange[0]+Math.random()*(S.fuseRange[1]-S.fuseRange[0]))*1000;
+ let elapsed=0, delay=750;
+ function loop(){
+  if(!S.playing||S.paused)return;
+  Sfx.play('tick'); PD.vibrate(15);
+  elapsed+=delay;
+  delay=Math.max(90,750-(elapsed/duration)*660);
+  if(elapsed>=duration){ explode(); }
+  else{ if(elapsed>duration*0.7) $('bombCard').classList.add('danger-pulse'); S.tick=setTimeout(loop,delay); }
+ }
+ loop();
+}
+function explode(){
+ S.playing=false; clearTimeout(S.tick);
+ Sfx.play('boom'); PD.vibrate([150,80,150]);
+ const winner=S.active==='A'?'B':'A';
+ S.scores[winner]++;
+ $('boomSub').textContent=`Team ${S.active} was holding the bomb! Team ${winner} scores a point.`;
+ $('boomScoreA').textContent=S.scores.A;
+ $('boomScoreB').textContent=S.scores.B;
+ $('boomCardA').classList.toggle('active',winner==='A');
+ $('boomCardB').classList.toggle('active',winner==='B');
+ hud("DETONATED","Team "+S.active+" Caught");
+ go('phBoom');
+}
+
+$('btnPause').onclick=()=>{
+ if(!S.playing)return;
+ S.paused=!S.paused;
+ $('btnPause').textContent=S.paused?'Resume':'Pause';
+ if(!S.paused){ startRoundResume(); }
+ else clearTimeout(S.tick);
+ Sfx.play('click');
+};
+function startRoundResume(){
+ // simplified resume: just restart tick loop with remaining randomness
+ let delay=400;
+ function loop(){
+  if(!S.playing||S.paused)return;
+  Sfx.play('tick'); PD.vibrate(15);
+  delay=Math.max(90,delay*0.94);
+  if(Math.random()<0.008) explode();
+  else S.tick=setTimeout(loop,delay);
+ }
+ loop();
+}
+
+$('btnNext').onclick=()=>{
+ $('scoreA').textContent=S.scores.A; $('scoreB').textContent=S.scores.B;
+ hud("BUZZER LIVE","Next Round",S.scores.A+"-"+S.scores.B);
+ go('phPlay');
+ setActive(S.active==='A'?'B':'A');
+ $('bombCard').classList.remove('danger-pulse');
+ $('bCat').textContent='READY'; $('bWord').textContent='Tap Start to Arm';
+ $('btnAction').textContent='Start Round';
+ Sfx.play('click');
+};
+
+$('btnHub').onclick=()=>PD.exitToHub();
+$('btnExit').onclick=()=>PD.exitToHub();
+
+renderAll();
+})();
+</script>
+</body>
+</html>

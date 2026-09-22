@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" id="metaThemeColor" />
+<title>Medusa's Eye | PartyDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  --ease: cubic-bezier(.2,.8,.3,1);
+}
+[data-theme="cyber-neon"] {
+  --bg-primary: #08090c; --bg-surface: #10141b; --bg-elevated: #181e29;
+  --text-primary: #ffffff; --text-secondary: #9ba3b4; --text-muted: #5c6577;
+  --accent: #00ffcc; --accent-glow: rgba(0,255,204,0.35); --accent-secondary: #ff007f;
+  --danger: #ff0055; --success: #00ff66; --border-color: rgba(0,255,204,0.22);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(0,255,204,0.12);
+}
+[data-theme="sunset-rave"] {
+  --bg-primary: #0f071d; --bg-surface: #1e0f38; --bg-elevated: #321659;
+  --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+  --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-secondary: #ff8800;
+  --danger: #ff0044; --success: #00ffaa; --border-color: rgba(255,0,127,0.3);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,0,127,0.2);
+}
+[data-theme="retro-arcade"] {
+  --bg-primary: #12131c; --bg-surface: #1a1b28; --bg-elevated: #26273b;
+  --text-primary: #f5f5f5; --text-secondary: #a2a8d3; --text-muted: #6873a8;
+  --accent: #ffd400; --accent-glow: rgba(255,212,0,0.35); --accent-secondary: #ff3860;
+  --danger: #ff3860; --success: #42e2b8; --border-color: rgba(255,212,0,0.25);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,212,0,0.15);
+}
+[data-theme="minimal-light"] {
+  --bg-primary: #f4f6f9; --bg-surface: #ffffff; --bg-elevated: #e8ecf2;
+  --text-primary: #101828; --text-secondary: #475467; --text-muted: #98a2b3;
+  --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2); --accent-secondary: #7c3aed;
+  --danger: #d92d20; --success: #0f9d58; --border-color: rgba(16,24,40,0.15);
+  --card-shadow: 0 8px 24px rgba(16,24,40,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
+.pd-hud{position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.hud-exit{display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;padding:.42rem .65rem;cursor:pointer;text-decoration:none;}
+.hud-exit:active{transform:scale(.96);}
+.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
+.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);white-space:nowrap;text-transform:uppercase;}
+.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:62px;text-align:center;}
+main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
+.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
+.phase.on{display:flex;animation:pFade .2s var(--ease);}
+@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
+.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
+h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
+p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
+.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
+.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
+.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
+.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
+.btn.push{margin-top:auto;}
+.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:30vh;overflow-y:auto;}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
+.ritem .seat{color:var(--accent);font-weight:700;}
+.ritem .nm{flex:1;font-weight:700;}
+.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;display:grid;place-items:center;}
+
+/* Radial Diagram */
+.radial-stage{position:relative;width:100%;aspect-ratio:1;max-width:340px;margin:0 auto;}
+.radial-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;border-radius:50%;background:var(--bg-elevated);border:2px solid var(--border-color);display:grid;place-items:center;color:var(--accent);}
+.seat-node{position:absolute;width:64px;height:64px;border-radius:50%;background:var(--bg-elevated);border:2px solid var(--border-color);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.62rem;font-weight:800;text-align:center;transform:translate(-50%,-50%);cursor:pointer;padding:2px;}
+.seat-node.self{border-color:var(--accent-secondary);opacity:.5;cursor:default;}
+.seat-node.stone{background:rgba(255,0,85,.12);border-color:var(--danger);color:var(--danger);opacity:.55;cursor:default;}
+.seat-node.selected{border-color:var(--accent);box-shadow:0 0 14px var(--accent-glow);background:var(--accent);color:var(--bg-primary);}
+
+/* Countdown Overlay */
+.countdown-overlay{position:fixed;inset:0;z-index:95;background:var(--bg-primary);display:none;align-items:center;justify-content:center;flex-direction:column;gap:1rem;}
+.countdown-overlay.on{display:flex;}
+.cd-num{font-family:var(--font-display);font-size:6rem;font-weight:900;color:var(--accent);text-shadow:0 0 30px var(--accent-glow);}
+.cd-label{font-family:var(--font-mono);font-size:1rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-secondary);}
+.cd-num.lookup{color:var(--danger);font-size:3rem;text-shadow:0 0 30px rgba(255,0,85,.5);}
+
+.curtain{position:fixed;inset:0;z-index:90;background:rgba(8,9,12,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.4rem;}
+.curtain.on{display:flex;}
+.cur-card{background:var(--bg-surface);border:2px solid var(--border-color);border-radius:var(--r-lg);padding:1.6rem 1.2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 0 30px var(--accent-glow);}
+.cur-tag{font-family:var(--font-mono);font-size:.6rem;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
+.cur-name{font-family:var(--font-display);font-size:1.5rem;font-weight:900;margin:.4rem 0 .65rem;}
+.pulse{animation:ring 2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 var(--accent-glow)}70%{box-shadow:0 0 0 16px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+
+.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
+.ico svg{width:100%;height:100%;display:block;}
+</style>
+</head>
+<body>
+<header class="pd-hud">
+  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
+  <div class="hud-mid">
+    <span class="hud-badge" id="hudBadge">SETUP // PHASE</span>
+    <span class="hud-label" id="hudLabel">Medusa's Eye</span>
+  </div>
+  <div class="hud-count" id="hudCount">RD 1</div>
+</header>
+
+<main>
+  <!-- SETUP -->
+  <section class="phase on" id="phSetup">
+    <div class="hero"><span class="ico" data-ic="eye"></span></div>
+    <h1 class="title">Medusa's Eye</h1>
+    <p class="sub">Sit in a circle. Eyes down. On "Look Up," secretly target someone with your gaze — mutual eye contact turns you both to stone.</p>
+    <div class="panel">
+      <p class="ptitle">Seating Order (clockwise)</p>
+      <ul class="rlist" id="rList"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="rInput" placeholder="Add player..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
+        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnStart" type="button">Begin Round 1</button>
+  </section>
+
+  <!-- ROUND INTRO -->
+  <section class="phase" id="phIntro">
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle" id="introRound">ROUND 1</p>
+      <h1 class="title" id="introSurvivors" style="color:var(--accent);">All Players Remain</h1>
+      <p class="sub" style="margin-top:.6rem;">Everyone look down at the table. When ready, tap Start Countdown.</p>
+    </div>
+    <div class="radial-stage" id="introRadial"></div>
+    <button class="btn push" id="btnCountdown" type="button">Start Countdown</button>
+  </section>
+
+  <!-- TARGET SELECTION -->
+  <section class="phase" id="phTarget">
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle" id="targetWho">PRIVATE: WHO DID YOU LOOK AT?</p>
+      <p class="sub">Tap the seat of the player you locked eyes with.</p>
+    </div>
+    <div class="radial-stage" id="targetRadial"></div>
+    <button class="btn push" id="btnLockTarget" type="button" disabled>Confirm Target</button>
+  </section>
+
+  <!-- ROUND RESULT -->
+  <section class="phase" id="phResult">
+    <div class="hero"><span class="ico" data-ic="skull"></span></div>
+    <h1 class="title" id="resultTitle">Round Result</h1>
+    <p class="sub" id="resultSub">—</p>
+    <div class="radial-stage" id="resultRadial"></div>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
+      <button class="btn" id="btnNextRound" type="button">Next Round</button>
+    </div>
+  </section>
+
+  <!-- WINNER -->
+  <section class="phase" id="phWinner">
+    <div class="hero"><span class="ico" data-ic="crown"></span></div>
+    <h1 class="title" id="winnerTitle" style="color:var(--accent);">Survivor</h1>
+    <p class="sub" id="winnerSub">—</p>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit2" type="button">Exit to Hub</button>
+      <button class="btn" id="btnNewGame" type="button">New Game</button>
+    </div>
+  </section>
+</main>
+
+<div class="countdown-overlay" id="cdOverlay">
+  <div class="cd-num" id="cdNum">3</div>
+  <div class="cd-label" id="cdLabel">EYES DOWN</div>
+</div>
+
+<div class="curtain" id="curtain" aria-hidden="true">
+  <div class="cur-card">
+    <div class="hero" style="margin-bottom:.5rem;"><span class="ico" data-ic="lock" style="width:36px;height:36px;"></span></div>
+    <span class="cur-tag">PRIVATE TARGET</span>
+    <h2 class="cur-name" id="curWho">Pass Phone</h2>
+    <p class="sub" style="margin-bottom:1.2rem;">This is your private turn to log who you looked at. Others must look away.</p>
+    <button class="btn pulse" id="btnCurtainUnlock" type="button">I am ready</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const LOCAL={
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+ eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+ skull:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M9 22h6M8 2a6 6 0 0 0-6 6c0 3 2 4 2 7h12c0-3 2-4 2-7a6 6 0 0 0-6-6"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>',
+ crown:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5z"/></svg>',
+ lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+ close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+};
+function ICO(k){ return LOCAL[k]||''; }
+document.querySelectorAll('[data-ic]').forEach(el=> el.innerHTML=ICO(el.getAttribute('data-ic')));
+
+const PD={
+ getPlayers:()=>{ try{ return JSON.parse(localStorage.getItem("partydeck_players")||"[]"); }catch(e){return[];} },
+ setPlayers:(a)=>{ try{ localStorage.setItem("partydeck_players",JSON.stringify(a)); }catch(e){} },
+ exitToHub:()=>{ window.location.href="../../index.html"; },
+ vibrate:(p)=>{ if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){} }
+};
+(function(){
+ let t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
+ document.documentElement.setAttribute("data-theme",t);
+})();
+
+const Sfx={
+ ctx:null,
+ ok(){ if(!this.ctx)try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume(); return !!this.ctx; },
+ t(f,d,type,vol,slide,delay){
+  if(!this.ok())return; const c=this.ctx, t0=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
+  o.type=type||"square"; o.frequency.setValueAtTime(f,t0);
+  if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+d);
+  g.gain.setValueAtTime(vol||.14,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+d);
+ },
+ play(n){
+  switch(n){
+   case"click": this.t(880,.045,"square",.1); break;
+   case"tick": this.t(500,.12,"sine",.15); break;
+   case"lookup": this.t(180,.35,"sawtooth",.24); this.t(120,.4,"sawtooth",.2,null,.1); break;
+   case"stone": this.t(160,.4,"sawtooth",.2); break;
+   case"success": this.t(523,.08,"triangle",.15); this.t(659,.08,"triangle",.15,null,.07); this.t(784,.14,"triangle",.15,null,.14); break;
+  }
+ }
+};
+
+let fullRoster=PD.getPlayers().slice(0,10);
+if(fullRoster.length<3) fullRoster=["Alex","Jordan","Taylor","Morgan"];
+const S={active:[],round:1,targets:{},selfIdx:0};
+
+const $=id=>document.getElementById(id);
+function hud(b,l,c){ $('hudBadge').textContent=b; $('hudLabel').textContent=l; if(c)$('hudCount').textContent=c; }
+function go(id){ document.querySelectorAll('.phase').forEach(p=>p.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); }
+
+function renderRoster(){
+ $('rList').innerHTML=fullRoster.map((p,i)=>`<li class="ritem"><span class="seat">#${i+1}</span><span class="nm">${p}</span><button type="button" data-del="${i}">${ICO('close')}</button></li>`).join('');
+ $('btnStart').disabled=fullRoster.length<3;
+ PD.setPlayers(fullRoster);
+}
+$('rAdd').onclick=()=>{ const v=$('rInput').value.trim(); if(v&&fullRoster.indexOf(v)===-1){ fullRoster.push(v); $('rInput').value=''; Sfx.play('click'); renderRoster(); } };
+$('rList').onclick=e=>{ const b=e.target.closest('[data-del]'); if(b){ fullRoster.splice(+b.dataset.del,1); Sfx.play('click'); renderRoster(); } };
+
+function drawRadial(container, opts){
+ container.innerHTML='<div class="radial-center">'+ICO('eye')+'</div>';
+ const n=fullRoster.length, R=42;
+ fullRoster.forEach((p,i)=>{
+  const angle=(i/n)*2*Math.PI - Math.PI/2;
+  const x=50+R*Math.cos(angle), y=50+R*Math.sin(angle);
+  const isActive=S.active.includes(p);
+  const node=document.createElement('div');
+  node.className='seat-node'+(isActive?'':' stone');
+  node.style.left=x+'%'; node.style.top=y+'%';
+  node.textContent=p;
+  if(opts && opts.selectable && isActive && p!==opts.self){
+   node.dataset.p=p;
+   node.addEventListener('click',()=>{
+    container.querySelectorAll('.seat-node').forEach(nd=>nd.classList.remove('selected'));
+    node.classList.add('selected');
+    opts.onSelect(p);
+    Sfx.play('click');
+   });
+  } else if(opts && opts.self===p){
+   node.classList.add('self');
+  }
+  container.appendChild(node);
+ });
+}
+
+$('btnStart').onclick=()=>{
+ S.active=[...fullRoster];
+ S.round=1;
+ startRoundIntro();
+};
+
+function startRoundIntro(){
+ hud("ROUND INTRO","Round "+S.round,"RD "+S.round);
+ $('introRound').textContent=`ROUND ${S.round}`;
+ $('introSurvivors').textContent = S.active.length===fullRoster.length ? "All Players Remain" : `${S.active.length} Players Remain`;
+ drawRadial($('introRadial'));
+ go('phIntro');
+}
+
+$('btnCountdown').onclick=()=>{
+ runCountdown();
+};
+
+function runCountdown(){
+ $('cdOverlay').classList.add('on');
+ const seq=[{n:'3',l:'EYES DOWN'},{n:'2',l:'EYES DOWN'},{n:'1',l:'EYES DOWN'},{n:'LOOK UP',l:'PICK YOUR TARGET NOW',cls:'lookup'}];
+ let i=0;
+ function step(){
+  const s=seq[i];
+  $('cdNum').textContent=s.n;
+  $('cdNum').className='cd-num'+(s.cls?' '+s.cls:'');
+  $('cdLabel').textContent=s.l;
+  if(s.cls==='lookup'){ Sfx.play('lookup'); PD.vibrate([80,40,80,40,200]); }
+  else { Sfx.play('tick'); PD.vibrate(30); }
+  i++;
+  if(i<seq.length){ setTimeout(step,900); }
+  else { setTimeout(()=>{ $('cdOverlay').classList.remove('on'); startTargetCollection(); },1400); }
+ }
+ step();
+}
+
+function startTargetCollection(){
+ S.targets={}; S.selfIdx=0;
+ promptTarget();
+}
+function promptTarget(){
+ const who=S.active[S.selfIdx];
+ $('curWho').textContent=who;
+ $('curtain').classList.add('on');
+ $('btnCurtainUnlock').onclick=()=>{
+  $('curtain').classList.remove('on');
+  Sfx.play('click');
+  $('targetWho').textContent=`${who.toUpperCase()}: WHO DID YOU LOOK AT?`;
+  let chosen=null;
+  $('btnLockTarget').disabled=true;
+  drawRadial($('targetRadial'),{selectable:true,self:who,onSelect:(p)=>{ chosen=p; $('btnLockTarget').disabled=false; }});
+  $('btnLockTarget').onclick=()=>{
+   S.targets[who]=chosen;
+   PD.vibrate(20);
+   S.selfIdx++;
+   if(S.selfIdx<S.active.length) promptTarget();
+   else resolveRound();
+  };
+  go('phTarget');
+ };
+}
+
+function resolveRound(){
+ const stoned=[];
+ S.active.forEach(p=>{
+  const target=S.targets[p];
+  if(target && S.targets[target]===p && !stoned.includes(p)){
+   stoned.push(p);
+   if(!stoned.includes(target)) stoned.push(target);
+  }
+ });
+ S.active = S.active.filter(p=> !stoned.includes(p));
+
+ $('resultTitle').textContent = stoned.length ? "Turned to Stone!" : "No Mutual Gaze";
+ $('resultSub').textContent = stoned.length
+  ? `${stoned.join(' & ')} made mutual eye contact with Medusa's Eye and turned to stone.`
+  : "Nobody locked eyes this round. Everyone survives to the next round.";
+
+ drawRadial($('resultRadial'));
+ hud("ROUND RESULT","Round "+S.round+" Done");
+ go('phResult');
+ Sfx.play(stoned.length?'stone':'success');
+ PD.vibrate(stoned.length?[100,60,100]:20);
+
+ if(S.active.length<=1){
+  $('btnNextRound').textContent="See Final Result";
+  $('btnNextRound').onclick=()=>{ showWinner(); };
+ } else {
+  $('btnNextRound').textContent="Next Round";
+  $('btnNextRound').onclick=()=>{ S.round++; startRoundIntro(); };
+ }
+}
+
+function showWinner(){
+ if(S.active.length===1){
+  $('winnerTitle').textContent=`${S.active[0]} SURVIVES!`;
+  $('winnerSub').textContent="The last player standing wins Medusa's Eye.";
+ } else {
+  $('winnerTitle').textContent="Everyone Turned to Stone";
+  $('winnerSub').textContent="No survivors remain. Medusa wins this game.";
+ }
+ hud("GAME OVER","Final Result");
+ go('phWinner');
+ Sfx.play('success');
+}
+
+$('btnNewGame').onclick=()=>{ renderRoster(); hud("SETUP // PHASE","Medusa's Eye"); go('phSetup'); Sfx.play('click'); };
+$('btnHub').onclick=()=>PD.exitToHub();
+$('btnExit').onclick=()=>PD.exitToHub();
+$('btnExit2').onclick=()=>PD.exitToHub();
+
+renderRoster();
+})();
+</script>
+</body>
+</html>

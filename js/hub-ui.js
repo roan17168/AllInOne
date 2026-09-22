@@ -3,6 +3,42 @@
  * Vector icon binding, filtering, and modal launchers.
  */
 document.addEventListener("DOMContentLoaded", () => {
+  // Universal PartyDeck Theme Switcher Fix
+  const themeSelector = document.getElementById("themeSelect") || document.getElementById("themeSelector");
+  const THEME_STORAGE_KEY = "partydeck_theme";
+  const VALID_THEMES = ["cyber-neon", "sunset-rave", "retro-arcade", "minimal-light"];
+
+  function applyGlobalTheme(themeName) {
+    const chosen = VALID_THEMES.includes(themeName) ? themeName : "cyber-neon";
+    document.documentElement.setAttribute("data-theme", chosen);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, chosen);
+    } catch (e) {}
+
+    const metaColor = {
+      "cyber-neon": "#08090c",
+      "sunset-rave": "#0f071d",
+      "retro-arcade": "#12131c",
+      "minimal-light": "#f4f6f9"
+    }[chosen];
+    const metaTag = document.getElementById("metaThemeColor") || document.querySelector('meta[name="theme-color"]');
+    if (metaTag && metaColor) metaTag.setAttribute("content", metaColor);
+  }
+
+  if (themeSelector) {
+    let saved = "cyber-neon";
+    try {
+      saved = localStorage.getItem(THEME_STORAGE_KEY) || saved;
+    } catch (e) {}
+    themeSelector.value = saved;
+    applyGlobalTheme(saved);
+
+    themeSelector.addEventListener("change", (e) => {
+      applyGlobalTheme(e.target.value);
+      if (window.PartyDeck && PartyDeck.playSound) PartyDeck.playSound("click");
+    });
+  }
+
   // Inject Static Icons
   const themeIconSlot = document.getElementById("themeIconSlot");
   if (themeIconSlot) themeIconSlot.innerHTML = Icons.get("palette");

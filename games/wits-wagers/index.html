@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" id="metaThemeColor" />
+<title>Wits & Wagers | PartyDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  --ease: cubic-bezier(.2,.8,.3,1);
+}
+[data-theme="cyber-neon"] {
+  --bg-primary: #08090c; --bg-surface: #10141b; --bg-elevated: #181e29;
+  --text-primary: #ffffff; --text-secondary: #9ba3b4; --text-muted: #5c6577;
+  --accent: #00ffcc; --accent-glow: rgba(0,255,204,0.35); --accent-secondary: #ff007f;
+  --danger: #ff0055; --success: #00ff66; --border-color: rgba(0,255,204,0.22);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(0,255,204,0.12);
+}
+[data-theme="sunset-rave"] {
+  --bg-primary: #0f071d; --bg-surface: #1e0f38; --bg-elevated: #321659;
+  --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+  --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-secondary: #ff8800;
+  --danger: #ff0044; --success: #00ffaa; --border-color: rgba(255,0,127,0.3);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,0,127,0.2);
+}
+[data-theme="retro-arcade"] {
+  --bg-primary: #12131c; --bg-surface: #1a1b28; --bg-elevated: #26273b;
+  --text-primary: #f5f5f5; --text-secondary: #a2a8d3; --text-muted: #6873a8;
+  --accent: #ffd400; --accent-glow: rgba(255,212,0,0.35); --accent-secondary: #ff3860;
+  --danger: #ff3860; --success: #42e2b8; --border-color: rgba(255,212,0,0.25);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,212,0,0.15);
+}
+[data-theme="minimal-light"] {
+  --bg-primary: #f4f6f9; --bg-surface: #ffffff; --bg-elevated: #e8ecf2;
+  --text-primary: #101828; --text-secondary: #475467; --text-muted: #98a2b3;
+  --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2); --accent-secondary: #7c3aed;
+  --danger: #d92d20; --success: #0f9d58; --border-color: rgba(16,24,40,0.15);
+  --card-shadow: 0 8px 24px rgba(16,24,40,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
+.pd-hud{position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.hud-exit{display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;padding:.42rem .65rem;cursor:pointer;text-decoration:none;}
+.hud-exit:active{transform:scale(.96);}
+.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
+.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);white-space:nowrap;text-transform:uppercase;}
+.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:62px;text-align:center;}
+main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
+.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
+.phase.on{display:flex;animation:pFade .2s var(--ease);}
+@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
+.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
+h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
+p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
+.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
+.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;}
+.chip{background:var(--bg-elevated);color:var(--text-secondary);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:.5rem .75rem;min-height:38px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.chip.is-on{background:var(--accent);color:var(--bg-primary);border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow);}
+.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
+.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
+.btn.push{margin-top:auto;}
+.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
+.q-banner{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-md);padding:1.1rem;text-align:center;}
+.q-tag{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
+.q-text{font-family:var(--font-display);font-size:1.25rem;font-weight:800;line-height:1.4;margin-top:.4rem;}
+.numpad-display{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-md);padding:1rem;text-align:center;font-family:var(--font-display);font-size:2.2rem;font-weight:900;color:var(--accent);}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;}
+.num-btn{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.9rem;font-family:var(--font-mono);font-size:1.1rem;font-weight:800;color:var(--text-primary);cursor:pointer;}
+.num-btn:active{background:var(--accent);color:var(--bg-primary);}
+.mat-row{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.65rem .8rem;cursor:pointer;}
+.mat-row.selected{border-color:var(--accent);box-shadow:0 0 10px var(--accent-glow);}
+.mat-row.winner{border-color:var(--success);background:rgba(0,255,102,0.08);}
+.mat-val{font-family:var(--font-display);font-size:1.15rem;font-weight:900;flex:1;}
+.mat-odds{font-family:var(--font-mono);font-size:.8rem;font-weight:800;color:var(--accent);background:var(--bg-surface);border-radius:999px;padding:.2rem .55rem;}
+.mat-owner{font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted);}
+.bank-strip{display:flex;flex-wrap:wrap;gap:.5rem;}
+.bank-chip{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.5rem .7rem;font-family:var(--font-mono);font-size:.75rem;font-weight:700;flex:1;min-width:90px;text-align:center;}
+.bank-chip b{display:block;color:var(--accent);font-size:1.05rem;margin-top:2px;}
+.curtain{position:fixed;inset:0;z-index:90;background:rgba(8,9,12,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.4rem;}
+.curtain.on{display:flex;}
+.cur-card{background:var(--bg-surface);border:2px solid var(--border-color);border-radius:var(--r-lg);padding:1.6rem 1.2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 0 30px var(--accent-glow);}
+.cur-tag{font-family:var(--font-mono);font-size:.6rem;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
+.cur-name{font-family:var(--font-display);font-size:1.5rem;font-weight:900;margin:.4rem 0 .65rem;}
+.pulse{animation:ring 2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 var(--accent-glow)}70%{box-shadow:0 0 0 16px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:30vh;overflow-y:auto;}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
+.ritem .seat{color:var(--accent);font-weight:700;}
+.ritem .nm{flex:1;font-weight:700;}
+.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;display:grid;place-items:center;}
+.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
+.ico svg{width:100%;height:100%;display:block;}
+</style>
+</head>
+<body>
+<header class="pd-hud">
+  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
+  <div class="hud-mid">
+    <span class="hud-badge" id="hudBadge">SETUP // PHASE</span>
+    <span class="hud-label" id="hudLabel">Wits & Wagers</span>
+  </div>
+  <div class="hud-count" id="hudCount">R1</div>
+</header>
+
+<main>
+  <!-- SETUP -->
+  <section class="phase on" id="phSetup">
+    <div class="hero"><span class="ico" data-ic="coin"></span></div>
+    <h1 class="title">Wits & Wagers</h1>
+    <p class="sub">Guess the number. Bet on who's closest without going over. Wits don't matter — confidence and odds do.</p>
+    <div class="panel">
+      <p class="ptitle">Roster</p>
+      <ul class="rlist" id="rList"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="rInput" placeholder="Add player..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
+        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Starting Chip Bank</p>
+      <div class="chips" id="bankChips">
+        <button class="chip" type="button" data-b="10">10 CHIPS</button>
+        <button class="chip is-on" type="button" data-b="15">15 CHIPS</button>
+        <button class="chip" type="button" data-b="25">25 CHIPS</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnStart" type="button">Deal First Question</button>
+  </section>
+
+  <!-- GUESS COLLECTION -->
+  <section class="phase" id="phGuess">
+    <div class="q-banner">
+      <span class="q-tag">NUMERICAL TRIVIA</span>
+      <div class="q-text" id="qText">Question</div>
+    </div>
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle" id="guessWho">GUESSING: PLAYER</p>
+      <div class="numpad-display" id="numDisplay">0</div>
+      <div class="numpad" style="margin-top:.7rem;">
+        <button class="num-btn" data-n="1">1</button><button class="num-btn" data-n="2">2</button><button class="num-btn" data-n="3">3</button>
+        <button class="num-btn" data-n="4">4</button><button class="num-btn" data-n="5">5</button><button class="num-btn" data-n="6">6</button>
+        <button class="num-btn" data-n="7">7</button><button class="num-btn" data-n="8">8</button><button class="num-btn" data-n="9">9</button>
+        <button class="num-btn" data-n="back">⌫</button><button class="num-btn" data-n="0">0</button><button class="num-btn" data-n="clear">C</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnLockGuess" type="button">Lock In Guess</button>
+  </section>
+
+  <!-- BETTING MAT -->
+  <section class="phase" id="phBet">
+    <div class="q-banner">
+      <span class="q-tag">BETTING MAT</span>
+      <div class="q-text" id="betQText" style="font-size:1.05rem;">Question</div>
+    </div>
+    <div class="panel">
+      <p class="ptitle" id="betWho">BETTING: PLAYER (BANK: 0)</p>
+      <div id="matList" style="display:flex;flex-direction:column;gap:.5rem;"></div>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Wager Amount</p>
+      <div class="numpad" style="grid-template-columns:repeat(5,1fr);">
+        <button class="num-btn wager-btn" data-w="1">1</button>
+        <button class="num-btn wager-btn" data-w="2">2</button>
+        <button class="num-btn wager-btn" data-w="3">3</button>
+        <button class="num-btn wager-btn" data-w="5">5</button>
+        <button class="num-btn wager-btn" data-w="all">ALL IN</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnLockBet" type="button" disabled>Confirm Wager</button>
+  </section>
+
+  <!-- REVEAL -->
+  <section class="phase" id="phReveal">
+    <div class="hero"><span class="ico" data-ic="trophy"></span></div>
+    <h1 class="title">Answer Revealed</h1>
+    <p class="sub" id="revealSub">—</p>
+    <div class="panel">
+      <p class="ptitle">Final Mat &amp; Payouts</p>
+      <div id="finalMat" style="display:flex;flex-direction:column;gap:.5rem;"></div>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Chip Bank</p>
+      <div class="bank-strip" id="bankStrip"></div>
+    </div>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
+      <button class="btn" id="btnNextQ" type="button">Next Question</button>
+    </div>
+  </section>
+</main>
+
+<div class="curtain" id="curtain" aria-hidden="true">
+  <div class="cur-card">
+    <div class="hero" style="margin-bottom:.5rem;"><span class="ico" data-ic="lock" style="width:36px;height:36px;"></span></div>
+    <span class="cur-tag" id="curTag">PRIVATE TURN</span>
+    <h2 class="cur-name" id="curWho">Pass Phone</h2>
+    <p class="sub" style="margin-bottom:1.2rem;" id="curDesc">Hold the screen away from others. Tap when ready.</p>
+    <button class="btn pulse" id="btnCurtainUnlock" type="button">I am ready</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const LOCAL={
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+ coin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9h1.5a1.5 1.5 0 0 1 0 3H9m0 0h1.5a1.5 1.5 0 0 1 0 3H9m3-8v8"/></svg>',
+ trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M17 5h3a2 2 0 0 1-2 5M7 5H4a2 2 0 0 0 2 5"/></svg>',
+ lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+ close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+};
+function ICO(k){ return LOCAL[k]||''; }
+document.querySelectorAll('[data-ic]').forEach(el=> el.innerHTML=ICO(el.getAttribute('data-ic')));
+
+const PD={
+ getPlayers:()=>{ try{ return JSON.parse(localStorage.getItem("partydeck_players")||"[]"); }catch(e){return[];} },
+ setPlayers:(a)=>{ try{ localStorage.setItem("partydeck_players",JSON.stringify(a)); }catch(e){} },
+ exitToHub:()=>{ window.location.href="../../index.html"; },
+ vibrate:(p)=>{ if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){} }
+};
+(function(){
+ let t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
+ document.documentElement.setAttribute("data-theme",t);
+})();
+
+const Sfx={
+ ctx:null,
+ ok(){ if(!this.ctx)try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume(); return !!this.ctx; },
+ t(f,d,type,vol,slide,delay){
+  if(!this.ok())return; const c=this.ctx, t0=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
+  o.type=type||"square"; o.frequency.setValueAtTime(f,t0);
+  if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+d);
+  g.gain.setValueAtTime(vol||.14,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+d);
+ },
+ play(n){
+  switch(n){
+   case"click": this.t(880,.045,"square",.1); break;
+   case"coin": this.t(1200,.06,"sine",.12,1600); break;
+   case"success": this.t(523,.08,"triangle",.15); this.t(659,.08,"triangle",.15,null,.07); this.t(784,.14,"triangle",.15,null,.14); break;
+   case"lose": this.t(200,.3,"sawtooth",.16); break;
+  }
+ }
+};
+
+const QUESTIONS=[
+ {q:"How many bones are in the adult human body?",a:206},
+ {q:"What is the boiling point of water in Fahrenheit?",a:212},
+ {q:"How many countries are in Africa?",a:54},
+ {q:"In what year did the Titanic sink?",a:1912},
+ {q:"How many strings does a standard guitar have?",a:6},
+ {q:"How many moons does Mars have?",a:2},
+ {q:"How many time zones does Russia span?",a:11},
+ {q:"How many keys are on a standard piano?",a:88},
+ {q:"How tall is the Eiffel Tower in meters?",a:330},
+ {q:"How many players are on a soccer team on the field (one side)?",a:11},
+ {q:"How many hearts does an octopus have?",a:3},
+ {q:"What year was the first iPhone released?",a:2007},
+ {q:"How many teeth does an adult human typically have?",a:32},
+ {q:"How many episodes are in the original Friends series?",a:236},
+ {q:"How many colors are in a rainbow?",a:7},
+ {q:"How many minutes are in a full day?",a:1440},
+ {q:"How many countries border Germany?",a:9},
+ {q:"How many symphonies did Beethoven compose?",a:9},
+ {q:"What year did World War II end?",a:1945},
+ {q:"How many dog years equal 1 human year (commonly cited)?",a:7},
+ {q:"How many Olympic rings are there?",a:5},
+ {q:"How many degrees are in a full circle?",a:360},
+ {q:"How many legs does a spider have?",a:8},
+ {q:"How many stars are on the US flag?",a:50},
+ {q:"How many playing cards are in a standard deck (no jokers)?",a:52}
+];
+
+let roster=PD.getPlayers().slice(0,10);
+if(roster.length<3) roster=["Alex","Jordan","Taylor"];
+const S={bank:{},startBank:15,qPool:[...QUESTIONS].sort(()=>Math.random()-.5),curQ:null,guessIdx:0,guesses:{},curNum:"",betIdx:0,mat:[],selectedSlot:null,curWager:0,bets:[],round:1};
+
+const $=id=>document.getElementById(id);
+function hud(b,l,c){ $('hudBadge').textContent=b; $('hudLabel').textContent=l; if(c)$('hudCount').textContent=c; }
+function go(id){ document.querySelectorAll('.phase').forEach(p=>p.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); }
+
+function renderRoster(){
+ $('rList').innerHTML=roster.map((p,i)=>`<li class="ritem"><span class="seat">#${i+1}</span><span class="nm">${p}</span><button type="button" data-del="${i}">${ICO('close')}</button></li>`).join('');
+ $('btnStart').disabled=roster.length<3;
+ PD.setPlayers(roster);
+}
+$('rAdd').onclick=()=>{ const v=$('rInput').value.trim(); if(v&&roster.indexOf(v)===-1){ roster.push(v); $('rInput').value=''; Sfx.play('click'); renderRoster(); } };
+$('rList').onclick=e=>{ const b=e.target.closest('[data-del]'); if(b){ roster.splice(+b.dataset.del,1); Sfx.play('click'); renderRoster(); } };
+
+$('bankChips').onclick=e=>{
+ const b=e.target.closest('[data-b]');
+ if(b){ $('bankChips').querySelectorAll('.chip').forEach(c=>c.classList.remove('is-on')); b.classList.add('is-on'); S.startBank=+b.dataset.b; Sfx.play('click'); }
+};
+
+$('btnStart').onclick=()=>{
+ roster.forEach(p=> S.bank[p]=S.startBank);
+ S.round=1;
+ dealQuestion();
+};
+
+function dealQuestion(){
+ if(S.qPool.length===0) S.qPool=[...QUESTIONS].sort(()=>Math.random()-.5);
+ S.curQ=S.qPool.pop();
+ S.guesses={}; S.guessIdx=0; S.curNum="";
+ hud("GUESSING","Round "+S.round,"R"+S.round);
+ $('qText').textContent=S.curQ.q;
+ promptGuess();
+}
+
+function promptGuess(){
+ const who=roster[S.guessIdx];
+ $('curTag').textContent="PRIVATE GUESS";
+ $('curWho').textContent=who;
+ $('curDesc').textContent="Enter your best numeric guess when the screen is yours alone.";
+ $('curtain').classList.add('on');
+ $('btnCurtainUnlock').onclick=()=>{
+  $('curtain').classList.remove('on');
+  Sfx.play('click');
+  S.curNum="";
+  $('numDisplay').textContent="0";
+  $('guessWho').textContent=`GUESSING: ${who.toUpperCase()}`;
+  go('phGuess');
+ };
+}
+document.querySelectorAll('.num-btn').forEach(b=>{
+ if(b.classList.contains('wager-btn'))return;
+ b.addEventListener('click',()=>{
+  const n=b.dataset.n;
+  if(n==='clear'){ S.curNum=""; }
+  else if(n==='back'){ S.curNum=S.curNum.slice(0,-1); }
+  else { if(S.curNum.length<6) S.curNum+=n; }
+  $('numDisplay').textContent=S.curNum||"0";
+  Sfx.play('click');
+ });
+});
+$('btnLockGuess').onclick=()=>{
+ const val=parseInt(S.curNum||"0",10);
+ S.guesses[roster[S.guessIdx]]=val;
+ Sfx.play('coin'); PD.vibrate(20);
+ S.guessIdx++;
+ if(S.guessIdx<roster.length) promptGuess();
+ else buildMat();
+};
+
+function buildMat(){
+ const arr=Object.entries(S.guesses).map(([p,v])=>({p,v})).sort((a,b)=>a.v-b.v);
+ const center=(arr.length-1)/2;
+ const oddsTable=[2,3,5,8];
+ arr.forEach((slot,i)=>{
+  const dist=Math.round(Math.abs(i-center));
+  slot.odds=oddsTable[Math.min(dist,oddsTable.length-1)];
+ });
+ S.mat=arr;
+ S.betIdx=0; S.bets=[];
+ promptBet();
+}
+
+function promptBet(){
+ const who=roster[S.betIdx];
+ $('curTag').textContent="PRIVATE WAGER";
+ $('curWho').textContent=who;
+ $('curDesc').textContent="Bet chips on the slot you believe is closest to the true answer without going over.";
+ $('curtain').classList.add('on');
+ $('btnCurtainUnlock').onclick=()=>{
+  $('curtain').classList.remove('on');
+  Sfx.play('click');
+  renderBetScreen(who);
+  go('phBet');
+ };
+}
+function renderBetScreen(who){
+ $('betQText').textContent=S.curQ.q;
+ $('betWho').textContent=`BETTING: ${who.toUpperCase()} (BANK: ${S.bank[who]})`;
+ S.selectedSlot=null; S.curWager=0;
+ $('btnLockBet').disabled=true;
+ $('matList').innerHTML=S.mat.map((slot,i)=>`
+  <div class="mat-row" data-i="${i}">
+   <span class="mat-val">${slot.v}</span>
+   <span class="mat-odds">${slot.odds}:1</span>
+  </div>
+ `).join('');
+ $('matList').querySelectorAll('.mat-row').forEach(row=>{
+  row.addEventListener('click',()=>{
+   $('matList').querySelectorAll('.mat-row').forEach(r=>r.classList.remove('selected'));
+   row.classList.add('selected');
+   S.selectedSlot=+row.dataset.i;
+   Sfx.play('click');
+   validateBetBtn();
+  });
+ });
+ document.querySelectorAll('.wager-btn').forEach(b=>{
+  b.onclick=()=>{
+   const bank=S.bank[who];
+   S.curWager = b.dataset.w==='all' ? bank : Math.min(+b.dataset.w, bank);
+   document.querySelectorAll('.wager-btn').forEach(x=>x.style.background='');
+   b.style.background='var(--accent)';
+   Sfx.play('click');
+   validateBetBtn();
+  };
+ });
+}
+function validateBetBtn(){
+ $('btnLockBet').disabled = !(S.selectedSlot!==null && S.curWager>0);
+}
+$('btnLockBet').onclick=()=>{
+ const who=roster[S.betIdx];
+ S.bank[who]-=S.curWager;
+ S.bets.push({p:who,slot:S.selectedSlot,amount:S.curWager});
+ Sfx.play('coin'); PD.vibrate(20);
+ S.betIdx++;
+ if(S.betIdx<roster.length) promptBet();
+ else revealAnswer();
+};
+
+function revealAnswer(){
+ const actual=S.curQ.a;
+ let winIdx=-1, bestVal=-Infinity;
+ S.mat.forEach((slot,i)=>{ if(slot.v<=actual && slot.v>bestVal){ bestVal=slot.v; winIdx=i; } });
+ if(winIdx===-1){
+  let minVal=Infinity;
+  S.mat.forEach((slot,i)=>{ if(slot.v<minVal){ minVal=slot.v; winIdx=i; } });
+ }
+ S.mat[winIdx].isWinner=true;
+
+ $('revealSub').textContent=`The real answer was ${actual}. Winning slot: ${S.mat[winIdx].v} (guessed by ${S.mat[winIdx].p}) at ${S.mat[winIdx].odds}:1.`;
+
+ S.bets.forEach(bet=>{
+  if(bet.slot===winIdx){
+   const odds=S.mat[winIdx].odds;
+   S.bank[bet.p]+= bet.amount*(odds+1);
+  }
+ });
+
+ $('finalMat').innerHTML=S.mat.map((slot,i)=>`
+  <div class="mat-row ${i===winIdx?'winner':''}">
+   <span class="mat-val">${slot.v}</span>
+   <span class="mat-owner">${slot.p}</span>
+   <span class="mat-odds">${slot.odds}:1${i===winIdx?' 🏆':''}</span>
+  </div>
+ `).join('').replace(/🏆/g,'');
+
+ $('bankStrip').innerHTML=roster.map(p=>`<div class="bank-chip">${p}<b>${S.bank[p]}</b></div>`).join('');
+
+ hud("RESULTS","Round "+S.round+" Complete");
+ go('phReveal');
+ Sfx.play(winIdx>-1?'success':'lose');
+}
+
+$('btnNextQ').onclick=()=>{ S.round++; dealQuestion(); };
+$('btnHub').onclick=()=>PD.exitToHub();
+$('btnExit').onclick=()=>PD.exitToHub();
+
+renderRoster();
+})();
+</script>
+</body>
+</html>

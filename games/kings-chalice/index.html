@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" id="metaThemeColor" />
+<title>King's Chalice | PartyDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ================= ARCADE DESIGN SYSTEM ================= */
+:root {
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  --ease: cubic-bezier(.2,.8,.3,1);
+}
+[data-theme="cyber-neon"] {
+  --bg-primary: #08090c; --bg-surface: #10141b; --bg-elevated: #181e29;
+  --text-primary: #ffffff; --text-secondary: #9ba3b4; --text-muted: #5c6577;
+  --accent: #00ffcc; --accent-glow: rgba(0,255,204,0.35); --accent-secondary: #ff007f;
+  --danger: #ff0055; --success: #00ff66; --border-color: rgba(0,255,204,0.22);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(0,255,204,0.12);
+}
+[data-theme="sunset-rave"] {
+  --bg-primary: #0f071d; --bg-surface: #1e0f38; --bg-elevated: #321659;
+  --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+  --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-secondary: #ff8800;
+  --danger: #ff0044; --success: #00ffaa; --border-color: rgba(255,0,127,0.3);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,0,127,0.2);
+}
+[data-theme="retro-arcade"] {
+  --bg-primary: #12131c; --bg-surface: #1a1b28; --bg-elevated: #26273b;
+  --text-primary: #f5f5f5; --text-secondary: #a2a8d3; --text-muted: #6873a8;
+  --accent: #ffd400; --accent-glow: rgba(255,212,0,0.35); --accent-secondary: #ff3860;
+  --danger: #ff3860; --success: #42e2b8; --border-color: rgba(255,212,0,0.25);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,212,0,0.15);
+}
+[data-theme="minimal-light"] {
+  --bg-primary: #f4f6f9; --bg-surface: #ffffff; --bg-elevated: #e8ecf2;
+  --text-primary: #101828; --text-secondary: #475467; --text-muted: #98a2b3;
+  --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2); --accent-secondary: #7c3aed;
+  --danger: #d92d20; --success: #0f9d58; --border-color: rgba(16,24,40,0.15);
+  --card-shadow: 0 8px 24px rgba(16,24,40,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
+
+.pd-hud {
+  position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);
+  padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+}
+.hud-exit {
+  display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);
+  border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;
+  padding:.42rem .65rem;cursor:pointer;text-decoration:none;
+}
+.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
+.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);white-space:nowrap;text-transform:uppercase;}
+.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:62px;text-align:center;}
+
+main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
+.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
+.phase.on{display:flex;animation:pFade .2s var(--ease);}
+@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
+.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
+h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
+p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
+.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
+.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
+
+.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
+.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
+
+/* 3D Card Flip Centerpiece */
+.stage{perspective:1000px;display:flex;flex-direction:column;align-items:center;padding:.4rem 0;}
+.card3d{width:min(200px,56vw);aspect-ratio:5/7;position:relative;transform-style:preserve-3d;transition:transform .5s var(--ease);cursor:pointer;}
+.card3d.flipped{transform:rotateY(180deg);}
+.face{position:absolute;inset:0;border-radius:var(--r-md);backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(0,0,0,.7);border:2px solid var(--border-color);}
+.face.back{background:repeating-linear-gradient(45deg,var(--bg-surface) 0 8px,var(--bg-elevated) 8px 16px);color:var(--accent);}
+.face.front{background:var(--bg-elevated);transform:rotateY(180deg);padding:12px;color:var(--text-primary);}
+.face.front.red{color:var(--danger);}
+.card-rank{font-family:var(--font-display);font-size:3.2rem;font-weight:900;line-height:1;}
+.card-suit{font-size:2rem;margin-top:2px;}
+
+/* Chalice Meter */
+.chalice-meter{display:flex;align-items:center;gap:12px;}
+.c-bar-bg{flex:1;height:12px;background:var(--bg-elevated);border-radius:999px;border:1px solid var(--border-color);overflow:hidden;}
+.c-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-secondary));transition:width .4s var(--ease);}
+
+/* Rule Helper Cards */
+.rule-headline{font-family:var(--font-display);font-size:1.4rem;font-weight:900;color:var(--accent);margin-bottom:.3rem;}
+.rule-desc{font-size:.9rem;color:var(--text-secondary);line-height:1.5;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.tile{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.7rem .5rem;color:var(--text-primary);font-family:var(--font-mono);font-size:.78rem;font-weight:700;text-align:center;cursor:pointer;}
+.tile.is-on{background:var(--accent);color:var(--bg-primary);box-shadow:0 0 10px var(--accent-glow);}
+
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
+.ritem .seat{color:var(--accent);font-weight:700;}
+.ritem .nm{flex:1;font-weight:700;}
+.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;display:grid;place-items:center;}
+
+.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
+.ico svg{width:100%;height:100%;display:block;}
+</style>
+</head>
+<body>
+<header class="pd-hud">
+  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
+  <div class="hud-mid">
+    <span class="hud-badge" id="hudBadge">SETUP // PHASE</span>
+    <span class="hud-label" id="hudLabel">The Ring</span>
+  </div>
+  <div class="hud-count" id="hudCount">52 CARDS</div>
+</header>
+
+<main>
+  <!-- PHASE 1: SETUP -->
+  <section class="phase on" id="phSetup">
+    <div class="hero"><span class="ico" data-ic="crown"></span></div>
+    <h1 class="title">King's Chalice</h1>
+    <p class="sub">Draw cards from the circle. Obey the rules. The 4th King drinks the mixed Chalice.</p>
+    <div class="panel">
+      <p class="ptitle">Table Roster</p>
+      <ul class="rlist" id="rList"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.7rem;">
+        <input type="text" id="rInput" placeholder="Add player name..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
+        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnStart" type="button">Shuffle Deck & Begin</button>
+  </section>
+
+  <!-- PHASE 2: PLAY TABLE -->
+  <section class="phase" id="phPlay">
+    <div class="panel chalice-meter">
+      <span class="ico" data-ic="crown" style="width:28px;height:28px;color:var(--accent);"></span>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:.65rem;color:var(--text-muted);margin-bottom:4px;">
+          <span>THE CHALICE</span><span id="kingTxt">0 / 4 KINGS</span>
+        </div>
+        <div class="c-bar-bg"><div class="c-bar-fill" id="chaliceFill"></div></div>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="card3d" id="cardEl">
+        <div class="face back"><span class="ico" data-ic="cards" style="width:48px;height:48px;"></span></div>
+        <div class="face front" id="cardFront"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="rulePanel" style="display:none;">
+      <div class="rule-headline" id="ruleTitle">Card Name</div>
+      <div class="rule-desc" id="ruleDesc">Card rule details will appear here.</div>
+      <div id="ruleHelperSlot" style="margin-top:.8rem;padding-top:.8rem;border-top:1px dashed rgba(255,255,255,.1);"></div>
+    </div>
+
+    <button class="btn push" id="btnDraw" type="button">Draw Card</button>
+  </section>
+
+  <!-- PHASE 3: END -->
+  <section class="phase" id="phEnd">
+    <div class="hero"><span class="ico" data-ic="crown"></span></div>
+    <h1 class="title" style="color:var(--danger);">The Chalice is Full!</h1>
+    <p class="sub" id="endSub">The 4th King has fallen. Finish the Chalice!</p>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
+      <button class="btn" id="btnAgain" type="button">New Deck</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+const LOCAL={
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+ crown:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5z"/></svg>',
+ cards:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="18" x="5" y="3" rx="2"/><path d="M10 8h4M10 12h4"/></svg>',
+ close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+};
+function ICO(k){ return LOCAL[k]||''; }
+document.querySelectorAll('[data-ic]').forEach(el=> el.innerHTML=ICO(el.getAttribute('data-ic')));
+
+const SDK=window.PartyDeck||{};
+const PD={
+ getPlayers:()=> { try{ return JSON.parse(localStorage.getItem("partydeck_players")||"[]"); }catch(e){return[];} },
+ setPlayers:(a)=> { try{ localStorage.setItem("partydeck_players",JSON.stringify(a)); }catch(e){} },
+ exitToHub:()=> { window.location.href="../../index.html"; },
+ vibrate:(p)=> { if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){} }
+};
+(function(){
+ let t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
+ document.documentElement.setAttribute("data-theme",t);
+})();
+
+const Sfx={
+ ctx:null,
+ ok(){ if(!this.ctx)try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume(); return !!this.ctx; },
+ t(f,d,type,vol,slide,delay){
+  if(!this.ok())return; const c=this.ctx, t0=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
+  o.type=type||"square"; o.frequency.setValueAtTime(f,t0);
+  if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+d);
+  g.gain.setValueAtTime(vol||.14,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+d);
+ },
+ play(n){
+  switch(n){
+   case"click": this.t(880,.045,"square",.1); break;
+   case"flip": this.t(420,.09,"sine",.15,700); break;
+   case"success": this.t(523,.08,"triangle",.15); this.t(659,.08,"triangle",.15,null,.07); this.t(784,.14,"triangle",.15,null,.14); break;
+   case"king": this.t(220,.25,"sawtooth",.2); this.t(330,.25,"sawtooth",.2,null,.1); break;
+  }
+ }
+};
+
+const SUITS=[{s:'♠',red:false},{s:'♥',red:true},{s:'♣',red:false},{s:'♦',red:true}];
+const RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const RULES={
+ 'A':{t:"Waterfall",d:"Everyone drinks together. No one stops until the player to their right stops.",h:"waterfall"},
+ '2':{t:"You Choose",d:"Pick any player to drink 2 units.",h:"pick"},
+ '3':{t:"Me (Drawer)",d:"The drawer drinks 2 units.",h:null},
+ '4':{t:"Floor",d:"Last person to touch the floor drinks.",h:null},
+ '5':{t:"Thumb Master",d:"You are Thumb Master. Place your thumb on table whenever you want; last to follow drinks.",h:"thumb"},
+ '6':{t:"Chicks",d:"All women/identifying drink.",h:null},
+ '7':{t:"Heaven",d:"Last hand to the sky drinks.",h:null},
+ '8':{t:"Drinking Mate",d:"Bond with a player. Whenever you drink, they drink.",h:"mate"},
+ '9':{t:"Rhyme",d:"Say a word. In circle order, rhyme with it. First to fail drinks.",h:null},
+ '10':{t:"Categories",d:"Pick a category. Go around naming items. First to repeat/fail drinks.",h:null},
+ 'J':{t:"Question Master",d:"If anyone answers your questions, they drink. Lasts until next Jack.",h:"question"},
+ 'Q':{t:"Never Have I Ever",d:"3 fingers up. Go around saying statements.",h:null},
+ 'K':{t:"King's Chalice",d:"Pour into the Chalice. 4th King drinks the entire cup!",h:"king"}
+};
+
+let roster=PD.getPlayers().slice(0,12);
+if(roster.length<2) roster=["Player 1","Player 2","Player 3"];
+const S={deck:[],kings:0,turn:0,thumb:null,qmaster:null,mate:[]};
+
+const $=id=>document.getElementById(id);
+function hud(b,l,c){ $('hudBadge').textContent=b; $('hudLabel').textContent=l; if(c)$('hudCount').textContent=c; }
+function go(id){ document.querySelectorAll('.phase').forEach(p=>p.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); }
+
+function renderRoster(){
+ $('rList').innerHTML=roster.map((p,i)=>`<li class="ritem"><span class="seat">#${String(i+1).padStart(2,'0')}</span><span class="nm">${p}</span><button type="button" data-del="${i}">${ICO('close')}</button></li>`).join('');
+ $('btnStart').disabled=roster.length<2;
+ PD.setPlayers(roster);
+}
+$('rAdd').onclick=()=>{ const v=$('rInput').value.trim(); if(v&&roster.indexOf(v)===-1){ roster.push(v); $('rInput').value=''; Sfx.play('click'); renderRoster(); } };
+$('rList').onclick=e=>{ const b=e.target.closest('[data-del]'); if(b){ roster.splice(+b.dataset.del,1); Sfx.play('click'); renderRoster(); } };
+
+$('btnStart').onclick=()=>{
+ const d=[];
+ SUITS.forEach(st=> RANKS.forEach(rk=> d.push({r:rk, s:st.s, red:st.red})));
+ S.deck=d.sort(()=>Math.random()-.5);
+ S.kings=0; S.turn=0; S.thumb=null; S.qmaster=null; S.mate=[];
+ $('chaliceFill').style.width='0%';
+ $('kingTxt').textContent='0 / 4 KINGS';
+ $('cardEl').classList.remove('flipped');
+ $('rulePanel').style.display='none';
+ hud("THE RING",roster[0],`${S.deck.length} CARDS`);
+ go('phPlay');
+ Sfx.play('success');
+};
+
+$('btnDraw').onclick=()=>{ drawCard(); };
+$('cardEl').onclick=()=>{ if($('cardEl').classList.contains('flipped')) drawCard(); };
+
+function drawCard(){
+ if(!S.deck.length){ endGame(false); return; }
+ const c=S.deck.pop();
+ const who=roster[S.turn%roster.length];
+ S.turn++;
+ 
+ $('cardFront').className='face front'+(c.red?' red':'');
+ $('cardFront').innerHTML=`<div class="card-rank">${c.r}</div><div class="card-suit">${c.s}</div>`;
+ $('cardEl').classList.add('flipped');
+ Sfx.play('flip');
+ 
+ const rule=RULES[c.r];
+ $('rulePanel').style.display='block';
+ $('ruleTitle').textContent=`${c.r} — ${rule.t}`;
+ $('ruleDesc').textContent=rule.d;
+ 
+ const slot=$('ruleHelperSlot');
+ slot.innerHTML='';
+ if(c.r==='K'){
+  S.kings++;
+  $('chaliceFill').style.width=`${(S.kings/4)*100}%`;
+  $('kingTxt').textContent=`${S.kings} / 4 KINGS`;
+  Sfx.play('king');
+  if(S.kings>=4){ setTimeout(()=>endGame(true,who),800); return; }
+ } else if(rule.h==='pick'||rule.h==='mate'){
+  slot.innerHTML=`<p class="ptitle">Select Target</p><div class="grid-2">${roster.map(p=>`<button class="tile" type="button" data-p="${p}">${p}</button>`).join('')}</div>`;
+  slot.onclick=e=>{ const b=e.target.closest('[data-p]'); if(b){ slot.querySelectorAll('.tile').forEach(t=>t.classList.remove('is-on')); b.classList.add('is-on'); Sfx.play('click'); } };
+ }
+ 
+ hud("THE RING",roster[S.turn%roster.length],`${S.deck.length} CARDS`);
+}
+
+function endGame(full,who){
+ $('endSub').textContent=full?`${who} drew the 4th King and must finish the Chalice!`:"The deck is empty. Hydrate!";
+ hud("GAME OVER","Chalice Drained");
+ go('phEnd');
+ Sfx.play('king');
+}
+
+$('btnAgain').onclick=()=>{ renderRoster(); hud("SETUP // PHASE","Roster"); go('phSetup'); Sfx.play('click'); };
+$('btnHub').onclick=()=>PD.exitToHub();
+$('btnExit').onclick=()=>PD.exitToHub();
+
+renderRoster();
+})();
+</script>
+</body>
+</html>

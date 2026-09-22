@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" id="metaThemeColor" />
+<title>A Fake Artist Goes to New York | PartyDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  --ease: cubic-bezier(.2,.8,.3,1);
+}
+[data-theme="cyber-neon"] {
+  --bg-primary: #08090c; --bg-surface: #10141b; --bg-elevated: #181e29;
+  --text-primary: #ffffff; --text-secondary: #9ba3b4; --text-muted: #5c6577;
+  --accent: #00ffcc; --accent-glow: rgba(0,255,204,0.35); --accent-secondary: #ff007f;
+  --danger: #ff0055; --success: #00ff66; --border-color: rgba(0,255,204,0.22);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(0,255,204,0.12);
+}
+[data-theme="sunset-rave"] {
+  --bg-primary: #0f071d; --bg-surface: #1e0f38; --bg-elevated: #321659;
+  --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+  --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-secondary: #ff8800;
+  --danger: #ff0044; --success: #00ffaa; --border-color: rgba(255,0,127,0.3);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,0,127,0.2);
+}
+[data-theme="retro-arcade"] {
+  --bg-primary: #12131c; --bg-surface: #1a1b28; --bg-elevated: #26273b;
+  --text-primary: #f5f5f5; --text-secondary: #a2a8d3; --text-muted: #6873a8;
+  --accent: #ffd400; --accent-glow: rgba(255,212,0,0.35); --accent-secondary: #ff3860;
+  --danger: #ff3860; --success: #42e2b8; --border-color: rgba(255,212,0,0.25);
+  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,212,0,0.15);
+}
+[data-theme="minimal-light"] {
+  --bg-primary: #f4f6f9; --bg-surface: #ffffff; --bg-elevated: #e8ecf2;
+  --text-primary: #101828; --text-secondary: #475467; --text-muted: #98a2b3;
+  --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2); --accent-secondary: #7c3aed;
+  --danger: #d92d20; --success: #0f9d58; --border-color: rgba(16,24,40,0.15);
+  --card-shadow: 0 8px 24px rgba(16,24,40,0.08);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
+.pd-hud{position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.hud-exit{display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;padding:.42rem .65rem;cursor:pointer;text-decoration:none;}
+.hud-exit:active{transform:scale(.96);}
+.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
+.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);white-space:nowrap;text-transform:uppercase;}
+.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:62px;text-align:center;}
+main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
+.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
+.phase.on{display:flex;animation:pFade .2s var(--ease);}
+@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
+.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
+h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
+p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
+.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
+.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;}
+.chip{background:var(--bg-elevated);color:var(--text-secondary);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:.5rem .75rem;min-height:38px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.chip.is-on{background:var(--accent);color:var(--bg-primary);border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow);}
+.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
+.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
+.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--danger);box-shadow:none;}
+.btn.push{margin-top:auto;}
+.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.tile{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.8rem .5rem;color:var(--text-primary);font-family:var(--font-mono);font-size:.82rem;font-weight:700;text-align:center;cursor:pointer;}
+.tile.is-on{background:var(--accent);color:var(--bg-primary);box-shadow:0 0 10px var(--accent-glow);}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:28vh;overflow-y:auto;}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
+.ritem .seat{color:var(--accent);font-weight:700;}
+.ritem .nm{flex:1;font-weight:700;}
+.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;display:grid;place-items:center;}
+
+.hold-card{position:relative;width:100%;aspect-ratio:16/10;border-radius:var(--r-lg);border:2px dashed var(--border-color);background:var(--bg-surface);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;touch-action:none;}
+.hold-card.revealed{border-style:solid;border-color:var(--accent);box-shadow:0 0 24px var(--accent-glow);}
+.hold-curtain{position:absolute;inset:0;background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;}
+.hold-face{position:absolute;inset:0;background:var(--bg-elevated);padding:1.4rem;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.45rem;}
+.hold-card.revealed .hold-curtain{display:none;}
+.hold-card.revealed .hold-face{display:flex;}
+.h-tag{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase;}
+.h-val{font-family:var(--font-display);font-size:1.5rem;font-weight:900;color:var(--accent);}
+.h-val.is-fake{color:var(--danger);}
+
+.canvas-wrap{position:relative;width:100%;aspect-ratio:4/3;background:#fff;border-radius:var(--r-md);border:2px solid var(--border-color);overflow:hidden;touch-action:none;}
+#drawCanvas{width:100%;height:100%;display:block;}
+.turn-strip{display:flex;align-items:center;justify-content:space-between;background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.6rem .8rem;}
+.turn-name{font-family:var(--font-display);font-size:1.1rem;font-weight:800;color:var(--accent);}
+.stroke-count{font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);}
+
+.curtain{position:fixed;inset:0;z-index:90;background:rgba(8,9,12,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.4rem;}
+.curtain.on{display:flex;}
+.cur-card{background:var(--bg-surface);border:2px solid var(--border-color);border-radius:var(--r-lg);padding:1.6rem 1.2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 0 30px var(--accent-glow);}
+.cur-tag{font-family:var(--font-mono);font-size:.6rem;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
+.cur-name{font-family:var(--font-display);font-size:1.5rem;font-weight:900;margin:.4rem 0 .65rem;}
+.pulse{animation:ring 2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 var(--accent-glow)}70%{box-shadow:0 0 0 16px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+
+.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
+.ico svg{width:100%;height:100%;display:block;}
+</style>
+</head>
+<body>
+<header class="pd-hud">
+  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
+  <div class="hud-mid">
+    <span class="hud-badge" id="hudBadge">SETUP // PHASE</span>
+    <span class="hud-label" id="hudLabel">Fake Artist</span>
+  </div>
+  <div class="hud-count" id="hudCount">0/0</div>
+</header>
+
+<main>
+  <!-- SETUP -->
+  <section class="phase on" id="phSetup">
+    <div class="hero"><span class="ico" data-ic="brush"></span></div>
+    <h1 class="title">A Fake Artist Goes to New York</h1>
+    <p class="sub">Everyone knows the secret word except the Fake Artist, who only sees the category. Draw one stroke per turn and find the impostor.</p>
+    <div class="panel">
+      <p class="ptitle">Artists (drawing order)</p>
+      <ul class="rlist" id="rList"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="rInput" placeholder="Add player..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
+        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Drawing Rounds</p>
+      <div class="chips" id="roundChips">
+        <button class="chip" type="button" data-r="1">QUICK (1 EACH)</button>
+        <button class="chip is-on" type="button" data-r="2">STANDARD (2 EACH)</button>
+        <button class="chip" type="button" data-r="3">EXTENDED (3 EACH)</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnStart" type="button">Assign Secret Roles</button>
+  </section>
+
+  <!-- DEAL -->
+  <section class="phase" id="phDeal">
+    <div class="panel" style="text-align:center;padding:1.4rem 1rem;">
+      <p class="ptitle" id="dealStep">PLAYER 1 OF 4</p>
+      <h1 class="title" id="dealWho" style="color:var(--accent);margin:.2rem 0 .9rem;">Player</h1>
+      <div class="hold-card" id="holdBox">
+        <div class="hold-curtain">
+          <span class="ico" data-ic="lock" style="width:32px;height:32px;color:var(--accent);"></span>
+          <span>Hold to Reveal Role</span>
+        </div>
+        <div class="hold-face" id="holdFace"></div>
+      </div>
+      <p class="sub" style="margin-top:.8rem;font-size:.78rem;">Release to hide, then pass the device.</p>
+    </div>
+    <button class="btn push" id="btnDealNext" type="button" disabled>View Role First</button>
+  </section>
+
+  <!-- DRAW -->
+  <section class="phase" id="phDraw">
+    <div class="turn-strip">
+      <span class="turn-name" id="turnName">Player</span>
+      <span class="stroke-count" id="strokeCount">Stroke 1 of 8</span>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="drawCanvas"></canvas>
+    </div>
+    <div class="btn-row">
+      <button class="btn ghost" id="btnUndo" type="button">Undo My Stroke</button>
+      <button class="btn" id="btnConfirmStroke" type="button" disabled>Confirm & Pass</button>
+    </div>
+    <button class="btn danger push" id="btnEndEarly" type="button">End Drawing & Vote Now</button>
+  </section>
+
+  <!-- VOTE -->
+  <section class="phase" id="phVote">
+    <h1 class="title">Accuse the Fake Artist</h1>
+    <p class="sub">Discuss the drawing, then unanimously tap who you believe is the Fake Artist.</p>
+    <div class="canvas-wrap" style="max-height:200px;">
+      <canvas id="voteCanvasPreview"></canvas>
+    </div>
+    <div class="panel">
+      <div class="grid-2" id="voteGrid"></div>
+    </div>
+    <button class="btn push" id="btnLockVote" type="button" disabled>Confirm Accusation</button>
+  </section>
+
+  <!-- ESCAPE GUESS -->
+  <section class="phase" id="phEscape">
+    <div class="hero"><span class="ico" data-ic="target"></span></div>
+    <h1 class="title" style="color:var(--danger);">Fake Artist Caught!</h1>
+    <p class="sub" id="escPrompt">Guess the secret word to steal the win:</p>
+    <div class="panel">
+      <input type="text" id="escInput" placeholder="Type your guess..." style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.8rem;outline:none;font-size:1rem;">
+    </div>
+    <button class="btn push" id="btnLockEscape" type="button">Submit Guess</button>
+  </section>
+
+  <!-- RESULT -->
+  <section class="phase" id="phResult">
+    <div class="hero"><span class="ico" data-ic="target"></span></div>
+    <h1 class="title" id="resTitle">Round Complete</h1>
+    <p class="sub" id="resSub">—</p>
+    <div class="panel">
+      <p class="ptitle">Secret Word</p>
+      <p class="title" id="resWord" style="color:var(--accent);font-size:1.4rem;text-align:left;">—</p>
+    </div>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
+      <button class="btn" id="btnAgain" type="button">New Canvas</button>
+    </div>
+  </section>
+</main>
+
+<div class="curtain" id="curtain" aria-hidden="true">
+  <div class="cur-card">
+    <div class="hero" style="margin-bottom:.5rem;"><span class="ico" data-ic="lock" style="width:36px;height:36px;"></span></div>
+    <span class="cur-tag">YOUR TURN</span>
+    <h2 class="cur-name" id="curWho">Pass Phone</h2>
+    <p class="sub" style="margin-bottom:1.2rem;">Draw exactly one continuous stroke related to the secret word.</p>
+    <button class="btn pulse" id="btnCurtainUnlock" type="button">I am ready</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const LOCAL={
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+ brush:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>',
+ lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+ target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+ close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+};
+function ICO(k){ return LOCAL[k]||''; }
+document.querySelectorAll('[data-ic]').forEach(el=> el.innerHTML=ICO(el.getAttribute('data-ic')));
+
+const PD={
+ getPlayers:()=>{ try{ return JSON.parse(localStorage.getItem("partydeck_players")||"[]"); }catch(e){return[];} },
+ setPlayers:(a)=>{ try{ localStorage.setItem("partydeck_players",JSON.stringify(a)); }catch(e){} },
+ exitToHub:()=>{ window.location.href="../../index.html"; },
+ vibrate:(p)=>{ if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){} }
+};
+(function(){
+ let t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
+ document.documentElement.setAttribute("data-theme",t);
+})();
+
+const Sfx={
+ ctx:null,
+ ok(){ if(!this.ctx)try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume(); return !!this.ctx; },
+ t(f,d,type,vol,slide,delay){
+  if(!this.ok())return; const c=this.ctx, t0=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
+  o.type=type||"square"; o.frequency.setValueAtTime(f,t0);
+  if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+d);
+  g.gain.setValueAtTime(vol||.14,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+d);
+ },
+ play(n){
+  switch(n){
+   case"click": this.t(880,.045,"square",.1); break;
+   case"reveal": this.t(360,.18,"sine",.14,680); break;
+   case"pen": this.t(600,.03,"sine",.05); break;
+   case"success": this.t(523,.08,"triangle",.15); this.t(659,.08,"triangle",.15,null,.07); this.t(784,.14,"triangle",.15,null,.14); break;
+   case"alert": this.t(180,.28,"sawtooth",.18); break;
+  }
+ }
+};
+
+const CATEGORIES={
+ "Animals":["Lion","Elephant","Giraffe","Penguin","Dolphin","Kangaroo","Octopus","Owl","Peacock","Flamingo"],
+ "Movies":["Titanic","Jaws","Frozen","Inception","Avatar","Jurassic Park","Rocky","Shrek"],
+ "Food":["Pizza","Sushi","Taco","Pancake","Cheeseburger","Ice Cream Sundae","Spaghetti","Donut"],
+ "Sports":["Basketball","Surfing","Boxing","Gymnastics","Hockey","Archery","Bowling","Golf"],
+ "Occupations":["Firefighter","Astronaut","Chef","Pilot","Dentist","Magician","Lifeguard","Beekeeper"],
+ "Objects":["Umbrella","Bicycle","Guitar","Lighthouse","Telescope","Kite","Chandelier","Anchor"]
+};
+
+let roster=PD.getPlayers().slice(0,10);
+if(roster.length<4) roster=["Alex","Jordan","Taylor","Morgan"];
+
+const S={category:'',word:'',fakeIdx:0,dealIdx:0,rounds:2,strokes:[],turnIdx:0,curPath:null,accused:null,ctx:null,canvas:null};
+
+const $=id=>document.getElementById(id);
+function hud(b,l,c){ $('hudBadge').textContent=b; $('hudLabel').textContent=l; if(c)$('hudCount').textContent=c; }
+function go(id){ document.querySelectorAll('.phase').forEach(p=>p.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); }
+
+function renderRoster(){
+ $('rList').innerHTML=roster.map((p,i)=>`<li class="ritem"><span class="seat">#${i+1}</span><span class="nm">${p}</span><button type="button" data-del="${i}">${ICO('close')}</button></li>`).join('');
+ $('btnStart').disabled=roster.length<4;
+ PD.setPlayers(roster);
+}
+$('rAdd').onclick=()=>{ const v=$('rInput').value.trim(); if(v&&roster.indexOf(v)===-1){ roster.push(v); $('rInput').value=''; Sfx.play('click'); renderRoster(); } };
+$('rList').onclick=e=>{ const b=e.target.closest('[data-del]'); if(b){ roster.splice(+b.dataset.del,1); Sfx.play('click'); renderRoster(); } };
+
+$('roundChips').onclick=e=>{
+ const b=e.target.closest('[data-r]');
+ if(b){ $('roundChips').querySelectorAll('.chip').forEach(c=>c.classList.remove('is-on')); b.classList.add('is-on'); S.rounds=+b.dataset.r; Sfx.play('click'); }
+};
+
+$('btnStart').onclick=()=>{
+ const catNames=Object.keys(CATEGORIES);
+ S.category=catNames[Math.floor(Math.random()*catNames.length)];
+ const words=CATEGORIES[S.category];
+ S.word=words[Math.floor(Math.random()*words.length)];
+ S.fakeIdx=Math.floor(Math.random()*roster.length);
+ S.dealIdx=0;
+ hud("DEAL // PHASE","Secret Roles");
+ renderDeal();
+ go('phDeal');
+ Sfx.play('success');
+};
+
+function renderDeal(){
+ $('dealStep').textContent=`PLAYER ${S.dealIdx+1} OF ${roster.length}`;
+ $('dealWho').textContent=roster[S.dealIdx];
+ const isFake=S.dealIdx===S.fakeIdx;
+ $('holdFace').innerHTML=isFake
+  ? `<div class="h-tag">CATEGORY ONLY</div><div class="h-val">${S.category}</div><div class="h-tag" style="margin-top:.4rem;color:var(--danger)">YOU ARE THE FAKE ARTIST</div><p class="sub" style="font-size:.76rem;color:var(--danger)">You don't know the word. Draw vaguely and blend in.</p>`
+  : `<div class="h-tag">CATEGORY</div><div class="h-val">${S.category}</div><div class="h-tag" style="margin-top:.4rem">SECRET WORD</div><div class="h-val" style="color:var(--text-primary);font-size:1.3rem;">${S.word}</div>`;
+ $('holdBox').classList.remove('revealed');
+ $('btnDealNext').disabled=true;
+ $('btnDealNext').textContent='View Role First';
+}
+
+const hBox=$('holdBox');
+hBox.addEventListener('pointerdown',e=>{
+ e.preventDefault();
+ hBox.classList.add('revealed');
+ Sfx.play('reveal');
+ PD.vibrate(25);
+ $('btnDealNext').disabled=false;
+ $('btnDealNext').textContent=S.dealIdx<roster.length-1?'Conceal & Pass':'Begin Drawing';
+});
+['pointerup','pointerleave','pointercancel'].forEach(ev=> hBox.addEventListener(ev,()=> hBox.classList.remove('revealed')));
+
+$('btnDealNext').onclick=()=>{
+ if(S.dealIdx<roster.length-1){ S.dealIdx++; renderDeal(); Sfx.play('click'); }
+ else { startDrawing(); }
+};
+
+function setupCanvas(){
+ S.canvas=$('drawCanvas');
+ const wrap=S.canvas.parentElement;
+ const ratio=window.devicePixelRatio||1;
+ const w=wrap.clientWidth, h=wrap.clientHeight;
+ S.canvas.width=w*ratio; S.canvas.height=h*ratio;
+ S.ctx=S.canvas.getContext('2d');
+ S.ctx.scale(ratio,ratio);
+ S.ctx.lineCap='round'; S.ctx.lineJoin='round'; S.ctx.lineWidth=3.5; S.ctx.strokeStyle='#111';
+}
+function redrawAll(ctxTarget,canvasTarget){
+ const c=ctxTarget||S.ctx, cv=canvasTarget||S.canvas;
+ const ratio=window.devicePixelRatio||1;
+ c.clearRect(0,0,cv.width/ratio,cv.height/ratio);
+ S.strokes.forEach(st=>{
+  if(st.points.length<2)return;
+  c.beginPath();
+  c.moveTo(st.points[0].x,st.points[0].y);
+  for(let i=1;i<st.points.length;i++) c.lineTo(st.points[i].x,st.points[i].y);
+  c.stroke();
+ });
+}
+
+function startDrawing(){
+ S.strokes=[]; S.turnIdx=0;
+ setupCanvas();
+ hud("DRAWING","Turn 1",`0/${roster.length*S.rounds}`);
+ promptDrawTurn();
+ go('phDraw');
+}
+function promptDrawTurn(){
+ const who=roster[S.turnIdx % roster.length];
+ $('curWho').textContent=who;
+ $('curtain').classList.add('on');
+ $('btnCurtainUnlock').onclick=()=>{
+  $('curtain').classList.remove('on');
+  Sfx.play('click');
+  $('turnName').textContent=who;
+  $('strokeCount').textContent=`Stroke ${S.strokes.length+1} of ${roster.length*S.rounds}`;
+  $('btnConfirmStroke').disabled=true;
+  S.curPath=null;
+  redrawAll();
+  hud("DRAWING",who,`${S.strokes.length}/${roster.length*S.rounds}`);
+ };
+}
+
+function getPos(e){
+ const rect=S.canvas.getBoundingClientRect();
+ const cx = e.touches ? e.touches[0].clientX : e.clientX;
+ const cy = e.touches ? e.touches[0].clientY : e.clientY;
+ return {x:cx-rect.left, y:cy-rect.top};
+}
+let drawing=false;
+function ptrDown(e){
+ if($('curtain').classList.contains('on'))return;
+ if($('btnConfirmStroke').disabled===false)return;
+ e.preventDefault();
+ drawing=true;
+ S.curPath={points:[getPos(e)]};
+ Sfx.play('pen');
+}
+function ptrMove(e){
+ if(!drawing)return;
+ e.preventDefault();
+ const p=getPos(e);
+ S.curPath.points.push(p);
+ S.ctx.beginPath();
+ const pts=S.curPath.points;
+ S.ctx.moveTo(pts[pts.length-2].x,pts[pts.length-2].y);
+ S.ctx.lineTo(p.x,p.y);
+ S.ctx.stroke();
+}
+function ptrUp(e){
+ if(!drawing)return;
+ drawing=false;
+ if(S.curPath && S.curPath.points.length>1){
+  S.strokes.push({player:roster[S.turnIdx%roster.length],points:S.curPath.points});
+  $('btnConfirmStroke').disabled=false;
+ }
+}
+$('drawCanvas').addEventListener('pointerdown',ptrDown);
+$('drawCanvas').addEventListener('pointermove',ptrMove);
+window.addEventListener('pointerup',ptrUp);
+
+$('btnUndo').onclick=()=>{
+ if(S.strokes.length && S.strokes[S.strokes.length-1].player===roster[S.turnIdx%roster.length]){
+  S.strokes.pop();
+  redrawAll();
+  $('btnConfirmStroke').disabled=true;
+  Sfx.play('click');
+ }
+};
+$('btnConfirmStroke').onclick=()=>{
+ S.turnIdx++;
+ if(S.turnIdx>=roster.length*S.rounds){ goToVote(); }
+ else { promptDrawTurn(); }
+};
+$('btnEndEarly').onclick=()=>{ goToVote(); };
+
+function goToVote(){
+ const vc=$('voteCanvasPreview');
+ const ratio=window.devicePixelRatio||1;
+ vc.width=vc.parentElement.clientWidth*ratio; vc.height=vc.parentElement.clientHeight*ratio;
+ const vctx=vc.getContext('2d');
+ vctx.scale(ratio,ratio);
+ vctx.lineCap='round'; vctx.lineJoin='round'; vctx.lineWidth=3; vctx.strokeStyle='#111';
+ redrawAll(vctx,vc);
+
+ $('voteGrid').innerHTML=roster.map(p=>`<button class="tile" type="button" data-acc="${p}">${p}</button>`).join('');
+ S.accused=null; $('btnLockVote').disabled=true;
+ hud("VOTE","Accuse Fake Artist");
+ go('phVote');
+ Sfx.play('alert');
+}
+$('voteGrid').onclick=e=>{
+ const b=e.target.closest('[data-acc]');
+ if(b){
+  $('voteGrid').querySelectorAll('.tile').forEach(t=>t.classList.remove('is-on'));
+  b.classList.add('is-on'); S.accused=b.dataset.acc; $('btnLockVote').disabled=false; Sfx.play('click');
+ }
+};
+$('btnLockVote').onclick=()=>{
+ const fakeName=roster[S.fakeIdx];
+ if(S.accused===fakeName){
+  $('escPrompt').textContent=`${fakeName} was caught! They get one guess at the secret word to steal the win:`;
+  hud("ESCAPE GUESS","Fake Artist");
+  $('escInput').value='';
+  go('phEscape');
+  Sfx.play('alert');
+ } else {
+  finishGame(false,`${S.accused} was innocent! The Fake Artist (${fakeName}) escaped undetected.`);
+ }
+};
+$('btnLockEscape').onclick=()=>{
+ const guess=$('escInput').value.trim().toLowerCase();
+ if(guess===S.word.toLowerCase()){
+  finishGame(false,`The Fake Artist correctly guessed "${S.word}" and stole the victory!`);
+ } else {
+  finishGame(true,`The Fake Artist guessed "${$('escInput').value.trim()||'(nothing)'}" — incorrect! The Artists win.`);
+ }
+};
+
+function finishGame(artistsWin, msg){
+ $('resTitle').textContent = artistsWin ? "ARTISTS WIN!" : "FAKE ARTIST WINS!";
+ $('resTitle').style.color = artistsWin ? "var(--success)" : "var(--danger)";
+ $('resSub').textContent = msg;
+ $('resWord').textContent = `${S.word} (${S.category})`;
+ hud("ROUND OVER","Resolved");
+ go('phResult');
+ Sfx.play(artistsWin?'success':'alert');
+}
+
+$('btnAgain').onclick=()=>{ renderRoster(); hud("SETUP // PHASE","Fake Artist"); go('phSetup'); Sfx.play('click'); };
+$('btnHub').onclick=()=>PD.exitToHub();
+$('btnExit').onclick=()=>PD.exitToHub();
+
+renderRoster();
+})();
+</script>
+</body>
+</html>
