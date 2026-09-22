@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" />
+<title>Resistance: Mini-Cell | PartyDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--font-body:'Plus Jakarta Sans',system-ui,sans-serif;--font-display:'Space Grotesk',system-ui,sans-serif;--font-mono:'Space Mono',monospace;--r-sm:8px;--r-md:14px;--r-lg:20px;--ease:cubic-bezier(.2,.8,.3,1);}
+[data-theme="cyber-neon"]{--bg-primary:#08090c;--bg-surface:#10141b;--bg-elevated:#181e29;--text-primary:#fff;--text-secondary:#9ba3b4;--text-muted:#5c6577;--accent:#00ffcc;--accent-glow:rgba(0,255,204,.35);--accent-secondary:#ff007f;--danger:#ff0055;--success:#00ff66;--border-color:rgba(0,255,204,.22);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(0,255,204,.12);}
+[data-theme="sunset-rave"]{--bg-primary:#0f071d;--bg-surface:#1e0f38;--bg-elevated:#321659;--text-primary:#fff;--text-secondary:#d6b4fc;--text-muted:#8b62b8;--accent:#ff007f;--accent-glow:rgba(255,0,127,.45);--accent-secondary:#ff8800;--danger:#ff0044;--success:#00ffaa;--border-color:rgba(255,0,127,.3);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(255,0,127,.2);}
+[data-theme="retro-arcade"]{--bg-primary:#12131c;--bg-surface:#1a1b28;--bg-elevated:#26273b;--text-primary:#f5f5f5;--text-secondary:#a2a8d3;--text-muted:#6873a8;--accent:#ffd400;--accent-glow:rgba(255,212,0,.35);--accent-secondary:#ff3860;--danger:#ff3860;--success:#42e2b8;--border-color:rgba(255,212,0,.25);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(255,212,0,.15);}
+[data-theme="minimal-light"]{--bg-primary:#f4f6f9;--bg-surface:#fff;--bg-elevated:#e8ecf2;--text-primary:#101828;--text-secondary:#475467;--text-muted:#98a2b3;--accent:#2563eb;--accent-glow:rgba(37,99,235,.2);--accent-secondary:#7c3aed;--danger:#d92d20;--success:#0f9d58;--border-color:rgba(16,24,40,.15);--card-shadow:0 8px 24px rgba(16,24,40,.08);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
+.pd-hud{position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.hud-exit{display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;padding:.42rem .65rem;cursor:pointer;}
+.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
+.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;}
+.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:52px;text-align:center;}
+main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
+.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
+.phase.on{display:flex;animation:pFade .2s var(--ease);}
+@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
+.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
+h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
+p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
+.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
+.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
+.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
+.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
+.btn.push{margin-top:auto;}
+.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
+.btn.danger{background:var(--danger);color:#fff;box-shadow:0 0 16px rgba(255,0,85,.3);}
+.btn.success-btn{background:var(--success);color:#031;box-shadow:0 0 16px rgba(0,255,102,.3);}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:30vh;overflow-y:auto;}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
+.ritem .seat{color:var(--accent);font-weight:700;}
+.ritem .nm{flex:1;font-weight:700;}
+.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;}
+.hold-card{position:relative;width:100%;aspect-ratio:16/10;border-radius:var(--r-lg);border:2px dashed var(--border-color);background:var(--bg-surface);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;touch-action:none;}
+.hold-card.revealed{border-style:solid;border-color:var(--accent);box-shadow:0 0 24px var(--accent-glow);}
+.hold-curtain{position:absolute;inset:0;background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;}
+.hold-face{position:absolute;inset:0;background:var(--bg-elevated);padding:1.4rem;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.45rem;}
+.hold-card.revealed .hold-curtain{display:none;}
+.hold-card.revealed .hold-face{display:flex;}
+.h-tag{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase;}
+.h-val{font-family:var(--font-display);font-size:1.6rem;font-weight:900;color:var(--accent);}
+.h-val.is-spy{color:var(--danger);}
+.mission-track{display:flex;gap:.4rem;justify-content:center;}
+.m-node{flex:1;aspect-ratio:1;border-radius:50%;background:var(--bg-elevated);border:2px solid var(--border-color);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.7rem;font-weight:800;}
+.m-node.pass{background:rgba(0,255,102,.16);border-color:var(--success);color:var(--success);}
+.m-node.fail{background:rgba(255,0,85,.16);border-color:var(--danger);color:var(--danger);}
+.m-node.current{border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow);}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.tile{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.8rem .5rem;color:var(--text-primary);font-family:var(--font-mono);font-size:.82rem;font-weight:700;text-align:center;cursor:pointer;}
+.tile.is-on{background:var(--accent);color:var(--bg-primary);box-shadow:0 0 10px var(--accent-glow);}
+.tile.locked{opacity:.4;pointer-events:none;}
+.curtain{position:fixed;inset:0;z-index:90;background:rgba(8,9,12,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.4rem;}
+.curtain.on{display:flex;}
+.cur-card{background:var(--bg-surface);border:2px solid var(--border-color);border-radius:var(--r-lg);padding:1.6rem 1.2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 0 30px var(--accent-glow);}
+.cur-tag{font-family:var(--font-mono);font-size:.6rem;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
+.cur-name{font-family:var(--font-display);font-size:1.5rem;font-weight:900;margin:.4rem 0 .65rem;}
+.pulse{animation:ring 2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 var(--accent-glow)}70%{box-shadow:0 0 0 16px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
+.ico svg{width:100%;height:100%;display:block;}
+</style>
+</head>
+<body>
+<header class="pd-hud">
+  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
+  <div class="hud-mid"><span class="hud-badge" id="hudBadge">SETUP</span><span class="hud-label" id="hudLabel">Resistance</span></div>
+  <div class="hud-count" id="hudCount">M1</div>
+</header>
+<main>
+  <section class="phase on" id="phSetup">
+    <div class="hero"><span class="ico" data-ic="cell"></span></div>
+    <h1 class="title">Resistance: Mini-Cell</h1>
+    <p class="sub">Secret Spies work to sabotage 5 missions. Resistance must find them before 3 missions fail. Requires 5–10 players.</p>
+    <div class="panel">
+      <p class="ptitle">Roster (5–10)</p>
+      <ul class="rlist" id="rList"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="rInput" placeholder="Add player..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
+        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
+      </div>
+      <p class="sub" style="margin-top:.6rem;font-size:.78rem;" id="spyCountNote">Add at least 5 players.</p>
+    </div>
+    <button class="btn push" id="btnStart" type="button">Assign Secret Roles</button>
+  </section>
+
+  <section class="phase" id="phDeal">
+    <div class="panel" style="text-align:center;padding:1.4rem 1rem;">
+      <p class="ptitle" id="dealStep">PLAYER 1 OF 5</p>
+      <h1 class="title" id="dealWho" style="color:var(--accent);margin:.2rem 0 .9rem;">Player</h1>
+      <div class="hold-card" id="holdBox">
+        <div class="hold-curtain"><span class="ico" data-ic="lock" style="width:32px;height:32px;color:var(--accent);"></span><span>Hold to Reveal Role</span></div>
+        <div class="hold-face" id="holdFace"></div>
+      </div>
+      <p class="sub" style="margin-top:.8rem;font-size:.78rem;">Release to hide, then pass the device.</p>
+    </div>
+    <button class="btn push" id="btnDealNext" type="button" disabled>View Role First</button>
+  </section>
+
+  <section class="phase" id="phBoard">
+    <div class="panel">
+      <p class="ptitle">Mission Track</p>
+      <div class="mission-track" id="missionTrack"></div>
+    </div>
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle" id="leaderTag">MISSION 1 LEADER</p>
+      <h1 class="title" id="leaderName" style="color:var(--accent);">Player</h1>
+      <p class="sub" id="teamSizeNote">Select 2 players for this mission.</p>
+    </div>
+    <div class="panel"><div class="grid-2" id="teamGrid"></div></div>
+    <button class="btn push" id="btnProposeTeam" type="button" disabled>Propose This Team</button>
+  </section>
+
+  <section class="phase" id="phApprove">
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle">Proposed Team</p>
+      <h1 class="title" id="proposedTeamText" style="color:var(--accent);font-size:1.2rem;">—</h1>
+    </div>
+    <p class="sub" id="approvePrompt">Pass the device to <b id="approveWho">Player</b> to vote in private.</p>
+    <div class="btn-row">
+      <button class="btn danger" id="btnReject" type="button">Reject</button>
+      <button class="btn success-btn" id="btnApprove" type="button">Approve</button>
+    </div>
+    <div class="panel"><p class="ptitle">Votes Locked</p><div id="approveProgress" style="font-family:var(--font-mono);font-size:.8rem;color:var(--text-secondary);"></div></div>
+  </section>
+
+  <section class="phase" id="phMissionVote">
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle">Team Approved</p>
+      <h1 class="title" id="missionTeamText" style="color:var(--accent);font-size:1.2rem;">—</h1>
+      <p class="sub" id="failsNeededNote">1 Fail card needed to sabotage this mission.</p>
+    </div>
+    <p class="sub" id="missionVotePrompt">Pass the device to <b id="missionVoteWho">Player</b> to vote in private.</p>
+    <div class="btn-row">
+      <button class="btn danger" id="btnMissionFail" type="button">Fail</button>
+      <button class="btn success-btn" id="btnMissionSuccess" type="button">Success</button>
+    </div>
+    <div class="panel"><p class="ptitle">Cards Submitted</p><div id="missionProgress" style="font-family:var(--font-mono);font-size:.8rem;color:var(--text-secondary);"></div></div>
+  </section>
+
+  <section class="phase" id="phMissionResult">
+    <div class="hero"><span class="ico" data-ic="cell"></span></div>
+    <h1 class="title" id="mrTitle">Mission Result</h1>
+    <p class="sub" id="mrSub">—</p>
+    <div class="panel"><p class="ptitle">Mission Track</p><div class="mission-track" id="missionTrack2"></div></div>
+    <button class="btn push" id="btnNextMission" type="button">Continue</button>
+  </section>
+
+  <section class="phase" id="phGameOver">
+    <div class="hero"><span class="ico" data-ic="cell"></span></div>
+    <h1 class="title" id="goTitle">Game Over</h1>
+    <p class="sub" id="goSub">—</p>
+    <div class="panel"><p class="ptitle">Final Roles Revealed</p><ul class="rlist" id="roleReveal" style="max-height:none;"></ul></div>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
+      <button class="btn" id="btnAgain" type="button">New Cell</button>
+    </div>
+  </section>
+</main>
+
+<div class="curtain" id="curtain" aria-hidden="true">
+  <div class="cur-card">
+    <div class="hero" style="margin-bottom:.5rem;"><span class="ico" data-ic="lock" style="width:36px;height:36px;"></span></div>
+    <span class="cur-tag" id="curTag">PRIVATE VOTE</span>
+    <h2 class="cur-name" id="curWho">Pass Phone</h2>
+    <p class="sub" style="margin-bottom:1.2rem;" id="curDesc">This is your private turn to vote.</p>
+    <button class="btn pulse" id="btnCurtainUnlock" type="button">I am ready</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var LOCAL={home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+cell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg>',
+lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'};
+function ICO(k){return LOCAL[k]||'';}
+document.querySelectorAll('[data-ic]').forEach(function(el){el.innerHTML=ICO(el.getAttribute('data-ic'));});
+var PD={getPlayers:function(){try{return JSON.parse(localStorage.getItem("partydeck_players")||"[]");}catch(e){return[];}},
+setPlayers:function(a){try{localStorage.setItem("partydeck_players",JSON.stringify(a));}catch(e){}},
+exitToHub:function(){window.location.href="../../index.html";},
+vibrate:function(p){if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}};
+(function(){var t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}document.documentElement.setAttribute("data-theme",t);})();
+var Sfx={ctx:null,ok:function(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume();return !!this.ctx;},
+t:function(f,d,type,vol,delay){if(!this.ok())return;var c=this.ctx,t0=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();o.type=type||"square";o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(vol||.14,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d);},
+play:function(n){if(n==="click")this.t(880,.045,"square",.1);else if(n==="reveal")this.t(360,.18,"sine",.14);else if(n==="approve"){this.t(523,.08,"triangle",.15);this.t(659,.1,"triangle",.13,.06);}else if(n==="reject")this.t(220,.16,"sawtooth",.15);else if(n==="win"){this.t(523,.08,"triangle",.15);this.t(659,.08,"triangle",.15,.07);this.t(784,.14,"triangle",.15,.14);}else if(n==="lose")this.t(160,.3,"sawtooth",.18);}};
+var ROLE_TABLE={5:{spies:2},6:{spies:2},7:{spies:3},8:{spies:3},9:{spies:3},10:{spies:4}};
+var TEAM_SIZES={5:[2,3,2,3,3],6:[2,3,4,3,4],7:[2,3,3,4,4],8:[3,4,4,5,5],9:[3,4,4,5,5],10:[3,4,4,5,5]};
+var FAILS_NEEDED={5:[1,1,1,1,1],6:[1,1,1,1,1],7:[1,1,1,2,1],8:[1,1,1,2,1],9:[1,1,1,2,1],10:[1,1,1,2,1]};
+
+var roster=PD.getPlayers().slice(0,10);
+if(roster.length<5)roster=["Player 1","Player 2","Player 3","Player 4","Player 5"];
+var S={spyIdx:[],dealIdx:0,missionResults:[],curMission:0,leaderIdx:0,rejectStreak:0,team:[],approveVotes:{},approveOrder:[],approveIdx:0,missionVotes:{},missionVoteOrder:[],missionVoteIdx:0};
+
+function $(id){return document.getElementById(id);}
+function hud(b,l,c){$('hudBadge').textContent=b;$('hudLabel').textContent=l;if(c!==undefined)$('hudCount').textContent=c;}
+function go(id){var all=document.querySelectorAll('.phase');for(var i=0;i<all.length;i++)all[i].classList.remove('on');$(id).classList.add('on');window.scrollTo(0,0);}
+
+function renderRoster(){
+ var h='';for(var i=0;i<roster.length;i++)h+='<li class="ritem"><span class="seat">#'+(i+1)+'</span><span class="nm">'+roster[i]+'</span><button type="button" data-del="'+i+'">'+ICO('close')+'</button></li>';
+ $('rList').innerHTML=h;
+ var ok=roster.length>=5&&roster.length<=10;
+ $('btnStart').disabled=!ok;
+ $('spyCountNote').textContent = ok ? (ROLE_TABLE[roster.length].spies+" spies will be secretly assigned among "+roster.length+" players.") : "Need between 5 and 10 players.";
+ PD.setPlayers(roster);
+}
+$('rAdd').onclick=function(){var v=$('rInput').value.trim();if(v&&roster.indexOf(v)===-1&&roster.length<10){roster.push(v);$('rInput').value='';renderRoster();Sfx.play('click');}};
+$('rList').onclick=function(e){var b=e.target.closest('[data-del]');if(b){roster.splice(+b.dataset.del,1);renderRoster();Sfx.play('click');}};
+
+$('btnStart').onclick=function(){
+ var n=roster.length;
+ var spyCount=ROLE_TABLE[n].spies;
+ var idxPool=roster.map(function(_,i){return i;});
+ for(var i=idxPool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=idxPool[i];idxPool[i]=idxPool[j];idxPool[j]=tmp;}
+ S.spyIdx=idxPool.slice(0,spyCount);
+ S.dealIdx=0; S.missionResults=[]; S.curMission=0; S.leaderIdx=0; S.rejectStreak=0;
+ hud("DEAL","Secret Roles");
+ renderDeal(); go('phDeal'); Sfx.play('win');
+};
+function renderDeal(){
+ $('dealStep').textContent="PLAYER "+(S.dealIdx+1)+" OF "+roster.length;
+ $('dealWho').textContent=roster[S.dealIdx];
+ var isSpy=S.spyIdx.indexOf(S.dealIdx)>-1;
+ if(isSpy){
+  var fellowSpies=S.spyIdx.filter(function(i){return i!==S.dealIdx;}).map(function(i){return roster[i];});
+  $('holdFace').innerHTML='<div class="h-tag">SECRET ROLE</div><div class="h-val is-spy">SPY</div><div class="h-tag" style="margin-top:.4rem">FELLOW SPIES</div><div class="h-val" style="font-size:1.1rem;color:var(--text-primary);">'+(fellowSpies.length?fellowSpies.join(', '):'None — you work alone')+'</div>';
+ } else {
+  $('holdFace').innerHTML='<div class="h-tag">SECRET ROLE</div><div class="h-val">RESISTANCE</div><div class="h-tag" style="margin-top:.4rem;color:var(--text-muted)">You do not know who the Spies are.</div>';
+ }
+ $('holdBox').classList.remove('revealed');
+ $('btnDealNext').disabled=true; $('btnDealNext').textContent='View Role First';
+}
+var hBox=$('holdBox');
+hBox.addEventListener('pointerdown',function(e){e.preventDefault();hBox.classList.add('revealed');Sfx.play('reveal');PD.vibrate(25);$('btnDealNext').disabled=false;$('btnDealNext').textContent=S.dealIdx<roster.length-1?'Conceal & Pass':'Begin Missions';});
+['pointerup','pointerleave','pointercancel'].forEach(function(ev){hBox.addEventListener(ev,function(){hBox.classList.remove('revealed');});});
+$('btnDealNext').onclick=function(){if(S.dealIdx<roster.length-1){S.dealIdx++;renderDeal();Sfx.play('click');}else{startMissionBoard();}};
+
+function renderTrack(elId){
+ var h=''; var sizes=TEAM_SIZES[roster.length];
+ for(var i=0;i<5;i++){
+  var cls='m-node'+(i===S.curMission?' current':'');
+  var label=(i+1)+'';
+  if(S.missionResults[i]==='pass'){cls='m-node pass';label='OK';}
+  else if(S.missionResults[i]==='fail'){cls='m-node fail';label='X';}
+  h+='<div class="'+cls+'"><span>M'+(i+1)+'</span><span>'+(S.missionResults[i]?label:sizes[i])+'</span></div>';
+ }
+ $(elId).innerHTML=h;
+}
+function startMissionBoard(){
+ renderTrack('missionTrack');
+ $('leaderTag').textContent="MISSION "+(S.curMission+1)+" LEADER";
+ var leader=roster[S.leaderIdx%roster.length];
+ $('leaderName').textContent=leader;
+ var size=TEAM_SIZES[roster.length][S.curMission];
+ $('teamSizeNote').textContent="Select "+size+" player"+(size===1?'':'s')+" for this mission.";
+ S.team=[];
+ var h='';for(var i=0;i<roster.length;i++)h+='<button class="tile" type="button" data-p="'+i+'">'+roster[i]+'</button>';
+ $('teamGrid').innerHTML=h;
+ $('btnProposeTeam').disabled=true;
+ hud("MISSION "+(S.curMission+1),"Leader: "+leader);
+ go('phBoard');
+}
+$('teamGrid').onclick=function(e){
+ var b=e.target.closest('[data-p]'); if(!b)return;
+ var idx=+b.dataset.p; var size=TEAM_SIZES[roster.length][S.curMission];
+ var pos=S.team.indexOf(idx);
+ if(pos>-1){S.team.splice(pos,1);b.classList.remove('is-on');}
+ else{ if(S.team.length>=size)return; S.team.push(idx); b.classList.add('is-on'); }
+ Sfx.play('click');
+ $('btnProposeTeam').disabled = S.team.length!==size;
+};
+$('btnProposeTeam').onclick=function(){
+ var names=S.team.map(function(i){return roster[i];});
+ $('proposedTeamText').textContent=names.join(', ');
+ S.approveOrder=roster.slice(); S.approveIdx=0; S.approveVotes={};
+ renderApproveProgress();
+ promptApprove();
+ go('phApprove');
+};
+function promptApprove(){
+ if(S.approveIdx>=S.approveOrder.length){ resolveApprove(); return; }
+ var who=S.approveOrder[S.approveIdx];
+ $('curTag').textContent="TEAM APPROVAL VOTE";
+ $('curWho').textContent=who;
+ $('curDesc').textContent="Do you approve the proposed mission team?";
+ $('curtain').classList.add('on');
+ $('btnCurtainUnlock').onclick=function(){
+  $('curtain').classList.remove('on'); Sfx.play('click');
+  $('approveWho').textContent=who;
+ };
+}
+$('btnApprove').onclick=function(){castApprove(true);};
+$('btnReject').onclick=function(){castApprove(false);};
+function castApprove(val){
+ var who=S.approveOrder[S.approveIdx];
+ S.approveVotes[who]=val;
+ Sfx.play(val?'approve':'reject'); PD.vibrate(15);
+ S.approveIdx++;
+ renderApproveProgress();
+ if(S.approveIdx<S.approveOrder.length) promptApprove(); else resolveApprove();
+}
+function renderApproveProgress(){
+ var h=''; for(var i=0;i<S.approveOrder.length;i++){var p=S.approveOrder[i]; h+= (p in S.approveVotes) ? (p+' voted &middot; ') : (p+' waiting &middot; ');}
+ $('approveProgress').innerHTML=h;
+}
+function resolveApprove(){
+ var approvals=0, rejections=0;
+ for(var k in S.approveVotes){ if(S.approveVotes[k]) approvals++; else rejections++; }
+ if(approvals>rejections){
+  S.rejectStreak=0;
+  startMissionVote();
+ } else {
+  S.rejectStreak++;
+  if(S.rejectStreak>=5){ endGame('spies','Five consecutive team rejections! The Spies win by chaos.'); return; }
+  S.leaderIdx++;
+  startMissionBoard();
+ }
+}
+
+function startMissionVote(){
+ $('missionTeamText').textContent=S.team.map(function(i){return roster[i];}).join(', ');
+ var needed=FAILS_NEEDED[roster.length][S.curMission];
+ $('failsNeededNote').textContent=needed+" Fail card"+(needed===1?'':'s')+" needed to sabotage this mission.";
+ S.missionVoteOrder=S.team.map(function(i){return roster[i];});
+ S.missionVoteIdx=0; S.missionVotes={};
+ renderMissionProgress();
+ promptMissionVote();
+ go('phMissionVote');
+}
+function promptMissionVote(){
+ if(S.missionVoteIdx>=S.missionVoteOrder.length){ resolveMission(); return; }
+ var who=S.missionVoteOrder[S.missionVoteIdx];
+ $('curTag').textContent="MISSION CARD";
+ $('curWho').textContent=who;
+ $('curDesc').textContent="Submit your mission card in private. Resistance must play Success.";
+ $('curtain').classList.add('on');
+ $('btnCurtainUnlock').onclick=function(){
+  $('curtain').classList.remove('on'); Sfx.play('click');
+  $('missionVoteWho').textContent=who;
+ };
+}
+$('btnMissionSuccess').onclick=function(){castMission(true);};
+$('btnMissionFail').onclick=function(){castMission(false);};
+function castMission(val){
+ var who=S.missionVoteOrder[S.missionVoteIdx];
+ S.missionVotes[who]=val;
+ Sfx.play(val?'approve':'reject'); PD.vibrate(15);
+ S.missionVoteIdx++;
+ renderMissionProgress();
+ if(S.missionVoteIdx<S.missionVoteOrder.length) promptMissionVote(); else resolveMission();
+}
+function renderMissionProgress(){
+ var h=''; for(var i=0;i<S.missionVoteOrder.length;i++){var p=S.missionVoteOrder[i]; h+= (p in S.missionVotes) ? (p+' submitted &middot; ') : (p+' waiting &middot; ');}
+ $('missionProgress').innerHTML=h;
+}
+function resolveMission(){
+ var fails=0; for(var k in S.missionVotes){ if(!S.missionVotes[k]) fails++; }
+ var needed=FAILS_NEEDED[roster.length][S.curMission];
+ var missionFailed = fails>=needed;
+ S.missionResults[S.curMission]=missionFailed?'fail':'pass';
+ $('mrTitle').textContent = missionFailed ? "Mission Sabotaged!" : "Mission Successful!";
+ $('mrSub').textContent = fails+" fail card"+(fails===1?'':'s')+" submitted ("+needed+" needed to sabotage). "+(missionFailed?"The Spies strike!":"The Resistance holds strong.");
+ renderTrack('missionTrack2');
+ Sfx.play(missionFailed?'lose':'win'); PD.vibrate(missionFailed?[80,50,80]:30);
+ go('phMissionResult');
+}
+$('btnNextMission').onclick=function(){
+ var passCount=S.missionResults.filter(function(r){return r==='pass';}).length;
+ var failCount=S.missionResults.filter(function(r){return r==='fail';}).length;
+ if(passCount>=3){ endGame('resistance','The Resistance completed 3 missions successfully!'); return; }
+ if(failCount>=3){ endGame('spies','The Spies sabotaged 3 missions!'); return; }
+ S.curMission++; S.leaderIdx++;
+ startMissionBoard();
+};
+function endGame(winner,msg){
+ $('goTitle').textContent = winner==='resistance' ? "RESISTANCE WINS!" : "SPIES WIN!";
+ $('goTitle').style.color = winner==='resistance' ? "var(--success)" : "var(--danger)";
+ $('goSub').textContent=msg;
+ var h='';
+ for(var i=0;i<roster.length;i++){
+  var isSpy=S.spyIdx.indexOf(i)>-1;
+  h+='<li class="ritem"><span class="nm">'+roster[i]+'</span><span style="color:'+(isSpy?'var(--danger)':'var(--success)')+';font-weight:800;">'+(isSpy?'SPY':'RESISTANCE')+'</span></li>';
+ }
+ $('roleReveal').innerHTML=h;
+ hud("GAME OVER","Roles Revealed");
+ go('phGameOver');
+ Sfx.play(winner==='resistance'?'win':'lose');
+}
+$('btnAgain').onclick=function(){renderRoster();hud("SETUP","Roster");go('phSetup');Sfx.play('click');};
+$('btnHub').onclick=function(){PD.exitToHub();};
+$('btnExit').onclick=function(){PD.exitToHub();};
+
+renderRoster();
+})();
+</script>
+</body>
+</html>
