@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" />
+<title>Coup: Pocket | PartyDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--font-body:'Plus Jakarta Sans',system-ui,sans-serif;--font-display:'Space Grotesk',system-ui,sans-serif;--font-mono:'Space Mono',monospace;--r-sm:8px;--r-md:14px;--r-lg:20px;--ease:cubic-bezier(.2,.8,.3,1);}
+[data-theme="cyber-neon"]{--bg-primary:#08090c;--bg-surface:#10141b;--bg-elevated:#181e29;--text-primary:#fff;--text-secondary:#9ba3b4;--text-muted:#5c6577;--accent:#00ffcc;--accent-glow:rgba(0,255,204,.35);--accent-secondary:#ff007f;--danger:#ff0055;--success:#00ff66;--border-color:rgba(0,255,204,.22);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(0,255,204,.12);}
+[data-theme="sunset-rave"]{--bg-primary:#0f071d;--bg-surface:#1e0f38;--bg-elevated:#321659;--text-primary:#fff;--text-secondary:#d6b4fc;--text-muted:#8b62b8;--accent:#ff007f;--accent-glow:rgba(255,0,127,.45);--accent-secondary:#ff8800;--danger:#ff0044;--success:#00ffaa;--border-color:rgba(255,0,127,.3);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(255,0,127,.2);}
+[data-theme="retro-arcade"]{--bg-primary:#12131c;--bg-surface:#1a1b28;--bg-elevated:#26273b;--text-primary:#f5f5f5;--text-secondary:#a2a8d3;--text-muted:#6873a8;--accent:#ffd400;--accent-glow:rgba(255,212,0,.35);--accent-secondary:#ff3860;--danger:#ff3860;--success:#42e2b8;--border-color:rgba(255,212,0,.25);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(255,212,0,.15);}
+[data-theme="minimal-light"]{--bg-primary:#f4f6f9;--bg-surface:#fff;--bg-elevated:#e8ecf2;--text-primary:#101828;--text-secondary:#475467;--text-muted:#98a2b3;--accent:#2563eb;--accent-glow:rgba(37,99,235,.2);--accent-secondary:#7c3aed;--danger:#d92d20;--success:#0f9d58;--border-color:rgba(16,24,40,.15);--card-shadow:0 8px 24px rgba(16,24,40,.08);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
+.pd-hud{position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.hud-exit{display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;padding:.42rem .65rem;cursor:pointer;}
+.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
+.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;}
+.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:52px;text-align:center;}
+main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
+.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
+.phase.on{display:flex;animation:pFade .2s var(--ease);}
+@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
+.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
+h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
+p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
+.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
+.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
+.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
+.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
+.btn.danger{background:var(--danger);color:#fff;box-shadow:0 0 16px rgba(255,0,85,.3);}
+.btn.push{margin-top:auto;}
+.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:28vh;overflow-y:auto;}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
+.ritem .seat{color:var(--accent);font-weight:700;}
+.ritem .nm{flex:1;font-weight:700;}
+.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.tile{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.75rem .5rem;color:var(--text-primary);font-family:var(--font-mono);font-size:.8rem;font-weight:700;text-align:center;cursor:pointer;}
+.tile.is-on{background:var(--accent);color:var(--bg-primary);box-shadow:0 0 10px var(--accent-glow);}
+.tile.dead{opacity:.35;text-decoration:line-through;pointer-events:none;}
+.player-strip{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.3rem;}
+.p-badge{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.5rem .7rem;min-width:100px;text-align:center;flex-shrink:0;}
+.p-badge.active{border-color:var(--accent);box-shadow:0 0 10px var(--accent-glow);}
+.p-badge.dead{opacity:.35;}
+.p-badge .p-nm{font-family:var(--font-display);font-size:.85rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.p-badge .p-meta{font-family:var(--font-mono);font-size:.65rem;color:var(--accent);margin-top:2px;}
+.act-list{display:flex;flex-direction:column;gap:.45rem;}
+.act-btn{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.65rem .8rem;text-align:left;display:flex;align-items:center;justify-content:space-between;cursor:pointer;color:var(--text-primary);}
+.act-btn:active{transform:scale(.98);}
+.act-btn.is-on{border-color:var(--accent);box-shadow:0 0 10px var(--accent-glow);}
+.act-title{font-family:var(--font-mono);font-size:.8rem;font-weight:800;}
+.act-desc{font-family:var(--font-body);font-size:.72rem;color:var(--text-secondary);}
+.curtain{position:fixed;inset:0;z-index:90;background:rgba(8,9,12,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.4rem;}
+.curtain.on{display:flex;}
+.cur-card{background:var(--bg-surface);border:2px solid var(--border-color);border-radius:var(--r-lg);padding:1.6rem 1.2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 0 30px var(--accent-glow);}
+.cur-tag{font-family:var(--font-mono);font-size:.6rem;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
+.cur-name{font-family:var(--font-display);font-size:1.5rem;font-weight:900;margin:.4rem 0 .65rem;}
+.pulse{animation:ring 2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 var(--accent-glow)}70%{box-shadow:0 0 0 16px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
+.ico svg{width:100%;height:100%;display:block;}
+</style>
+</head>
+<body>
+<header class="pd-hud">
+  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
+  <div class="hud-mid"><span class="hud-badge" id="hudBadge">COUP</span><span class="hud-label" id="hudLabel">Treasury Desk</span></div>
+  <div class="hud-count" id="hudCount">2 COINS</div>
+</header>
+<main>
+  <!-- SETUP -->
+  <section class="phase on" id="phSetup">
+    <div class="hero"><span class="ico" data-ic="crown"></span></div>
+    <h1 class="title">Coup: Pocket</h1>
+    <p class="sub">Bluff, tax, assassinate, and steal. Only one player can hold the supreme influence of the court.</p>
+    <div class="panel">
+      <p class="ptitle">Roster (2–6)</p>
+      <ul class="rlist" id="rList"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="rInput" placeholder="Add player..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
+        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnStart" type="button">Deal Influence Cards</button>
+  </section>
+
+  <!-- PLAY / ACTION SELECTION -->
+  <section class="phase" id="phPlay">
+    <div class="player-strip" id="playerStrip"></div>
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle" id="turnWho">PLAYER'S TURN</p>
+      <p class="sub" id="myInfluenceSummary">Cards: ? / ? &middot; Coins: 2</p>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Choose Action</p>
+      <div class="act-list" id="actionList"></div>
+    </div>
+    <button class="btn push" id="btnExecuteAction" type="button" disabled>Declare Action</button>
+  </section>
+
+  <!-- CLAIM / CHALLENGE DIALOG -->
+  <section class="phase" id="phChallenge">
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle">ACTION DECLARED</p>
+      <h1 class="title" id="claimedActionTitle" style="color:var(--accent);font-size:1.3rem;">—</h1>
+      <p class="sub" id="claimedActionDesc">—</p>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Court Response</p>
+      <p class="sub" style="font-size:.82rem;margin-bottom:.6rem;">Any player may challenge this claim, or the target may block.</p>
+      <div class="btn-row">
+        <button class="btn danger" id="btnCallChallenge" type="button">Challenge Bluff!</button>
+        <button class="btn" id="btnAllowAction" type="button">Allow Action</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LOSE INFLUENCE -->
+  <section class="phase" id="phLose">
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle" style="color:var(--danger);" id="loseWhoHeader">PLAYER MUST LOSE INFLUENCE</p>
+      <p class="sub">Choose which secret character card to reveal and eliminate.</p>
+    </div>
+    <div class="panel"><div class="grid-2" id="loseCardGrid"></div></div>
+    <button class="btn push danger" id="btnConfirmLose" type="button" disabled>Eliminate Influence</button>
+  </section>
+
+  <!-- WINNER -->
+  <section class="phase" id="phWin">
+    <div class="hero"><span class="ico" data-ic="crown"></span></div>
+    <h1 class="title" id="winTitle" style="color:var(--accent);">Court Champion</h1>
+    <p class="sub" id="winSub">All rival influence has been dismantled.</p>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
+      <button class="btn" id="btnAgain" type="button">New Game</button>
+    </div>
+  </section>
+</main>
+
+<div class="curtain" id="curtain" aria-hidden="true">
+  <div class="cur-card">
+    <div class="hero" style="margin-bottom:.5rem;"><span class="ico" data-ic="lock" style="width:36px;height:36px;"></span></div>
+    <span class="cur-tag">COURT HANDOVER</span>
+    <h2 class="cur-name" id="curWho">Pass Phone</h2>
+    <p class="sub" style="margin-bottom:1.2rem;">Hold screen securely to maintain secret influence.</p>
+    <button class="btn pulse" id="btnCurtainUnlock" type="button">Enter Court</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var LOCAL={home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+crown:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5z"/></svg>',
+lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'};
+function ICO(k){return LOCAL[k]||'';}
+document.querySelectorAll('[data-ic]').forEach(function(el){el.innerHTML=ICO(el.getAttribute('data-ic'));});
+var PD={getPlayers:function(){try{return JSON.parse(localStorage.getItem("partydeck_players")||"[]");}catch(e){return[];}},
+setPlayers:function(a){try{localStorage.setItem("partydeck_players",JSON.stringify(a));}catch(e){} },
+exitToHub:function(){window.location.href="../../index.html";},
+vibrate:function(p){if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}};
+(function(){var t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}document.documentElement.setAttribute("data-theme",t);})();
+var Sfx={ctx:null,ok:function(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume();return !!this.ctx;},
+t:function(f,d,type,vol,delay){if(!this.ok())return;var c=this.ctx,t0=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();o.type=type||"square";o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(vol||.14,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d);},
+play:function(n){if(n==="click")this.t(880,.045,"square",.1);else if(n==="coin")this.t(1200,.05,"sine",.14,1600);else if(n==="coup")this.t(160,.4,"sawtooth",.24);else if(n==="win"){this.t(523,.08,"triangle",.15);this.t(659,.08,"triangle",.15,.07);this.t(784,.14,"triangle",.15,.14);}}};
+
+var DECK_CHARACTERS=["Duke","Duke","Duke","Assassin","Assassin","Assassin","Captain","Captain","Captain","Ambassador","Ambassador","Ambassador","Contessa","Contessa","Contessa"];
+
+var ACTIONS=[
+ {id:'income',name:'Income',cost:0,char:null,desc:'Take 1 coin from the treasury (Unblockable)'},
+ {id:'foreign',name:'Foreign Aid',cost:0,char:null,desc:'Take 2 coins (Can be blocked by Duke)'},
+ {id:'coup',name:'Coup',cost:7,char:null,desc:'Pay 7 coins to eliminate a player influence (Unblockable)'},
+ {id:'tax',name:'Tax (Duke)',cost:0,char:'Duke',desc:'Take 3 coins from the treasury'},
+ {id:'assassinate',name:'Assassinate (Assassin)',cost:3,char:'Assassin',desc:'Pay 3 coins to eliminate a target (Blocked by Contessa)'},
+ {id:'steal',name:'Steal (Captain)',cost:0,char:'Captain',desc:'Take 2 coins from a target (Blocked by Captain/Ambassador)'},
+ {id:'exchange',name:'Exchange (Ambassador)',cost:0,char:'Ambassador',desc:'Draw 2 cards from deck, swap with your cards'}
+];
+
+var roster=PD.getPlayers().slice(0,6);
+if(roster.length<2) roster=["Player 1","Player 2","Player 3"];
+
+var S={
+ players:[], coins:{}, hands:{}, deadHands:{}, turnIdx:0,
+ chosenAction:null, chosenTarget:null, pendingLoser:null
+};
+
+function $(id){return document.getElementById(id);}
+function hud(b,l,c){$('hudBadge').textContent=b;$('hudLabel').textContent=l;if(c!==undefined)$('hudCount').textContent=c;}
+function go(id){var all=document.querySelectorAll('.phase');for(var i=0;i<all.length;i++)all[i].classList.remove('on');$(id).classList.add('on');window.scrollTo(0,0);}
+
+function renderRoster(){
+ $('rList').innerHTML=roster.map(function(p,i){return '<li class="ritem"><span class="seat">#'+(i+1)+'</span><span class="nm">'+p+'</span><button type="button" data-del="'+i+'">'+ICO('close')+'</button></li>';}).join('');
+ $('btnStart').disabled=roster.length<2;
+ PD.setPlayers(roster);
+}
+$('rAdd').onclick=function(){var v=$('rInput').value.trim();if(v&&roster.indexOf(v)===-1&&roster.length<6){roster.push(v);$('rInput').value='';renderRoster();Sfx.play('click');}};
+$('rList').onclick=function(e){var b=e.target.closest('[data-del]');if(b){roster.splice(+b.dataset.del,1);renderRoster();Sfx.play('click');}};
+
+$('btnStart').onclick=function(){
+ var deck=DECK_CHARACTERS.slice().sort(function(){return Math.random()-.5;});
+ S.players=roster.slice();
+ S.coins={}; S.hands={}; S.deadHands={}; S.turnIdx=0;
+ S.players.forEach(function(p){
+  S.coins[p]=2;
+  S.hands[p]=[deck.pop(),deck.pop()];
+  S.deadHands[p]=[];
+ });
+ promptTurn();
+};
+
+function promptTurn(){
+ var active=S.players.filter(function(p){return S.hands[p].length>0;});
+ if(active.length<=1){ endGame(active[0]); return; }
+ var who=S.players[S.turnIdx % S.players.length];
+ if(S.hands[who].length===0){ S.turnIdx++; promptTurn(); return; }
+ 
+ $('curTag').textContent="COURT HANDOVER";
+ $('curWho').textContent=who;
+ $('curtain').classList.add('on');
+ $('btnCurtainUnlock').onclick=function(){
+  $('curtain').classList.remove('on'); Sfx.play('click');
+  renderTurnUI(who);
+  go('phPlay');
+ };
+}
+
+function renderTurnUI(who){
+ var strip=$('playerStrip');
+ strip.innerHTML=S.players.map(function(p){
+  var isAlive=S.hands[p].length>0;
+  return '<div class="p-badge'+(p===who?' active':'')+(isAlive?'':' dead')+'"><div class="p-nm">'+p+'</div><div class="p-meta">'+S.coins[p]+' coins &middot; '+S.hands[p].length+' inf</div></div>';
+ }).join('');
+ 
+ $('turnWho').textContent=`${who.toUpperCase()}'S TURN`;
+ $('myInfluenceSummary').textContent=`Secret Cards: ${S.hands[who].join(' + ')} | Coins: ${S.coins[who]}`;
+ hud("TURN",who,S.coins[who]+" COINS");
+ 
+ var mustCoup = S.coins[who]>=10;
+ S.chosenAction=null; S.chosenTarget=null;
+ $('btnExecuteAction').disabled=true;
+ 
+ $('actionList').innerHTML=ACTIONS.map(function(a){
+  var canAfford = S.coins[who]>=a.cost;
+  var disabled = mustCoup ? (a.id!=='coup') : (!canAfford);
+  return '<button class="act-btn'+(disabled?' tile dead':'')+'" type="button" data-act="'+a.id+'"><div><div class="act-title">'+a.name+' '+(a.cost>0?'('+a.cost+' coins)':'')+'</div><div class="act-desc">'+a.desc+'</div></div></button>';
+ }).join('');
+}
+
+$('actionList').onclick=function(e){
+ var b=e.target.closest('[data-act]'); if(!b||b.classList.contains('dead'))return;
+ $('actionList').querySelectorAll('.act-btn').forEach(function(x){x.classList.remove('is-on');});
+ b.classList.add('is-on');
+ S.chosenAction=ACTIONS.find(function(a){return a.id===b.dataset.act;});
+ Sfx.play('click');
+ $('btnExecuteAction').disabled=false;
+};
+
+$('btnExecuteAction').onclick=function(){
+ var who=S.players[S.turnIdx % S.players.length];
+ var a=S.chosenAction;
+ S.coins[who]-=a.cost;
+ 
+ if(a.id==='income'){ S.coins[who]+=1; Sfx.play('coin'); nextTurn(); return; }
+ if(a.id==='coup'){
+  Sfx.play('coup');
+  promptTargetSelection(who, function(tgt){ promptLoseInfluence(tgt); });
+  return;
+ }
+ 
+ // Character bluff/action claim dialog
+ $('claimedActionTitle').textContent=a.name;
+ $('claimedActionDesc').textContent=who+' is declaring '+a.name+'. Any player may challenge this character claim.';
+ go('phChallenge');
+};
+
+function promptTargetSelection(who, onPick){
+ var targets=S.players.filter(function(p){return p!==who && S.hands[p].length>0;});
+ var h=targets.map(function(p){return '<button class="tile" type="button" data-tgt="'+p+'">'+p+'</button>';}).join('');
+ $('loseCardGrid').innerHTML=h;
+ $('loseWhoHeader').textContent="CHOOSE A TARGET";
+ $('btnConfirmLose').disabled=true;
+ var chosen=null;
+ $('loseCardGrid').onclick=function(e){
+  var b=e.target.closest('[data-tgt]'); if(!b)return;
+  $('loseCardGrid').querySelectorAll('.tile').forEach(function(x){x.classList.remove('is-on');});
+  b.classList.add('is-on'); chosen=b.dataset.tgt; $('btnConfirmLose').disabled=false; Sfx.play('click');
+ };
+ $('btnConfirmLose').onclick=function(){ onPick(chosen); };
+ go('phLose');
+}
+
+$('btnAllowAction').onclick=function(){
+ var who=S.players[S.turnIdx % S.players.length];
+ var a=S.chosenAction;
+ if(a.id==='foreign') S.coins[who]+=2;
+ else if(a.id==='tax') S.coins[who]+=3;
+ else if(a.id==='steal') promptTargetSelection(who, function(tgt){ var st=Math.min(2,S.coins[tgt]); S.coins[tgt]-=st; S.coins[who]+=st; Sfx.play('coin'); nextTurn(); });
+ else if(a.id==='assassinate') promptTargetSelection(who, function(tgt){ promptLoseInfluence(tgt); });
+ else if(a.id==='exchange') { S.hands[who]=S.hands[who].sort(function(){return Math.random()-.5;}); }
+ Sfx.play('coin');
+ if(a.id!=='steal'&&a.id!=='assassinate') nextTurn();
+};
+
+$('btnCallChallenge').onclick=function(){
+ var who=S.players[S.turnIdx % S.players.length];
+ var a=S.chosenAction;
+ var hasCard=S.hands[who].indexOf(a.char)>-1;
+ if(hasCard){
+  alert(who+" revealed the real "+a.char+"! Challenger loses 1 influence.");
+  promptTargetSelection(who, function(challenger){ promptLoseInfluence(challenger); });
+ } else {
+  alert(who+" was BLUFFING! "+who+" loses 1 influence.");
+  promptLoseInfluence(who);
+ }
+};
+
+function promptLoseInfluence(player){
+ $('loseWhoHeader').textContent=player.toUpperCase()+" LOSES 1 INFLUENCE";
+ $('loseCardGrid').innerHTML=S.hands[player].map(function(c,i){
+  return '<button class="tile" type="button" data-ci="'+i+'">'+c+'</button>';
+ }).join('');
+ $('btnConfirmLose').disabled=true;
+ var selIdx=null;
+ $('loseCardGrid').onclick=function(e){
+  var b=e.target.closest('[data-ci]'); if(!b)return;
+  $('loseCardGrid').querySelectorAll('.tile').forEach(function(x){x.classList.remove('is-on');});
+  b.classList.add('is-on'); selIdx=+b.dataset.ci; $('btnConfirmLose').disabled=false; Sfx.play('click');
+ };
+ $('btnConfirmLose').onclick=function(){
+  var removed=S.hands[player].splice(selIdx,1)[0];
+  S.deadHands[player].push(removed);
+  Sfx.play('coup'); PD.vibrate(40);
+  nextTurn();
+ };
+ go('phLose');
+}
+
+function nextTurn(){
+ S.turnIdx++;
+ promptTurn();
+}
+
+function endGame(winner){
+ $('winTitle').textContent=winner+" WINS THE COURT!";
+ $('winSub').textContent="All other players lost their influence.";
+ hud("GAME OVER",winner);
+ go('phWin');
+ Sfx.play('win');
+}
+
+$('btnAgain').onclick=function(){ renderRoster(); hud("COUP","Setup"); go('phSetup'); Sfx.play('click'); };
+$('btnHub').onclick=function(){PD.exitToHub();};
+$('btnExit').onclick=function(){PD.exitToHub();};
+
+renderRoster();
+})();
+</script>
+</body>
+</html>

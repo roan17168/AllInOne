@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" />
+<title>Two Rooms Lite | PartyDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--font-body:'Plus Jakarta Sans',system-ui,sans-serif;--font-display:'Space Grotesk',system-ui,sans-serif;--font-mono:'Space Mono',monospace;--r-sm:8px;--r-md:14px;--r-lg:20px;--ease:cubic-bezier(.2,.8,.3,1);}
+[data-theme="cyber-neon"]{--bg-primary:#08090c;--bg-surface:#10141b;--bg-elevated:#181e29;--text-primary:#fff;--text-secondary:#9ba3b4;--text-muted:#5c6577;--accent:#00ffcc;--accent-glow:rgba(0,255,204,.35);--accent-secondary:#ff007f;--danger:#ff0055;--success:#00ff66;--border-color:rgba(0,255,204,.22);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(0,255,204,.12);}
+[data-theme="sunset-rave"]{--bg-primary:#0f071d;--bg-surface:#1e0f38;--bg-elevated:#321659;--text-primary:#fff;--text-secondary:#d6b4fc;--text-muted:#8b62b8;--accent:#ff007f;--accent-glow:rgba(255,0,127,.45);--accent-secondary:#ff8800;--danger:#ff0044;--success:#00ffaa;--border-color:rgba(255,0,127,.3);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(255,0,127,.2);}
+[data-theme="retro-arcade"]{--bg-primary:#12131c;--bg-surface:#1a1b28;--bg-elevated:#26273b;--text-primary:#f5f5f5;--text-secondary:#a2a8d3;--text-muted:#6873a8;--accent:#ffd400;--accent-glow:rgba(255,212,0,.35);--accent-secondary:#ff3860;--danger:#ff3860;--success:#42e2b8;--border-color:rgba(255,212,0,.25);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(255,212,0,.15);}
+[data-theme="minimal-light"]{--bg-primary:#f4f6f9;--bg-surface:#fff;--bg-elevated:#e8ecf2;--text-primary:#101828;--text-secondary:#475467;--text-muted:#98a2b3;--accent:#2563eb;--accent-glow:rgba(37,99,235,.2);--accent-secondary:#7c3aed;--danger:#d92d20;--success:#0f9d58;--border-color:rgba(16,24,40,.15);--card-shadow:0 8px 24px rgba(16,24,40,.08);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
+.pd-hud{position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.hud-exit{display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;padding:.42rem .65rem;cursor:pointer;}
+.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
+.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;}
+.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:52px;text-align:center;}
+main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
+.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
+.phase.on{display:flex;animation:pFade .2s var(--ease);}
+@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
+.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
+h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
+p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
+.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
+.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
+.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
+.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
+.btn.push{margin-top:auto;}
+.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:28vh;overflow-y:auto;}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
+.ritem .seat{color:var(--accent);font-weight:700;}
+.ritem .nm{flex:1;font-weight:700;}
+.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;}
+.hold-card{position:relative;width:100%;aspect-ratio:16/10;border-radius:var(--r-lg);border:2px dashed var(--border-color);background:var(--bg-surface);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;touch-action:none;}
+.hold-card.revealed{border-style:solid;border-color:var(--accent);box-shadow:0 0 24px var(--accent-glow);}
+.hold-curtain{position:absolute;inset:0;background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;}
+.hold-face{position:absolute;inset:0;background:var(--bg-elevated);padding:1.4rem;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.45rem;}
+.hold-card.revealed .hold-curtain{display:none;}
+.hold-card.revealed .hold-face{display:flex;}
+.h-tag{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase;}
+.h-val{font-family:var(--font-display);font-size:1.6rem;font-weight:900;color:var(--accent);}
+.h-room{font-family:var(--font-mono);font-size:1rem;font-weight:800;color:var(--accent-secondary);margin-top:4px;}
+.room-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+.room-col{background:var(--bg-elevated);border:2px solid var(--border-color);border-radius:var(--r-md);padding:.8rem;display:flex;flex-direction:column;gap:.4rem;}
+.room-title{font-family:var(--font-mono);font-size:.75rem;font-weight:800;letter-spacing:.1em;color:var(--accent);text-align:center;margin-bottom:4px;}
+.timer-big{font-family:var(--font-display);font-size:3.5rem;font-weight:900;text-align:center;color:var(--accent);text-shadow:0 0 20px var(--accent-glow);margin:.6rem 0;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+.tile{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.8rem .5rem;color:var(--text-primary);font-family:var(--font-mono);font-size:.8rem;font-weight:700;text-align:center;cursor:pointer;}
+.tile.is-on{background:var(--accent);color:var(--bg-primary);box-shadow:0 0 10px var(--accent-glow);}
+.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
+.ico svg{width:100%;height:100%;display:block;}
+</style>
+</head>
+<body>
+<header class="pd-hud">
+  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
+  <div class="hud-mid"><span class="hud-badge" id="hudBadge">TWO ROOMS</span><span class="hud-label" id="hudLabel">Mission Protocol</span></div>
+  <div class="hud-count" id="hudCount">RD 1/3</div>
+</header>
+<main>
+  <!-- SETUP -->
+  <section class="phase on" id="phSetup">
+    <div class="hero"><span class="ico" data-ic="split"></span></div>
+    <h1 class="title">Two Rooms & A Boom</h1>
+    <p class="sub">Separate into Room Alpha and Room Bravo. Keep the President away from the Bomber across 3 timed rounds of hostage trades.</p>
+    <div class="panel">
+      <p class="ptitle">Roster (6–12)</p>
+      <ul class="rlist" id="rList"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="rInput" placeholder="Add player..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
+        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnStart" type="button">Assign Rooms &amp; Roles</button>
+  </section>
+
+  <!-- DEAL -->
+  <section class="phase" id="phDeal">
+    <div class="panel" style="text-align:center;padding:1.4rem 1rem;">
+      <p class="ptitle" id="dealStep">PLAYER 1 OF 6</p>
+      <h1 class="title" id="dealWho" style="color:var(--accent);margin:.2rem 0 .9rem;">Player</h1>
+      <div class="hold-card" id="holdBox">
+        <div class="hold-curtain"><span class="ico" data-ic="lock" style="width:32px;height:32px;color:var(--accent);"></span><span>Hold to Reveal Role &amp; Room</span></div>
+        <div class="hold-face" id="holdFace"></div>
+      </div>
+      <p class="sub" style="margin-top:.8rem;font-size:.78rem;">Memorize your team card and assigned physical room, then pass.</p>
+    </div>
+    <button class="btn push" id="btnDealNext" type="button" disabled>View Role First</button>
+  </section>
+
+  <!-- ROUND TIMER & ROOM HUD -->
+  <section class="phase" id="phRound">
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle" id="roundKicker">ROUND 1 OF 3 (3 MINUTES)</p>
+      <div class="timer-big" id="roundTimer">03:00</div>
+      <p class="sub">Disperse to your physical rooms. Elect leaders and discuss card shares.</p>
+    </div>
+    <div class="room-grid">
+      <div class="room-col"><div class="room-title">ROOM ALPHA</div><ul class="rlist" id="roomListA"></ul></div>
+      <div class="room-col"><div class="room-title">ROOM BRAVO</div><ul class="rlist" id="roomListB"></ul></div>
+    </div>
+    <button class="btn push" id="btnToTrade" type="button">Time Expired &mdash; Hostage Trade</button>
+  </section>
+
+  <!-- HOSTAGE TRADE -->
+  <section class="phase" id="phTrade">
+    <div class="panel" style="text-align:center;">
+      <p class="ptitle">HOSTAGE EXCHANGE</p>
+      <h1 class="title" style="color:var(--accent);font-size:1.3rem;">Select 1 Hostage From Each Room</h1>
+    </div>
+    <div class="room-grid">
+      <div class="room-col"><div class="room-title">ALPHA HOSTAGE</div><div id="tradeGridA"></div></div>
+      <div class="room-col"><div class="room-title">BRAVO HOSTAGE</div><div id="tradeGridB"></div></div>
+    </div>
+    <button class="btn push" id="btnConfirmTrade" type="button" disabled>Execute Hostage Trade</button>
+  </section>
+
+  <!-- DETONATION ENDGAME -->
+  <section class="phase" id="phEnd">
+    <div class="hero"><span class="ico" data-ic="bomb"></span></div>
+    <h1 class="title" id="endTitle">Final Detonation</h1>
+    <p class="sub" id="endSub">—</p>
+    <div class="room-grid" style="margin:.6rem 0;">
+      <div class="room-col"><div class="room-title">ROOM ALPHA</div><ul class="rlist" id="finalListA"></ul></div>
+      <div class="room-col"><div class="room-title">ROOM BRAVO</div><ul class="rlist" id="finalListB"></ul></div>
+    </div>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
+      <button class="btn" id="btnAgain" type="button">New Game</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+var LOCAL={home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+split:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18"/></svg>',
+bomb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="13" r="8"/><path d="M11 5V3m0 0 3 2m-3-2-3 2M17 8l2-2m0 0 2 1m-2-1-1 2"/></svg>',
+lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'};
+function ICO(k){return LOCAL[k]||'';}
+document.querySelectorAll('[data-ic]').forEach(function(el){el.innerHTML=ICO(el.getAttribute('data-ic'));});
+var PD={getPlayers:function(){try{return JSON.parse(localStorage.getItem("partydeck_players")||"[]");}catch(e){return[];}},
+setPlayers:function(a){try{localStorage.setItem("partydeck_players",JSON.stringify(a));}catch(e){} },
+exitToHub:function(){window.location.href="../../index.html";},
+vibrate:function(p){if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){} }};
+(function(){var t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}document.documentElement.setAttribute("data-theme",t);})();
+var Sfx={ctx:null,ok:function(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume();return !!this.ctx;},
+t:function(f,d,type,vol,delay){if(!this.ok())return;var c=this.ctx,t0=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();o.type=type||"square";o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(vol||.14,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d);},
+play:function(n){if(n==="click")this.t(880,.045,"square",.1);else if(n==="reveal")this.t(360,.18,"sine",.14);else if(n==="boom"){this.t(140,.5,"sawtooth",.3);this.t(90,.6,"sawtooth",.25,null,.08);}else if(n==="win"){this.t(523,.08,"triangle",.15);this.t(659,.08,"triangle",.15,.07);this.t(784,.14,"triangle",.15,.14);}}};
+
+var roster=PD.getPlayers().slice(0,12);
+if(roster.length<6) roster=["Player 1","Player 2","Player 3","Player 4","Player 5","Player 6"];
+
+var S={
+ roles:{}, rooms:{A:[],B:[]}, round:1, secondsLeft:180, timerHandle:null,
+ dealIdx:0, tradeA:null, tradeB:null
+};
+
+function $(id){return document.getElementById(id);}
+function hud(b,l,c){$('hudBadge').textContent=b;$('hudLabel').textContent=l;if(c!==undefined)$('hudCount').textContent=c;}
+function go(id){var all=document.querySelectorAll('.phase');for(var i=0;i<all.length;i++)all[i].classList.remove('on');$(id).classList.add('on');window.scrollTo(0,0);}
+
+function renderRoster(){
+ $('rList').innerHTML=roster.map(function(p,i){return '<li class="ritem"><span class="seat">#'+(i+1)+'</span><span class="nm">'+p+'</span><button type="button" data-del="'+i+'">'+ICO('close')+'</button></li>';}).join('');
+ $('btnStart').disabled=roster.length<6;
+ PD.setPlayers(roster);
+}
+$('rAdd').onclick=function(){var v=$('rInput').value.trim();if(v&&roster.indexOf(v)===-1&&roster.length<12){roster.push(v);$('rInput').value='';renderRoster();Sfx.play('click');}};
+$('rList').onclick=function(e){var b=e.target.closest('[data-del]');if(b){roster.splice(+b.dataset.del,1);renderRoster();Sfx.play('click');}};
+
+$('btnStart').onclick=function(){
+ var n=roster.length;
+ var shuffled=[...roster].sort(function(){return Math.random()-.5;});
+ S.roles={};
+ S.roles[shuffled[0]]={team:'Blue',role:'President'};
+ S.roles[shuffled[1]]={team:'Red',role:'Bomber'};
+ for(var i=2;i<n;i++){
+  var team= i%2===0 ? 'Blue' : 'Red';
+  S.roles[shuffled[i]]={team:team,role:team+' Team Member'};
+ }
+ var half=Math.ceil(n/2);
+ S.rooms.A=shuffled.slice(0,half);
+ S.rooms.B=shuffled.slice(half);
+ S.dealIdx=0; S.round=1;
+ hud("DEAL","Role Assignment");
+ renderDeal();
+ go('phDeal');
+ Sfx.play('win');
+};
+
+function renderDeal(){
+ $('dealStep').textContent="PLAYER "+(S.dealIdx+1)+" OF "+roster.length;
+ var p=roster[S.dealIdx];
+ $('dealWho').textContent=p;
+ var r=S.roles[p];
+ var myRoom = S.rooms.A.indexOf(p)>-1 ? "ROOM ALPHA" : "ROOM BRAVO";
+ $('holdFace').innerHTML='<div class="h-tag">YOUR TEAM & ROLE</div><div class="h-val" style="color:'+(r.team==='Blue'?'#00e5ff':'#ff0055')+';">'+r.role.toUpperCase()+'</div><div class="h-room">'+myRoom+'</div>';
+ $('holdBox').classList.remove('revealed');
+ $('btnDealNext').disabled=true; $('btnDealNext').textContent='View Role First';
+}
+var hBox=$('holdBox');
+hBox.addEventListener('pointerdown',function(e){e.preventDefault();hBox.classList.add('revealed');Sfx.play('reveal');PD.vibrate(25);$('btnDealNext').disabled=false;$('btnDealNext').textContent=S.dealIdx<roster.length-1?'Conceal & Pass':'Start Round 1 Timer';});
+['pointerup','pointerleave','pointercancel'].forEach(function(ev){hBox.addEventListener(ev,function(){hBox.classList.remove('revealed');});});
+
+$('btnDealNext').onclick=function(){
+ if(S.dealIdx<roster.length-1){S.dealIdx++;renderDeal();Sfx.play('click');}
+ else { startRound(); }
+};
+
+function startRound(){
+ S.secondsLeft = S.round===1 ? 180 : (S.round===2 ? 120 : 60);
+ hud("ROUND "+S.round,"Timer Active","RD "+S.round+"/3");
+ $('roundKicker').textContent="ROUND "+S.round+" OF 3 ("+Math.round(S.secondsLeft/60)+" MIN)";
+ $('roomListA').innerHTML=S.rooms.A.map(function(p){return '<li class="ritem"><span class="nm">'+p+'</span></li>';}).join('');
+ $('roomListB').innerHTML=S.rooms.B.map(function(p){return '<li class="ritem"><span class="nm">'+p+'</span></li>';}).join('');
+ go('phRound');
+ Sfx.play('win');
+ runTimer();
+}
+
+function runTimer(){
+ clearInterval(S.timerHandle);
+ updateTimerDisplay();
+ S.timerHandle=setInterval(function(){
+  S.secondsLeft--;
+  updateTimerDisplay();
+  if(S.secondsLeft<=0){
+   clearInterval(S.timerHandle);
+   Sfx.play('boom'); PD.vibrate([100,50,100]);
+   $('btnToTrade').click();
+  }
+ },1000);
+}
+function updateTimerDisplay(){
+ var m=Math.floor(S.secondsLeft/60), s=S.secondsLeft%60;
+ $('roundTimer').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+$('btnToTrade').onclick=function(){
+ clearInterval(S.timerHandle);
+ if(S.round>=3){ resolveEndgame(); return; }
+ S.tradeA=null; S.tradeB=null;
+ $('btnConfirmTrade').disabled=true;
+ $('tradeGridA').innerHTML=S.rooms.A.map(function(p){return '<button class="tile" type="button" data-ta="'+p+'">'+p+'</button>';}).join('');
+ $('tradeGridB').innerHTML=S.rooms.B.map(function(p){return '<button class="tile" type="button" data-tb="'+p+'">'+p+'</button>';}).join('');
+ go('phTrade');
+};
+
+$('tradeGridA').onclick=function(e){
+ var b=e.target.closest('[data-ta]'); if(!b)return;
+ $('tradeGridA').querySelectorAll('.tile').forEach(function(x){x.classList.remove('is-on');});
+ b.classList.add('is-on'); S.tradeA=b.dataset.ta; Sfx.play('click');
+ checkTradeBtn();
+};
+$('tradeGridB').onclick=function(e){
+ var b=e.target.closest('[data-tb]'); if(!b)return;
+ $('tradeGridB').querySelectorAll('.tile').forEach(function(x){x.classList.remove('is-on');});
+ b.classList.add('is-on'); S.tradeB=b.dataset.tb; Sfx.play('click');
+ checkTradeBtn();
+};
+function checkTradeBtn(){
+ $('btnConfirmTrade').disabled = !(S.tradeA && S.tradeB);
+}
+
+$('btnConfirmTrade').onclick=function(){
+ S.rooms.A.splice(S.rooms.A.indexOf(S.tradeA),1); S.rooms.B.push(S.tradeA);
+ S.rooms.B.splice(S.rooms.B.indexOf(S.tradeB),1); S.rooms.A.push(S.tradeB);
+ S.round++;
+ startRound();
+};
+
+function resolveEndgame(){
+ var presRoom = S.rooms.A.find(function(p){return S.roles[p].role==='President';}) ? "Room Alpha" : "Room Bravo";
+ var bombRoom = S.rooms.A.find(function(p){return S.roles[p].role==='Bomber';}) ? "Room Alpha" : "Room Bravo";
+ var redWins = presRoom === bombRoom;
+ 
+ $('endTitle').textContent = redWins ? "RED TEAM WINS! (BOOM!)" : "BLUE TEAM WINS!";
+ $('endTitle').style.color = redWins ? "var(--danger)" : "var(--accent)";
+ $('endSub').textContent = redWins
+  ? "The Bomber and President ended up in the same room ("+presRoom+"). Detonation successful!"
+  : "The President survived in "+presRoom+" while the Bomber detonated in "+bombRoom+".";
+ 
+ function fmtList(arr){
+  return arr.map(function(p){
+   var r=S.roles[p];
+   return '<li class="ritem"><span class="nm">'+p+'</span><span style="font-weight:800;color:'+(r.team==='Blue'?'#00e5ff':'#ff0055')+';">'+r.role+'</span></li>';
+  }).join('');
+ }
+ $('finalListA').innerHTML=fmtList(S.rooms.A);
+ $('finalListB').innerHTML=fmtList(S.rooms.B);
+ 
+ hud("GAME OVER",redWins?"Red Boom":"Blue Win");
+ go('phEnd');
+ Sfx.play(redWins?'boom':'win');
+}
+
+$('btnAgain').onclick=function(){ renderRoster(); hud("TWO ROOMS","Setup"); go('phSetup'); Sfx.play('click'); };
+$('btnHub').onclick=function(){clearInterval(S.timerHandle);PD.exitToHub();};
+$('btnExit').onclick=function(){clearInterval(S.timerHandle);PD.exitToHub();};
+
+renderRoster();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyber-neon">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#08090c" />
+<title>Decrypto Blitz | PartyDeck</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--font-body:'Plus Jakarta Sans',system-ui,sans-serif;--font-display:'Space Grotesk',system-ui,sans-serif;--font-mono:'Space Mono',monospace;--r-sm:8px;--r-md:14px;--r-lg:20px;--ease:cubic-bezier(.2,.8,.3,1);}
+[data-theme="cyber-neon"]{--bg-primary:#08090c;--bg-surface:#10141b;--bg-elevated:#181e29;--text-primary:#fff;--text-secondary:#9ba3b4;--text-muted:#5c6577;--accent:#00ffcc;--accent-glow:rgba(0,255,204,.35);--accent-secondary:#ff007f;--danger:#ff0055;--success:#00ff66;--border-color:rgba(0,255,204,.22);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(0,255,204,.12);}
+[data-theme="sunset-rave"]{--bg-primary:#0f071d;--bg-surface:#1e0f38;--bg-elevated:#321659;--text-primary:#fff;--text-secondary:#d6b4fc;--text-muted:#8b62b8;--accent:#ff007f;--accent-glow:rgba(255,0,127,.45);--accent-secondary:#ff8800;--danger:#ff0044;--success:#00ffaa;--border-color:rgba(255,0,127,.3);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(255,0,127,.2);}
+[data-theme="retro-arcade"]{--bg-primary:#12131c;--bg-surface:#1a1b28;--bg-elevated:#26273b;--text-primary:#f5f5f5;--text-secondary:#a2a8d3;--text-muted:#6873a8;--accent:#ffd400;--accent-glow:rgba(255,212,0,.35);--accent-secondary:#ff3860;--danger:#ff3860;--success:#42e2b8;--border-color:rgba(255,212,0,.25);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(255,212,0,.15);}
+[data-theme="minimal-light"]{--bg-primary:#f4f6f9;--bg-surface:#fff;--bg-elevated:#e8ecf2;--text-primary:#101828;--text-secondary:#475467;--text-muted:#98a2b3;--accent:#2563eb;--accent-glow:rgba(37,99,235,.2);--accent-secondary:#7c3aed;--danger:#d92d20;--success:#0f9d58;--border-color:rgba(16,24,40,.15);--card-shadow:0 8px 24px rgba(16,24,40,.08);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
+.pd-hud{position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
+.hud-exit{display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;padding:.42rem .65rem;cursor:pointer;}
+.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
+.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;}
+.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:52px;text-align:center;}
+main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
+.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
+.phase.on{display:flex;animation:pFade .2s var(--ease);}
+@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
+.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
+h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
+p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
+.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
+.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
+.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
+.btn:active{transform:scale(.98);}
+.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
+.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
+.btn.push{margin-top:auto;}
+.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:24vh;overflow-y:auto;}
+.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
+.ritem .seat{color:var(--accent);font-weight:700;}
+.ritem .nm{flex:1;font-weight:700;}
+.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;}
+.team-scorebar{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;}
+.ts-box{background:var(--bg-elevated);border:2px solid var(--border-color);border-radius:var(--r-md);padding:.7rem;display:flex;flex-direction:column;gap:.3rem;}
+.ts-box.active{border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow);}
+.ts-head{font-family:var(--font-mono);font-size:.7rem;font-weight:800;letter-spacing:.1em;color:var(--accent);display:flex;justify-content:space-between;}
+.tokens-row{display:flex;gap:.4rem;font-family:var(--font-mono);font-size:.65rem;font-weight:700;}
+.tok{padding:.2rem .45rem;border-radius:var(--r-sm);background:var(--bg-surface);}
+.tok.int{color:var(--success);border:1px solid var(--success);}
+.tok.mis{color:var(--danger);border:1px solid var(--danger);}
+.terminal-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;}
+.term-card{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.6rem .3rem;text-align:center;display:flex;flex-direction:column;gap:.25rem;}
+.term-num{font-family:var(--font-mono);font-size:.6rem;font-weight:800;color:var(--accent);}
+.term-word{font-family:var(--font-display);font-size:.84rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.code-display{font-family:var(--font-mono);font-size:2.4rem;font-weight:900;letter-spacing:.3em;text-align:center;color:var(--accent);text-shadow:0 0 20px var(--accent-glow);margin:.6rem 0;}
+.clue-input-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem;}
+.clue-slot-label{font-family:var(--font-mono);font-size:.75rem;font-weight:800;color:var(--accent);width:28px;}
+input[type="text"]{background:var(--bg-elevated);border:1px solid rgba(255,255,255,.14);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.6rem .7rem;font-size:.85rem;width:100%;outline:none;}
+input[type="text"]:focus{border-color:var(--accent);}
+.clues-banner{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;}
+.clue-item{display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;border-bottom:1px solid rgba(255,255,255,.07);font-family:var(--font-mono);font-size:.82rem;}
+.clue-item:last-child{border-bottom:none;}
+.code-picker-row{display:flex;gap:.5rem;justify-content:center;margin-top:.4rem;}
+.code-picker-select{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);color:var(--accent);font-family:var(--font-mono);font-size:1.1rem;font-weight:800;padding:.5rem;outline:none;}
+.curtain{position:fixed;inset:0;z-index:90;background:rgba(8,9,12,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.4rem;}
+.curtain.on{display:flex;}
+.cur-card{background:var(--bg-surface);border:2px solid var(--border-color);border-radius:var(--r-lg);padding:1.6rem 1.2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 0 30px var(--accent-glow);}
+.cur-tag{font-family:var(--font-mono);font-size:.6rem;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
+.cur-name{font-family:var(--font-display);font-size:1.5rem;font-weight:900;margin:.4rem 0 .65rem;}
+.pulse{animation:ring 2s infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 var(--accent-glow)}70%{box-shadow:0 0 0 16px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
+.ico svg{width:100%;height:100%;display:block;}
+</style>
+</head>
+<body>
+<header class="pd-hud">
+  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
+  <div class="hud-mid"><span class="hud-badge" id="hudBadge">DECRYPTO</span><span class="hud-label" id="hudLabel">Encryption Desk</span></div>
+  <div class="hud-count" id="hudCount">RD 1</div>
+</header>
+<main>
+  <!-- SETUP -->
+  <section class="phase on" id="phSetup">
+    <div class="hero"><span class="ico" data-ic="lock"></span></div>
+    <h1 class="title">Decrypto Blitz</h1>
+    <p class="sub">2 teams encrypt and transmit 3-digit secret codes. Intercept the opposing team's transmissions without miscommunicating with your own.</p>
+    <div class="panel">
+      <p class="ptitle">Team White Roster</p>
+      <ul class="rlist" id="rListW"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="inputW" placeholder="Add player to Team White..." maxlength="14">
+        <button class="btn" id="addW" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="ptitle">Team Black Roster</p>
+      <ul class="rlist" id="rListB"></ul>
+      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
+        <input type="text" id="inputB" placeholder="Add player to Team Black..." maxlength="14">
+        <button class="btn" id="addB" style="width:54px;min-height:auto;">+</button>
+      </div>
+    </div>
+    <button class="btn push" id="btnStart" type="button">Initialize Encrypted Terminals</button>
+  </section>
+
+  <!-- TRANSMIT CODE -->
+  <section class="phase" id="phTransmit">
+    <div class="team-scorebar">
+      <div class="ts-box" id="tsW"><div class="ts-head"><span>TEAM WHITE</span></div><div class="tokens-row"><span class="tok int" id="tokIntW">0 INT</span><span class="tok mis" id="tokMisW">0 MIS</span></div></div>
+      <div class="ts-box" id="tsB"><div class="ts-head"><span>TEAM BLACK</span></div><div class="tokens-row"><span class="tok int" id="tokIntB">0 INT</span><span class="tok mis" id="tokMisB">0 MIS</span></div></div>
+    </div>
+    <div class="panel">
+      <p class="ptitle" id="encryptorHeader">TRANSMITTER: PLAYER</p>
+      <p class="sub" style="text-align:left;font-size:.78rem;margin-bottom:.6rem;">Your team's 4 private key slots:</p>
+      <div class="terminal-grid" id="termKeywords"></div>
+    </div>
+    <div class="panel">
+      <p class="ptitle">SECRET TRANSMISSION CODE</p>
+      <div class="code-display" id="secretCodeDisplay">3 &middot; 1 &middot; 4</div>
+      <p class="ptitle" style="margin-top:.6rem;">ENTER 3 ONE-WORD CLUES IN CODE ORDER</p>
+      <div class="clue-input-row"><span class="clue-slot-label" id="cSlot1">#3:</span><input type="text" id="clueIn1" placeholder="Clue for slot 1..."></div>
+      <div class="clue-input-row"><span class="clue-slot-label" id="cSlot2">#1:</span><input type="text" id="clueIn2" placeholder="Clue for slot 2..."></div>
+      <div class="clue-input-row"><span class="clue-slot-label" id="cSlot3">#4:</span><input type="text" id="clueIn3" placeholder="Clue for slot 3..."></div>
+    </div>
+    <button class="btn push" id="btnBroadcast" type="button">Broadcast Clues</button>
+  </section>
+
+  <!-- DECODE & INTERCEPT -->
+  <section class="phase" id="phIntercept">
+    <div class="panel">
+      <p class="ptitle" id="interceptHeader">INCOMING BROADCAST</p>
+      <div class="clues-banner" id="broadcastClues"></div>
+    </div>
+    <div class="panel">
+      <p class="ptitle" id="oppGuessHeader">OPPOSING TEAM INTERCEPTION GUESS</p>
+      <p class="sub" style="text-align:left;font-size:.78rem;margin-bottom:.4rem;">Guess the 3 key digits:</p>
+      <div class="code-picker-row">
+        <select class="code-picker-select" id="oppD1"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+        <select class="code-picker-select" id="oppD2"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+        <select class="code-picker-select" id="oppD3"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="ptitle" id="teamGuessHeader">ACTIVE TEAM DECODE GUESS</p>
+      <p class="sub" style="text-align:left;font-size:.78rem;margin-bottom:.4rem;">Match to your keywords:</p>
+      <div class="code-picker-row">
+        <select class="code-picker-select" id="teamD1"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+        <select class="code-picker-select" id="teamD2"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+        <select class="code-picker-select" id="teamD3"><option>1</option><option>2</option><option>3</option><option>4</option></select>
+      </div>
+    </div>
+    <button class="btn push" id="btnResolveCode" type="button">Verify Transmission</button>
+  </section>
+
+  <!-- OUTCOME -->
+  <section class="phase" id="phOutcome">
+    <div class="hero"><span class="ico" data-ic="lock"></span></div>
+    <h1 class="title" id="outTitle">Transmission Verified</h1>
+    <p class="sub" id="outSub">—</p>
+    <div class="panel">
+      <p class="ptitle">Actual Code</p>
+      <div class="code-display" id="outCode">3 &middot; 1 &middot; 4</div>
+    </div>
+    <button class="btn push" id="btnNextTurn" type="button">Continue to Next Turn</button>
+  </section>
+
+  <!-- GAME OVER -->
+  <section class="phase" id="phEnd">
+    <div class="hero"><span class="ico" data-ic="trophy"></span></div>
+    <h1 class="title" id="endTitle" style="color:var(--accent);">Team Victory</h1>
+    <p class="sub" id="endSub">—</p>
+    <div class="btn-row push">
+      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
+      <button class="btn" id="btnAgain" type="button">New Match</button>
+    </div>
+  </section>
+</main>
+
+<div class="curtain" id="curtain" aria-hidden="true">
+  <div class="cur-card">
+    <div class="hero" style="margin-bottom:.5rem;"><span class="ico" data-ic="lock" style="width:36px;height:36px;"></span></div>
+    <span class="cur-tag" id="curTag">ENCRYPTOR TERMINAL</span>
+    <h2 class="cur-name" id="curWho">Pass Phone</h2>
+    <p class="sub" style="margin-bottom:1.2rem;">Only the appointed encryptor may view the private keywords and code.</p>
+    <button class="btn pulse" id="btnCurtainUnlock" type="button">Access Terminal</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var LOCAL={home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M17 5h3a2 2 0 0 1-2 5M7 5H4a2 2 0 0 0 2 5"/></svg>',
+close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'};
+function ICO(k){return LOCAL[k]||'';}
+document.querySelectorAll('[data-ic]').forEach(function(el){el.innerHTML=ICO(el.getAttribute('data-ic'));});
+var PD={getPlayers:function(){try{return JSON.parse(localStorage.getItem("partydeck_players")||"[]");}catch(e){return[];}},
+exitToHub:function(){window.location.href="../../index.html";},
+vibrate:function(p){if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}};
+(function(){var t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}document.documentElement.setAttribute("data-theme",t);})();
+var Sfx={ctx:null,ok:function(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume();return !!this.ctx;},
+t:function(f,d,type,vol,delay){if(!this.ok())return;var c=this.ctx,t0=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();o.type=type||"square";o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(vol||.14,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d);},
+play:function(n){if(n==="click")this.t(880,.045,"square",.1);else if(n==="code")this.t(520,.08,"sine",.14);else if(n==="intercept"){this.t(784,.12,"triangle",.16);this.t(1046,.18,"triangle",.16,.08);}else if(n==="miscom")this.t(180,.3,"sawtooth",.2);else if(n==="win"){this.t(523,.08,"triangle",.15);this.t(659,.08,"triangle",.15,.07);this.t(784,.14,"triangle",.15,.14);}}};
+
+var WORD_BANK=["Oxygen","Shadow","Thunder","Castle","Mirror","Velvet","Falcon","Bridge","Rocket","Planet","Jungle","Diamond","Matrix","Canvas","Tunnel","Guitar","Anchor","Lizard","Desert","Glacier","Dragon","Engine","Sphinx","Compass","Vector","Bicycle","Cactus","Island"];
+
+var teams={W:[],B:[]};
+var stored=PD.getPlayers();
+if(stored.length>=4){var half=Math.ceil(stored.length/2);teams.W=stored.slice(0,half);teams.B=stored.slice(half);}
+else{teams.W=["Agent White 1","Agent White 2"];teams.B=["Agent Black 1","Agent Black 2"];}
+
+var S={
+ keys:{W:[],B:[]},tokens:{W:{int:0,mis:0},B:{int:0,mis:0}},
+ turnTeam:'W',round:1,curCode:[],curClues:[],encryptorIdx:{W:0,B:0}
+};
+
+function $(id){return document.getElementById(id);}
+function hud(b,l,c){$('hudBadge').textContent=b;$('hudLabel').textContent=l;if(c!==undefined)$('hudCount').textContent=c;}
+function go(id){var all=document.querySelectorAll('.phase');for(var i=0;i<all.length;i++)all[i].classList.remove('on');$(id).classList.add('on');window.scrollTo(0,0);}
+
+function renderTeamLists(){
+ $('rListW').innerHTML=teams.W.map(function(p,i){return '<li class="ritem"><span class="seat">W'+(i+1)+'</span><span class="nm">'+p+'</span><button type="button" data-del="W" data-i="'+i+'">'+ICO('close')+'</button></li>';}).join('');
+ $('rListB').innerHTML=teams.B.map(function(p,i){return '<li class="ritem"><span class="seat">B'+(i+1)+'</span><span class="nm">'+p+'</span><button type="button" data-del="B" data-i="'+i+'">'+ICO('close')+'</button></li>';}).join('');
+}
+$('addW').onclick=function(){var v=$('inputW').value.trim();if(v){teams.W.push(v);$('inputW').value='';renderTeamLists();Sfx.play('click');}};
+$('addB').onclick=function(){var v=$('inputB').value.trim();if(v){teams.B.push(v);$('inputB').value='';renderTeamLists();Sfx.play('click');}};
+document.addEventListener('click',function(e){
+ var b=e.target.closest('[data-del]');
+ if(b){teams[b.dataset.del].splice(+b.dataset.i,1);renderTeamLists();Sfx.play('click');}
+});
+
+function pickKeywords(){
+ var pool=WORD_BANK.slice().sort(function(){return Math.random()-.5;});
+ S.keys.W=pool.slice(0,4); S.keys.B=pool.slice(4,8);
+}
+function generateCode(){
+ var digits=[1,2,3,4].sort(function(){return Math.random()-.5;});
+ return digits.slice(0,3);
+}
+
+$('btnStart').onclick=function(){
+ pickKeywords();
+ S.tokens={W:{int:0,mis:0},B:{int:0,mis:0}};
+ S.turnTeam='W'; S.round=1; S.encryptorIdx={W:0,B:0};
+ startTransmissionTurn();
+};
+
+function startTransmissionTurn(){
+ var t=S.turnTeam;
+ var teamName = t==='W' ? "Team White" : "Team Black";
+ var encryptor = teams[t][S.encryptorIdx[t] % teams[t].length];
+ S.curCode=generateCode();
+ hud("TRANSMIT",teamName,"RD "+S.round);
+ 
+ $('curTag').textContent=teamName.toUpperCase()+" TRANSMITTER";
+ $('curWho').textContent=encryptor;
+ $('curtain').classList.add('on');
+ $('btnCurtainUnlock').onclick=function(){
+  $('curtain').classList.remove('on'); Sfx.play('click');
+  renderTransmitUI(t, encryptor);
+  go('phTransmit');
+ };
+}
+
+function renderTransmitUI(t, encryptor){
+ $('tsW').classList.toggle('active',t==='W');
+ $('tsB').classList.toggle('active',t==='B');
+ $('tokIntW').textContent=S.tokens.W.int+" INT"; $('tokMisW').textContent=S.tokens.W.mis+" MIS";
+ $('tokIntB').textContent=S.tokens.B.int+" INT"; $('tokMisB').textContent=S.tokens.B.mis+" MIS";
+ $('encryptorHeader').textContent="TRANSMITTER: "+encryptor.toUpperCase();
+ $('termKeywords').innerHTML=S.keys[t].map(function(k,i){
+  return '<div class="term-card"><span class="term-num">KEY #'+(i+1)+'</span><span class="term-word">'+k+'</span></div>';
+ }).join('');
+ $('secretCodeDisplay').textContent=S.curCode.join(' · ');
+ $('cSlot1').textContent="#"+S.curCode[0]+":";
+ $('cSlot2').textContent="#"+S.curCode[1]+":";
+ $('cSlot3').textContent="#"+S.curCode[2]+":";
+ $('clueIn1').value=''; $('clueIn2').value=''; $('clueIn3').value='';
+}
+
+$('btnBroadcast').onclick=function(){
+ var c1=$('clueIn1').value.trim(), c2=$('clueIn2').value.trim(), c3=$('clueIn3').value.trim();
+ if(!c1||!c2||!c3) return;
+ S.curClues=[c1,c2,c3];
+ Sfx.play('code'); PD.vibrate(25);
+ renderInterceptUI();
+ go('phIntercept');
+};
+
+function renderInterceptUI(){
+ var t=S.turnTeam;
+ var opp= t==='W'?'B':'W';
+ var oppName = opp==='W'?"Team White":"Team Black";
+ var teamName = t==='W'?"Team White":"Team Black";
+ $('interceptHeader').textContent="INCOMING BROADCAST ("+teamName.toUpperCase()+")";
+ $('broadcastClues').innerHTML=S.curClues.map(function(c,i){
+  return '<div class="clue-item"><span>TRANSMISSION #'+(i+1)+'</span><b style="color:var(--accent);">"'+c+'"</b></div>';
+ }).join('');
+ $('oppGuessHeader').textContent=oppName.toUpperCase()+" INTERCEPTION ATTEMPT";
+ $('teamGuessHeader').textContent=teamName.toUpperCase()+" DECODE ATTEMPT";
+}
+
+$('btnResolveCode').onclick=function(){
+ var oppGuess=[+$('oppD1').value, +$('oppD2').value, +$('oppD3').value];
+ var teamGuess=[+$('teamD1').value, +$('teamD2').value, +$('teamD3').value];
+ var codeStr=S.curCode.join('');
+ var oppStr=oppGuess.join('');
+ var teamStr=teamGuess.join('');
+ 
+ var t=S.turnTeam;
+ var opp= t==='W'?'B':'W';
+ var oppIntercepted = oppStr===codeStr;
+ var teamMiscom = teamStr!==codeStr;
+ 
+ if(oppIntercepted) S.tokens[opp].int++;
+ if(teamMiscom) S.tokens[t].mis++;
+ 
+ var msg=[];
+ if(oppIntercepted) msg.push((opp==='W'?"Team White":"Team Black")+" successfully INTERCEPTED the code!");
+ else msg.push((opp==='W'?"Team White":"Team Black")+" failed to intercept.");
+ 
+ if(teamMiscom) msg.push((t==='W'?"Team White":"Team Black")+" MISCOMMUNICATED with their own transmitter!");
+ else msg.push((t==='W'?"Team White":"Team Black")+" successfully decoded their transmission.");
+ 
+ $('outTitle').textContent= (oppIntercepted||teamMiscom) ? "Transmission Breached!" : "Transmission Secure!";
+ $('outSub').textContent=msg.join(' ');
+ $('outCode').textContent=S.curCode.join(' · ');
+ 
+ if(oppIntercepted) Sfx.play('intercept');
+ else if(teamMiscom) Sfx.play('miscom');
+ else Sfx.play('win');
+ 
+ go('phOutcome');
+};
+
+$('btnNextTurn').onclick=function(){
+ // Check win/loss conditions
+ if(S.tokens.W.int>=2 || S.tokens.B.mis>=2){ endGame("Team White Wins!","Captured 2 Intercept Tokens or Enemy suffered 2 Miscommunications."); return; }
+ if(S.tokens.B.int>=2 || S.tokens.W.mis>=2){ endGame("Team Black Wins!","Captured 2 Intercept Tokens or Enemy suffered 2 Miscommunications."); return; }
+ 
+ S.encryptorIdx[S.turnTeam]++;
+ S.turnTeam = S.turnTeam==='W' ? 'B' : 'W';
+ if(S.turnTeam==='W') S.round++;
+ startTransmissionTurn();
+};
+
+function endGame(winnerTitle, desc){
+ $('endTitle').textContent=winnerTitle;
+ $('endSub').textContent=desc;
+ hud("MATCH OVER","Winner Declared");
+ go('phEnd');
+ Sfx.play('win');
+}
+
+$('btnAgain').onclick=function(){ renderTeamLists(); hud("DECRYPTO","Setup"); go('phSetup'); Sfx.play('click'); };
+$('btnHub').onclick=function(){PD.exitToHub();};
+$('btnExit').onclick=function(){PD.exitToHub();};
+
+renderTeamLists();
+})();
+</script>
+</body>
+</html>
