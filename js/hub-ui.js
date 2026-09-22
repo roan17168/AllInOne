@@ -1,29 +1,80 @@
 /**
  * PARTYDECK Hub UI Controller
- * Robust modal launching, defensive tag mapping, category filters, and roster syncing.
+ * Vector icon binding, filtering, and modal launchers.
  */
 document.addEventListener("DOMContentLoaded", () => {
-  "use strict";
+  // Universal PartyDeck Theme Switcher Fix
+  const themeSelector = document.getElementById("themeSelect") || document.getElementById("themeSelector");
+  const THEME_STORAGE_KEY = "partydeck_theme";
+  const VALID_THEMES = ["cyber-neon", "sunset-rave", "retro-arcade", "minimal-light"];
 
-  // Elements
+  function applyGlobalTheme(themeName) {
+    const chosen = VALID_THEMES.includes(themeName) ? themeName : "cyber-neon";
+    document.documentElement.setAttribute("data-theme", chosen);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, chosen);
+    } catch (e) {}
+
+    const metaColor = {
+      "cyber-neon": "#08090c",
+      "sunset-rave": "#0f071d",
+      "retro-arcade": "#12131c",
+      "minimal-light": "#f4f6f9"
+    }[chosen];
+    const metaTag = document.getElementById("metaThemeColor") || document.querySelector('meta[name="theme-color"]');
+    if (metaTag && metaColor) metaTag.setAttribute("content", metaColor);
+  }
+
+  if (themeSelector) {
+    let saved = "cyber-neon";
+    try {
+      saved = localStorage.getItem(THEME_STORAGE_KEY) || saved;
+    } catch (e) {}
+    themeSelector.value = saved;
+    applyGlobalTheme(saved);
+
+    themeSelector.addEventListener("change", (e) => {
+      applyGlobalTheme(e.target.value);
+      if (window.PartyDeck && PartyDeck.playSound) PartyDeck.playSound("click");
+    });
+  }
+
+  // Inject Static Icons
+  const themeIconSlot = document.getElementById("themeIconSlot");
+  if (themeIconSlot) themeIconSlot.innerHTML = Icons.get("palette");
+
+  const rosterIconSlot = document.getElementById("rosterIconSlot");
+  if (rosterIconSlot) rosterIconSlot.innerHTML = Icons.get("users");
+
+  const btnCloseRoster = document.getElementById("btnCloseRoster");
+  if (btnCloseRoster) btnCloseRoster.innerHTML = Icons.get("close");
+
+  const btnCloseGameModal = document.getElementById("btnCloseGameModal");
+  if (btnCloseGameModal) btnCloseGameModal.innerHTML = Icons.get("close");
+
+  const rosterModalTitle = document.getElementById("rosterModalTitle");
+  if (rosterModalTitle) {
+    rosterModalTitle.innerHTML = `${Icons.get("users")} <span>PARTY ROSTER</span>`;
+  }
+
   const gamesGrid = document.getElementById("gamesGrid");
-  const filterNav = document.getElementById("filterNav");
+  const filterPills = document.querySelectorAll(".filter-pill");
   const countAll = document.getElementById("countAll");
 
-  // Roster Modal Elements
   const rosterModal = document.getElementById("rosterModal");
-  const rosterList = document.getElementById("rosterList");
-  const rosterLabel = document.getElementById("rosterLabel");
+  const gameModal = document.getElementById("gameModal");
+  const btnEditRoster = document.getElementById("btnEditRoster");
+  const btnSaveRoster = document.getElementById("btnSaveRoster");
+  const btnClearRoster = document.getElementById("btnClearRoster");
   const addPlayerForm = document.getElementById("addPlayerForm");
   const newPlayerName = document.getElementById("newPlayerName");
-  const btnManageRoster = document.getElementById("btnManageRoster");
-  const btnCloseRoster = document.getElementById("btnCloseRoster");
-  const btnClearRoster = document.getElementById("btnClearRoster");
-  const btnSaveRoster = document.getElementById("btnSaveRoster");
+  const rosterList = document.getElementById("rosterList");
+  const rosterLabel = document.getElementById("rosterLabel");
 
-  // Game Details Preview Modal Elements
-  const gameModal = document.getElementById("gameModal");
-  const previewIcon = document.getElementById("previewIcon");
+  const btnCancelLaunch = document.getElementById("btnCancelLaunch");
+  const btnLaunchGame = document.getElementById("btnLaunchGame");
+
+  const previewIconBox = document.getElementById("previewIconBox");
   const previewCategory = document.getElementById("previewCategory");
   const previewTitle = document.getElementById("previewTitle");
   const previewTagline = document.getElementById("previewTagline");
@@ -32,226 +83,143 @@ document.addEventListener("DOMContentLoaded", () => {
   const previewTime = document.getElementById("previewTime");
   const previewDrink = document.getElementById("previewDrink");
   const previewTags = document.getElementById("previewTags");
-  const btnLaunchGame = document.getElementById("btnLaunchGame");
-  const btnCloseGameModal = document.getElementById("btnCloseGameModal");
-  const btnCancelLaunch = document.getElementById("btnCancelLaunch");
 
-  // Icons Helper with Safe Fallbacks
-  function getIcon(key) {
-    if (window.Icons && typeof window.Icons.get === "function") {
-      return window.Icons.get(key || "palette");
-    }
-    return `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>`;
-  }
-
-  // Inject Static UI Icons
-  const themeIconSlot = document.getElementById("themeIconSlot");
-  if (themeIconSlot) themeIconSlot.innerHTML = getIcon("palette");
-
-  const rosterIconSlot = document.getElementById("rosterIconSlot");
-  if (rosterIconSlot) rosterIconSlot.innerHTML = getIcon("users");
-
-  if (btnCloseRoster) btnCloseRoster.innerHTML = getIcon("close");
-  if (btnCloseGameModal) btnCloseGameModal.innerHTML = getIcon("close");
-
-  // State
   let activeCategory = "all";
-  let activeRoster = [];
-  try {
-    activeRoster = JSON.parse(localStorage.getItem("partydeck_players") || "[]");
-    if (!Array.isArray(activeRoster)) activeRoster = [];
-  } catch (e) {
-    activeRoster = [];
-  }
+  let activeRoster = PartyDeck.getPlayers();
 
-  // Render Game Cards
   function renderGames(category = "all") {
-    if (!gamesGrid) return;
-    const games = Array.isArray(window.PARTY_GAMES) ? window.PARTY_GAMES : [];
-    const filtered = category === "all" ? games : games.filter((g) => g.category === category);
+    if (countAll) countAll.textContent = PARTY_GAMES.length;
+    gamesGrid.innerHTML = "";
 
-    if (countAll) countAll.textContent = games.length;
+    const filtered = category === "all" 
+      ? PARTY_GAMES 
+      : PARTY_GAMES.filter(g => g.category === category);
 
-    gamesGrid.innerHTML = filtered
-      .map((game) => {
-        const tagsList = Array.isArray(game.tags) ? game.tags : [];
-        const tagBadges = tagsList
-          .slice(0, 2)
-          .map((t) => `<span class="badge-tag">${t}</span>`)
-          .join("");
+    filtered.forEach(game => {
+      const card = document.createElement("article");
+      card.className = "game-card";
+      card.setAttribute("tabindex", "0");
+      card.setAttribute("role", "button");
+      card.setAttribute("aria-label", `View details for ${game.title}`);
 
-        return `
-        <article class="game-card" data-id="${game.id}" tabindex="0" role="button" aria-label="${game.title}">
-          <div class="card-hero">
-            <span class="card-icon-slot">${getIcon(game.icon || "palette")}</span>
-            <span class="card-cat">${(game.category || "Party").toUpperCase()}</span>
-          </div>
-          <div class="card-body">
-            <h3 class="card-title">${game.title}</h3>
-            <p class="card-tagline">${game.tagline || ""}</p>
-            <div class="card-meta-row">
-              <span>${game.minPlayers || 2}–${game.maxPlayers || 12} Players</span>
-              <span>${game.estimatedTime || "15m"}</span>
-            </div>
-            <div class="card-tags-row">${tagBadges}</div>
-          </div>
-        </article>
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="card-icon-box">${Icons.get(game.iconKey)}</div>
+          <span class="card-badge">${game.category}</span>
+        </div>
+        <div>
+          <h3 class="game-title">${game.title}</h3>
+          <p class="game-tagline">${game.tagline}</p>
+        </div>
+        <div class="card-meta">
+          <span class="meta-indicator">${Icons.get('users')} ${game.minPlayers}–${game.maxPlayers}P</span>
+          <span class="meta-indicator">${Icons.get('clock')} ${game.estimatedTime}</span>
+          ${game.drinkingMode ? `<span class="meta-indicator drink-pill">${Icons.get('beer')} DRINK</span>` : ''}
+        </div>
       `;
-      })
-      .join("");
-  }
 
-  // Open Game Modal (Defensive against undefined values)
-  function openGameModal(gameId) {
-    const games = Array.isArray(window.PARTY_GAMES) ? window.PARTY_GAMES : [];
-    const game = games.find((g) => g.id === gameId);
-    if (!game || !gameModal) return;
-
-    if (previewIcon) previewIcon.innerHTML = getIcon(game.icon || "palette");
-    if (previewCategory) previewCategory.textContent = (game.category || "Party").toUpperCase();
-    if (previewTitle) previewTitle.textContent = game.title || "Game Preview";
-    if (previewTagline) previewTagline.textContent = game.tagline || "";
-    if (previewDescription) previewDescription.textContent = game.description || "No description provided.";
-    if (previewPlayers) previewPlayers.textContent = `${game.minPlayers || 2}–${game.maxPlayers || 12} Players`;
-    if (previewTime) previewTime.textContent = game.estimatedTime || "15 min";
-    if (previewDrink) previewDrink.textContent = game.drinkingMode ? "Drinking Game" : "Casual / Casual Party";
-
-    // Safe Tag Mapping (Defends against Line 145 Uncaught TypeError)
-    if (previewTags) {
-      const tagsList = Array.isArray(game.tags) ? game.tags : [];
-      previewTags.innerHTML = tagsList.map((tag) => `<span class="tag-pill">${tag}</span>`).join("");
-    }
-
-    if (btnLaunchGame) {
-      btnLaunchGame.href = game.entryPath || "#";
-    }
-
-    if (typeof gameModal.showModal === "function") {
-      gameModal.showModal();
-    } else {
-      gameModal.setAttribute("open", "");
-    }
-  }
-
-  // Click on Game Card
-  if (gamesGrid) {
-    gamesGrid.addEventListener("click", (e) => {
-      const card = e.target.closest(".game-card");
-      if (card && card.dataset.id) {
-        if (window.PartyDeck && PartyDeck.playSound) PartyDeck.playSound("click");
-        openGameModal(card.dataset.id);
-      }
-    });
-
-    gamesGrid.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        const card = e.target.closest(".game-card");
-        if (card && card.dataset.id) {
+      card.addEventListener("click", () => openGameModal(game));
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          openGameModal(card.dataset.id);
+          openGameModal(game);
         }
-      }
+      });
+
+      gamesGrid.appendChild(card);
     });
   }
 
-  // Category Filter Pills
-  if (filterNav) {
-    filterNav.addEventListener("click", (e) => {
-      const pill = e.target.closest(".filter-pill");
-      if (!pill) return;
+  function openGameModal(game) {
+    PartyDeck.playSound("click");
+    previewIconBox.innerHTML = Icons.get(game.iconKey);
+    previewCategory.textContent = `MODULE // ${game.category.toUpperCase()}`;
+    previewTitle.textContent = game.title;
+    previewTagline.textContent = game.tagline;
+    previewDescription.textContent = game.description;
+    previewPlayers.textContent = `${game.minPlayers}–${game.maxPlayers}P`;
+    previewTime.textContent = game.estimatedTime;
+    previewDrink.textContent = game.drinkingMode ? "Enabled" : "Disabled";
 
-      filterNav.querySelectorAll(".filter-pill").forEach((p) => p.classList.remove("active"));
+    previewTags.innerHTML = game.tags
+      .map(t => `<span class="game-tag-badge">#${t}</span>`)
+      .join("");
+
+    btnLaunchGame.href = game.entryPath;
+    btnLaunchGame.innerHTML = `${Icons.get('play')} Launch Module`;
+    gameModal.showModal();
+  }
+
+  filterPills.forEach(pill => {
+    pill.addEventListener("click", () => {
+      PartyDeck.playSound("click");
+      filterPills.forEach(p => p.classList.remove("active"));
       pill.classList.add("active");
-      activeCategory = pill.dataset.category || "all";
+      activeCategory = pill.dataset.category;
       renderGames(activeCategory);
-      if (window.PartyDeck && PartyDeck.playSound) PartyDeck.playSound("click");
     });
-  }
+  });
 
-  // Roster Management
   function updateRosterUI() {
-    if (rosterLabel) {
-      if (activeRoster.length === 0) {
-        rosterLabel.innerHTML = `Active Roster: <strong>None set</strong>`;
-      } else {
-        rosterLabel.innerHTML = `Active Roster: <strong>${activeRoster.length} (${activeRoster.join(", ")})</strong>`;
-      }
+    rosterList.innerHTML = "";
+    if (activeRoster.length === 0) {
+      rosterLabel.innerHTML = `Active Roster: <strong>None set</strong>`;
+    } else {
+      rosterLabel.innerHTML = `Active Roster: <strong>${activeRoster.length} (${activeRoster.join(", ")})</strong>`;
     }
 
-    if (rosterList) {
-      rosterList.innerHTML = activeRoster
-        .map(
-          (name, idx) => `
-        <li class="roster-tag">
-          <span>${name}</span>
-          <button type="button" class="roster-tag-remove" data-idx="${idx}" aria-label="Remove ${name}">
-            ${getIcon("close")}
-          </button>
-        </li>
-      `
-        )
-        .join("");
-    }
-
-    try {
-      localStorage.setItem("partydeck_players", JSON.stringify(activeRoster));
-    } catch (e) {}
-  }
-
-  if (addPlayerForm) {
-    addPlayerForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = newPlayerName.value.trim();
-      if (name && !activeRoster.includes(name)) {
-        activeRoster.push(name);
-        newPlayerName.value = "";
-        if (window.PartyDeck && PartyDeck.playSound) PartyDeck.playSound("click");
-        updateRosterUI();
-      }
+    activeRoster.forEach((name, idx) => {
+      const li = document.createElement("li");
+      li.className = "roster-tag";
+      li.innerHTML = `
+        <span>${name}</span>
+        <button type="button" class="roster-tag-remove" data-idx="${idx}" aria-label="Remove ${name}">
+          ${Icons.get('close')}
+        </button>
+      `;
+      rosterList.appendChild(li);
     });
+
+    PartyDeck.setPlayers(activeRoster);
   }
 
-  if (rosterList) {
-    rosterList.addEventListener("click", (e) => {
-      const btn = e.target.closest(".roster-tag-remove");
-      if (btn) {
-        const idx = parseInt(btn.dataset.idx, 10);
-        activeRoster.splice(idx, 1);
-        if (window.PartyDeck && PartyDeck.playSound) PartyDeck.playSound("click");
-        updateRosterUI();
-      }
-    });
-  }
-
-  if (btnClearRoster) {
-    btnClearRoster.addEventListener("click", () => {
-      activeRoster = [];
-      if (window.PartyDeck && PartyDeck.playSound) PartyDeck.playSound("click");
+  addPlayerForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = newPlayerName.value.trim();
+    if (name && !activeRoster.includes(name)) {
+      activeRoster.push(name);
+      newPlayerName.value = "";
+      PartyDeck.playSound("click");
       updateRosterUI();
-    });
-  }
+    }
+  });
 
-  if (btnManageRoster && rosterModal) {
-    btnManageRoster.addEventListener("click", () => {
-      if (window.PartyDeck && PartyDeck.playSound) PartyDeck.playSound("click");
-      if (typeof rosterModal.showModal === "function") rosterModal.showModal();
-      else rosterModal.setAttribute("open", "");
-    });
-  }
+  rosterList.addEventListener("click", (e) => {
+    const btn = e.target.closest(".roster-tag-remove");
+    if (btn) {
+      const idx = parseInt(btn.dataset.idx, 10);
+      activeRoster.splice(idx, 1);
+      PartyDeck.playSound("click");
+      updateRosterUI();
+    }
+  });
 
-  // Close Modals
-  const closeModal = (modal) => {
-    if (!modal) return;
-    if (typeof modal.close === "function") modal.close();
-    else modal.removeAttribute("open");
-  };
+  btnClearRoster.addEventListener("click", () => {
+    activeRoster = [];
+    PartyDeck.playSound("click");
+    updateRosterUI();
+  });
 
-  if (btnCloseRoster) btnCloseRoster.addEventListener("click", () => closeModal(rosterModal));
-  if (btnSaveRoster) btnSaveRoster.addEventListener("click", () => closeModal(rosterModal));
-  if (btnCloseGameModal) btnCloseGameModal.addEventListener("click", () => closeModal(gameModal));
-  if (btnCancelLaunch) btnCancelLaunch.addEventListener("click", () => closeModal(gameModal));
+  btnEditRoster.addEventListener("click", () => {
+    PartyDeck.playSound("click");
+    rosterModal.showModal();
+  });
 
-  // Initialize
+  btnCloseRoster.addEventListener("click", () => rosterModal.close());
+  btnSaveRoster.addEventListener("click", () => rosterModal.close());
+  btnCloseGameModal.addEventListener("click", () => gameModal.close());
+  btnCancelLaunch.addEventListener("click", () => gameModal.close());
+
   renderGames();
   updateRosterUI();
 });
