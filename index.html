@@ -1,133 +1,933 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cyber-neon">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#08090c" id="metaThemeColor" />
-  <title>PartyDeck | Zero-Friction Offline Party Hub</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/themes.css" />
-  <link rel="stylesheet" href="css/base.css" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="description" content="PartyDeck — offline, zero-setup party games for one phone or many." />
+<title>PartyDeck | Offline Party Game Station</title>
+
+<!-- Pre-paint theme bootstrap: eliminates flash of wrong palette -->
+<script>
+(function(){
+  try {
+    var t = localStorage.getItem("partydeck_theme") || "nordic-slate";
+    document.documentElement.setAttribute("data-theme", t);
+  } catch(e) {
+    document.documentElement.setAttribute("data-theme", "nordic-slate");
+  }
+})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/themes.css" />
+<link rel="stylesheet" href="css/base.css" />
+
+<style>
+  /* The hub manages its own top inset so the sticky bar sits below the notch */
+  body { padding-top: 0; }
+
+  /* ---------- App bar ---------- */
+  .hub-header{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between; gap:.6rem;
+    padding:.5rem .75rem;
+    padding-top:max(.5rem, var(--sat));
+    background:color-mix(in srgb, var(--bg-surface) 92%, transparent);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border-ui);
+  }
+  .hub-brand{display:flex;align-items:center;gap:.55rem;text-decoration:none;color:var(--text-primary);min-width:0}
+  .brand-logo{
+    width:36px;height:36px;border-radius:var(--r-sm);flex-shrink:0;
+    background:var(--accent);color:var(--accent-contrast);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 12px var(--accent-glow);
+  }
+  .brand-title{font-family:var(--font-display);font-size:1.1rem;font-weight:900;letter-spacing:-.02em;white-space:nowrap}
+  .hub-controls{display:flex;align-items:center;gap:.35rem;flex-shrink:0}
+
+  .count-badge{
+    position:absolute;top:4px;right:4px;
+    min-width:18px;height:18px;padding:0 4px;border-radius:var(--r-full);
+    background:var(--accent);color:var(--accent-contrast);
+    font-family:var(--font-mono);font-size:.6rem;font-weight:700;
+    display:flex;align-items:center;justify-content:center;pointer-events:none;
+  }
+  .btn-icon-only{position:relative}
+
+  /* ---------- Hero ---------- */
+  .hero{padding:1.75rem 1.1rem 1.25rem;max-width:720px;margin:0 auto;text-align:center;width:100%}
+  .hero-kicker{
+    display:inline-flex;align-items:center;gap:.4rem;
+    font-family:var(--font-mono);font-size:.64rem;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--accent);
+    border:1px solid var(--border-ui-active);border-radius:var(--r-full);
+    padding:.3rem .7rem;margin-bottom:.85rem;
+  }
+  .hero-title{font-size:clamp(1.7rem,7vw,2.4rem);margin-bottom:.6rem}
+  .hero-desc{font-size:.92rem;color:var(--text-secondary);max-width:46ch;margin:0 auto 1.25rem;line-height:1.55}
+  .hero-actions{display:flex;gap:.55rem;justify-content:center;flex-wrap:wrap}
+  .hero-actions .btn{flex:1 1 160px;max-width:230px}
+
+  /* ---------- Filters ---------- */
+  .filter-section{max-width:1100px;margin:0 auto;padding:0 0 1rem;width:100%}
+  .filter-scroller{
+    display:flex;gap:.5rem;overflow-x:auto;
+    padding:.25rem 1.1rem .5rem;scroll-snap-type:x proximity;
+  }
+  .filter-btn{
+    flex:0 0 auto;scroll-snap-align:start;
+    display:inline-flex;align-items:center;gap:.45rem;
+    background:var(--bg-surface);border:1px solid var(--border-ui);
+    color:var(--text-secondary);
+    font-size:.8rem;font-weight:700;
+    padding:.55rem .9rem;min-height:var(--tap);
+    border-radius:var(--r-full);white-space:nowrap;
+  }
+  .filter-btn .ico{width:1rem;height:1rem}
+  .filter-btn.is-active{
+    background:var(--accent);color:var(--accent-contrast);border-color:var(--accent);
+    box-shadow:0 3px 12px var(--accent-glow);
+  }
+  .filter-count{
+    font-family:var(--font-mono);font-size:.62rem;opacity:.65;
+  }
+
+  /* ---------- Game grid (FIX H3: min() clamp kills overflow) ---------- */
+  .games-container{
+    max-width:1100px;margin:0 auto;width:100%;
+    padding:0 1.1rem 2.5rem;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+    gap:.9rem;
+    flex:1;
+  }
+  .game-card{
+    background:var(--bg-surface);border:1px solid var(--border-ui);
+    border-radius:var(--r-lg);padding:1.05rem;
+    display:flex;flex-direction:column;gap:.8rem;
+    box-shadow:var(--card-shadow);
+    text-decoration:none;color:inherit;
+    transition:transform var(--transition-fast),border-color var(--transition-fast),box-shadow var(--transition-fast);
+  }
+  .game-card:active{transform:scale(.985)}
+  @media (hover:hover) and (pointer:fine){
+    .game-card:hover{border-color:var(--border-ui-active);transform:translateY(-3px)}
+  }
+  .game-card.is-short{opacity:.5}
+
+  .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem}
+  .card-icon-box{
+    width:44px;height:44px;flex-shrink:0;
+    background:var(--bg-elevated);border:1px solid var(--border-ui);
+    border-radius:var(--r-md);color:var(--accent);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .card-badge{
+    font-family:var(--font-mono);font-size:.58rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:.09em;
+    padding:.3rem .55rem;border-radius:var(--r-sm);
+    background:var(--bg-elevated);color:var(--text-secondary);
+    border:1px solid var(--border-ui);white-space:nowrap;
+  }
+  .card-body{flex:1;min-width:0}
+  .card-body h3{font-size:1.1rem;margin-bottom:.25rem}
+  .card-tagline{font-size:.82rem;color:var(--text-secondary);line-height:1.45}
+
+  .card-meta{
+    display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;
+    font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted);
+    border-top:1px solid var(--border-ui);padding-top:.7rem;
+  }
+  .meta-tag{display:inline-flex;align-items:center;gap:.3rem}
+  .meta-tag .ico{width:.85rem;height:.85rem}
+  .drink-tag{color:var(--danger);font-weight:700}
+  .short-note{
+    font-family:var(--font-mono);font-size:.64rem;color:var(--warning);
+    display:flex;align-items:center;gap:.3rem;
+  }
+
+  /* ---------- Empty state (FIX: was a blank void) ---------- */
+  .empty-state{
+    grid-column:1/-1;text-align:center;
+    padding:3rem 1.5rem;color:var(--text-muted);
+    display:flex;flex-direction:column;align-items:center;gap:.7rem;
+  }
+  .empty-state h3{font-size:1.1rem;color:var(--text-secondary)}
+  .empty-state p{font-size:.85rem;max-width:34ch}
+
+  /* ---------- Roster drawer ---------- */
+  .roster-form{display:flex;gap:.5rem;margin-bottom:.9rem}
+  .roster-form input{
+    flex:1;min-width:0;
+    background:var(--bg-elevated);border:1px solid var(--border-ui);
+    border-radius:var(--r-md);color:var(--text-primary);
+    font-family:var(--font-mono);padding:.7rem .9rem;
+    min-height:var(--tap);outline:none;
+  }
+  .roster-form input:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow);outline:none}
+  .roster-list{list-style:none;display:flex;flex-direction:column;gap:.45rem}
+  .roster-item{
+    display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+    background:var(--bg-elevated);border:1px solid var(--border-ui);
+    border-radius:var(--r-sm);padding:.3rem .35rem .3rem .8rem;
+    font-family:var(--font-mono);font-size:.85rem;
+  }
+  .roster-item span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .seat-no{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:22px;height:22px;border-radius:50%;flex-shrink:0;
+    background:var(--accent);color:var(--accent-contrast);
+    font-size:.62rem;font-weight:700;margin-right:.55rem;
+  }
+  .roster-empty{
+    text-align:center;padding:1.5rem .5rem;color:var(--text-muted);
+    font-family:var(--font-mono);font-size:.8rem;
+    border:1px dashed var(--border-ui);border-radius:var(--r-md);
+  }
+
+  /* ---------- Theme drawer ---------- */
+  .theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:.6rem}
+  .theme-choice{
+    display:flex;flex-direction:column;align-items:flex-start;gap:.5rem;
+    padding:.8rem;border-radius:var(--r-md);text-align:left;
+    background:var(--bg-elevated);min-height:auto;
+  }
+  .theme-choice strong{font-family:var(--font-display);font-size:.88rem;font-weight:800}
+  .theme-choice.is-active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+  .theme-dots{display:flex;gap:5px}
+  .theme-dot{width:15px;height:15px;border-radius:50%;border:1px solid rgba(128,128,128,.25)}
+
+  /* ---------- Footer ---------- */
+  .hub-footer{
+    text-align:center;padding:1.25rem 1.1rem calc(1.5rem + var(--sab));
+    font-family:var(--font-mono);font-size:.68rem;color:var(--text-muted);
+    border-top:1px solid var(--border-ui);
+  }
+</style>
 </head>
-<body class="hub-body">
-  <header class="hub-header">
-    <div class="header-container">
-      <div class="brand">
-        <span class="brand-badge">OFFLINE_SYSTEM // READY</span>
-        <h1 class="brand-title">PARTY<span>DECK</span></h1>
-      </div>
-      
-      <div class="theme-selector-wrap">
-        <label for="themeSelect" class="sr-only">Choose Visual Theme</label>
-        <div class="select-styled">
-          <span id="themeIconSlot"></span>
-          <select id="themeSelect" aria-label="Select Theme">
-            <option value="cyber-neon">Cyber Neon</option>
-            <option value="sunset-rave">Sunset Rave</option>
-            <option value="retro-arcade">Retro Arcade</option>
-            <option value="minimal-light">Minimal Light</option>
-          </select>
-        </div>
-      </div>
+<body>
+
+<header class="hub-header">
+  <a class="hub-brand" href="./index.html" aria-label="PartyDeck home">
+    <span class="brand-logo"><span class="ico ico-sm" data-ic="sparkle"></span></span>
+    <span class="brand-title">PartyDeck</span>
+  </a>
+  <nav class="hub-controls" aria-label="Hub controls">
+    <button class="btn btn-ghost btn-icon-only" id="btnFullscreen" aria-label="Toggle fullscreen">
+      <span class="ico" data-ic="expand"></span>
+    </button>
+    <button class="btn btn-ghost btn-icon-only" id="btnTheme" aria-label="Change colour theme" aria-haspopup="dialog">
+      <span class="ico" data-ic="palette"></span>
+    </button>
+    <button class="btn btn-ghost btn-icon-only" id="btnRoster" aria-label="Manage party roster" aria-haspopup="dialog">
+      <span class="ico" data-ic="users"></span>
+      <span class="count-badge" id="rosterBadge">0</span>
+    </button>
+  </nav>
+</header>
+
+<section class="hero">
+  <span class="hero-kicker"><span class="ico ico-sm" data-ic="wifi-off"></span> 100% Offline &middot; No Accounts</span>
+  <h1 class="hero-title">Zero setup. Pure play.</h1>
+  <p class="hero-desc">Pass-and-play and multi-phone party games that run entirely on this device. No room codes, no lag, no downloads.</p>
+  <div class="hero-actions">
+    <button class="btn btn-accent" id="btnSurprise"><span class="ico" data-ic="dice"></span> Surprise Me</button>
+    <button class="btn btn-ghost" id="btnRosterHero"><span class="ico" data-ic="users"></span> <span id="rosterHeroLabel">Set Up Players</span></button>
+  </div>
+</section>
+
+<nav class="filter-section" aria-label="Game categories">
+  <div class="filter-scroller no-scrollbar" id="filterScroller"></div>
+</nav>
+
+<main class="games-container" id="gamesContainer" aria-live="polite" aria-label="Game library"></main>
+
+<footer class="hub-footer">
+  <span id="footerStat">All games &middot; client-side</span>
+</footer>
+
+<!-- ============ ROSTER DRAWER ============ -->
+<div class="pd-drawer" id="rosterDrawer" role="dialog" aria-modal="true" aria-labelledby="rosterTitle">
+  <div class="pd-drawer-card">
+    <div class="pd-drawer-handle" aria-hidden="true"></div>
+    <div class="pd-drawer-header">
+      <h2 id="rosterTitle" style="font-size:1.2rem">Party Roster</h2>
+      <button class="btn btn-ghost btn-icon-only" data-close-drawer aria-label="Close roster">
+        <span class="ico" data-ic="close"></span>
+      </button>
     </div>
-
-    <!-- Quick Player Roster HUD Bar -->
-    <section class="roster-bar">
-      <div class="roster-summary">
-        <span id="rosterIconSlot"></span>
-        <span id="rosterLabel">Active Roster: <strong>None set</strong></span>
-      </div>
-      <button id="btnEditRoster" class="btn-ghost-sm">Manage Roster</button>
-    </section>
-  </header>
-
-  <main class="hub-main">
-    <!-- Category Filter Bar -->
-    <nav class="filter-nav" aria-label="Game Categories" id="filterNav">
-      <button class="filter-pill active" data-category="all">All Modules <span class="badge-count" id="countAll">20</span></button>
-      <button class="filter-pill" data-category="creative">Creative</button>
-      <button class="filter-pill" data-category="deduction">Deduction</button>
-      <button class="filter-pill" data-category="drinking">Drinking</button>
-      <button class="filter-pill" data-category="social">Social</button>
-      <button class="filter-pill" data-category="action">Action</button>
-      <button class="filter-pill" data-category="bluffing">Bluffing</button>
-      <button class="filter-pill" data-category="trivia">Trivia</button>
-    </nav>
-
-    <!-- Games Grid -->
-    <section class="games-grid" id="gamesGrid" aria-live="polite"></section>
-  </main>
-
-  <!-- Player Roster Modal -->
-  <dialog id="rosterModal" class="party-modal">
-    <div class="modal-card">
-      <header class="modal-header">
-        <h2 id="rosterModalTitle">Party Roster</h2>
-        <button class="btn-close" id="btnCloseRoster" aria-label="Close modal"></button>
-      </header>
-      <div class="modal-body">
-        <p class="modal-subtitle">Registered players are automatically injected into turn sequences across all games.</p>
-        <form id="addPlayerForm" class="player-input-row">
-          <input type="text" id="newPlayerName" placeholder="PLAYER_NAME..." maxlength="18" required autocomplete="off" />
-          <button type="submit" class="btn-accent">+ Add</button>
-        </form>
-        <ul id="rosterList" class="roster-tags-list"></ul>
-      </div>
-      <footer class="modal-footer">
-        <button class="btn-ghost" id="btnClearRoster">Clear All</button>
-        <button class="btn-primary" id="btnSaveRoster">Done</button>
-      </footer>
+    <div class="pd-drawer-body">
+      <p style="font-size:.82rem;color:var(--text-secondary);margin-bottom:.9rem;line-height:1.5">
+        Names saved here load automatically into every PartyDeck game on this device.
+      </p>
+      <form class="roster-form" id="rosterForm" autocomplete="off">
+        <input type="text" id="rosterInput" placeholder="Add a player name" maxlength="14"
+               aria-label="Player name" enterkeyhint="done" />
+        <button type="submit" class="btn btn-accent" aria-label="Add player">
+          <span class="ico" data-ic="plus"></span>
+        </button>
+      </form>
+      <ul class="roster-list" id="rosterList"></ul>
+      <button class="btn btn-ghost" id="btnClearRoster" style="width:100%;margin-top:.9rem">
+        <span class="ico" data-ic="trash"></span> Clear All
+      </button>
     </div>
-  </dialog>
+  </div>
+</div>
 
-  <!-- Game Details Preview Modal -->
-  <dialog id="gameModal" class="party-modal">
-    <div class="modal-card game-preview-card">
-      <header class="modal-header modal-hero">
-        <div class="preview-icon-box" id="previewIconBox"></div>
-        <div>
-          <span class="preview-cat" id="previewCategory">MODULE // DEDUCTION</span>
-          <h2 id="previewTitle">Game Title</h2>
-        </div>
-        <button class="btn-close" id="btnCloseGameModal" aria-label="Close modal"></button>
-      </header>
-      <div class="modal-body">
-        <p class="preview-tagline" id="previewTagline"></p>
-        <p class="preview-desc" id="previewDescription"></p>
-        
-        <div class="meta-pills-row">
-          <div class="meta-item">
-            <span class="meta-label">Players</span>
-            <span class="meta-val" id="previewPlayers">3-10</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Est. Time</span>
-            <span class="meta-val" id="previewTime">15m</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-label">Drinking Mode</span>
-            <span class="meta-val" id="previewDrink">Optional</span>
-          </div>
-        </div>
-
-        <div class="tags-row" id="previewTags"></div>
-      </div>
-      <footer class="modal-footer">
-        <button class="btn-ghost" id="btnCancelLaunch">Back</button>
-        <a id="btnLaunchGame" href="#" class="btn-primary btn-launch">Launch Module</a>
-      </footer>
+<!-- ============ THEME DRAWER ============ -->
+<div class="pd-drawer" id="themeDrawer" role="dialog" aria-modal="true" aria-labelledby="themeTitle">
+  <div class="pd-drawer-card">
+    <div class="pd-drawer-handle" aria-hidden="true"></div>
+    <div class="pd-drawer-header">
+      <h2 id="themeTitle" style="font-size:1.2rem">Visual Palette</h2>
+      <button class="btn btn-ghost btn-icon-only" data-close-drawer aria-label="Close themes">
+        <span class="ico" data-ic="close"></span>
+      </button>
     </div>
-  </dialog>
+    <div class="pd-drawer-body">
+      <div class="theme-grid" id="themeGrid"></div>
+    </div>
+  </div>
+</div>
 
-  <footer class="hub-footer">
-    <p>PARTYDECK // CLIENT-SIDE DISCONNECTED CONTROLLER ENGINE</p>
-  </footer>
+<div class="pd-toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script src="js/utils/icons.js"></script>
-  <script src="js/games.config.js"></script>
-  <script src="js/partydeck-sdk.js"></script>
-  <script src="js/hub-ui.js"></script>
+<script>
+"use strict";
+/* ==========================================================================
+   PARTYDECK HUB CONTROLLER
+   Inline SVG registry, deterministic category tags, roster-aware library.
+   ========================================================================== */
+(function () {
+
+/* ---------- SVG ICON REGISTRY (no unicode emojis anywhere) ---------- */
+const ICONS = {
+  sparkle:  '<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>',
+  expand:   '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>',
+  collapse: '<path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/>',
+  palette:  '<circle cx="13.5" cy="6.5" r=".9" fill="currentColor" stroke="none"/><circle cx="17.5" cy="10.5" r=".9" fill="currentColor" stroke="none"/><circle cx="8.5" cy="7.5" r=".9" fill="currentColor" stroke="none"/><circle cx="6.5" cy="12.5" r=".9" fill="currentColor" stroke="none"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.83-.44-1.12-.29-.29-.44-.65-.44-1.13a1.64 1.64 0 0 1 1.67-1.67h2c3.05 0 5.56-2.5 5.56-5.55C21.97 6.01 17.46 2 12 2Z"/>',
+  users:    '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  close:    '<path d="M18 6 6 18M6 6l12 12"/>',
+  plus:     '<path d="M12 5v14M5 12h14"/>',
+  trash:    '<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>',
+  clock:    '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  beer:     '<path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6M13 12v6"/><path d="M5 8h12v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8Z"/><path d="M5 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2"/>',
+  grid:     '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/>',
+  timer:    '<line x1="10" y1="2" x2="14" y2="2"/><path d="M12 14 15 11"/><circle cx="12" cy="14" r="8"/>',
+  phones:   '<rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="16" rx="2"/><path d="M7 17h.01M17 17h.01"/>',
+  gamepad:  '<path d="M6 12h4M8 10v4"/><circle cx="15" cy="13" r=".9" fill="currentColor" stroke="none"/><circle cx="18" cy="11" r=".9" fill="currentColor" stroke="none"/><rect width="20" height="12" x="2" y="6" rx="6"/>',
+  brush:    '<path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02Z"/>',
+  skull:    '<circle cx="9" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.1" fill="currentColor" stroke="none"/><path d="M8 20v2h8v-2M12.5 17l-.5-1-.5 1M16 20a3 3 0 0 0 3-3V9a7 7 0 1 0-14 0v8a3 3 0 0 0 3 3Z"/>',
+  crown:    '<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7Zm3 16h14v2H5Z"/>',
+  relay:    '<path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="m4 4 5 5"/>',
+  signal:   '<path d="M4.9 19.1a10 10 0 0 1 0-14.2M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4M19.1 4.9a10 10 0 0 1 0 14.2"/><circle cx="12" cy="12" r="2"/>',
+  bomb:     '<circle cx="11" cy="13" r="8"/><path d="m19 5-2 2"/><path d="M19 5h2V3"/><path d="m16.5 7.5 1.5-1.5"/>',
+  plane:    '<path d="M17.8 19.2 16 11l3.5-3.5a2.12 2.12 0 0 0-3-3L13 8 4.8 6.2a1 1 0 0 0-1 1.6l3.6 3.6-2 2-2.2-.6a1 1 0 0 0-1 1.7l2.7 2.7 2.7 2.7a1 1 0 0 0 1.7-1l-.6-2.2 2-2 3.6 3.6a1 1 0 0 0 1.6-1Z"/>',
+  bolt:     '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  finger:   '<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 11.5v-2a1.5 1.5 0 1 1 3 0V12"/><path d="M14 10.5a1.5 1.5 0 0 1 3 0V13"/><path d="M17 12a1.5 1.5 0 0 1 3 0v3a6 6 0 0 1-6 6h-2a7 7 0 0 1-7-7v-1a1.5 1.5 0 1 1 3 0"/>',
+  dial:     '<path d="M3.3 17a10 10 0 1 1 17.4 0"/><path d="m13.4 10.6 3.6-3.6"/><circle cx="12" cy="12" r="2"/>',
+  mask:     '<path d="M2 9s2-3 10-3 10 3 10 3-1 9-10 9S2 9 2 9Z"/><circle cx="8.5" cy="10.5" r="1.2"/><circle cx="15.5" cy="10.5" r="1.2"/>',
+  dice:     '<rect width="18" height="18" x="3" y="3" rx="3"/><circle cx="8.5" cy="8.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/>',
+  alert:    '<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
+  "wifi-off":'<path d="M12 20h.01"/><path d="M8.5 16.4a5 5 0 0 1 7 0"/><path d="M5 12.9a10 10 0 0 1 5.2-2.7"/><path d="M2 8.8a15 15 0 0 1 4.2-2.5"/><path d="M17.5 12.9a10 10 0 0 0-2.7-1.9"/><path d="M22 8.8a15 15 0 0 0-5.5-3"/><path d="m2 2 20 20"/>'
+};
+
+function paintIcons(root){
+  (root || document).querySelectorAll("[data-ic]").forEach(function(el){
+    if (el.firstChild) return;                 // never repaint an existing icon
+    const k = el.getAttribute("data-ic");
+    if (ICONS[k]) el.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' + ICONS[k] + '</svg>';
+  });
+}
+
+/* ---------- CATEGORY TAXONOMY (explicit tags, not derived guesses) ---------- */
+const CATEGORIES = [
+  { id:"all",      label:"All Games",    icon:"grid"    },
+  { id:"quick",    label:"Quick & Casual", icon:"timer"  },
+  { id:"party",    label:"Big Party",    icon:"users"   },
+  { id:"drinking", label:"Drinking",     icon:"beer"    },
+  { id:"creative", label:"Draw & Words", icon:"brush"   },
+  { id:"multi",    label:"Multi-Phone",  icon:"phones"  },
+  { id:"arcade",   label:"Reflex",       icon:"gamepad" }
+];
+const CAT_LABEL = {
+  quick:"Quick", party:"Big Party", drinking:"Drinking",
+  creative:"Draw & Words", multi:"Multi-Phone", arcade:"Reflex"
+};
+
+/* ---------- GAME REGISTRY — every path verified against delivered folders ---------- */
+const GAMES = [
+  { id:"telestrations",    title:"Tele-Sketch",        tag:"Draw it, guess it, watch it fall apart",
+    cats:["creative","party"],            minP:4, maxP:12, time:"15–25m", drink:false, icon:"brush",
+    path:"games/tele-sketch/index.html" },
+
+  { id:"fake-artist",      title:"Fake Artist in NY",  tag:"One shared canvas, one impostor",
+    cats:["creative","party"],            minP:4, maxP:10, time:"15m",    drink:false, icon:"brush",
+    path:"games/fake-artist/index.html" },
+
+  { id:"skull-digital",    title:"Skull Digital",      tag:"Bluff, bid, and push your luck",
+    cats:["quick"],                       minP:3, maxP:6,  time:"15–20m", drink:false, icon:"skull",
+    path:"games/skull-digital/index.html" },
+
+  { id:"coup-pocket",      title:"Coup Pocket",        tag:"Lie about who you are, survive",
+    cats:["quick"],                       minP:2, maxP:6,  time:"15m",    drink:false, icon:"crown",
+    path:"games/coup-pocket/index.html" },
+
+  { id:"dual-tele-relay",  title:"Dual-Track Relay",   tag:"Two phones, two drawing chains, one clock",
+    cats:["multi","creative","party"],    minP:6, maxP:16, time:"15–20m", drink:true,  icon:"relay",
+    path:"games/dual-tale-relay/index.html" },
+
+  { id:"two-rooms-spy",    title:"Two Rooms: Classified", tag:"Split the party, swap the hostages",
+    cats:["multi","party"],               minP:6, maxP:14, time:"15m",    drink:false, icon:"signal",
+    path:"games/two-rooms-spy/index.html" },
+
+  { id:"bomb-countdown",   title:"Ticking Timebomb",   tag:"Name it and pass before it blows",
+    cats:["arcade","drinking","party"],   minP:3, maxP:12, time:"5–10m",  drink:true,  icon:"bomb",
+    path:"games/bomb-countdown/index.html" },
+
+  { id:"flappy-penalty",   title:"Flappy Gauntlet",    tag:"One tap, one life, one public failure",
+    cats:["arcade","drinking"],           minP:2, maxP:12, time:"5–10m",  drink:true,  icon:"plane",
+    path:"games/flappy-penalty/index.html" },
+
+  { id:"quick-draw-duel",  title:"Quick-Draw Duel",    tag:"Hold, wait, lift first",
+    cats:["arcade","quick","drinking"],   minP:2, maxP:2,  time:"3–5m",   drink:true,  icon:"bolt",
+    path:"games/quick-draw-duel/index.html" },
+
+  { id:"finger-roulette",  title:"Finger Roulette",    tag:"Fingers down, the phone decides",
+    cats:["arcade","drinking","quick"],   minP:2, maxP:6,  time:"1–2m",   drink:true,  icon:"finger",
+    path:"games/finger-roulette/index.html" },
+
+  { id:"wavelength-pocket",title:"Mind Dial",          tag:"Read your team's mind on a spectrum",
+    cats:["party"],                       minP:4, maxP:12, time:"15m",    drink:false, icon:"dial",
+    path:"games/wave-length-pocket/index.html" },
+
+  { id:"chameleon-word",   title:"Chameleon Word",     tag:"Blend in or expose the secret word",
+    cats:["creative","quick","party"],    minP:4, maxP:8,  time:"10m",    drink:false, icon:"mask",
+    path:"games/chameleon-word/index.html" },
+
+  { id:"most-likely-to",   title:"Most Likely To…",    tag:"Point, vote, and face the verdict",
+    cats:["party","drinking"],            minP:3, maxP:12, time:"10–20m", drink:true,  icon:"users",
+    path:"games/most-likely-to/index.html" },
+
+  { id:"decrypto-blitz", title:"Decrypto Blitz", tag:"Crack the enemy team's codes",
+    cats:["party"], minP:4, maxP:8, time:"20–35m", drink:false, icon:"relay",
+    path:"games/decrypto-blitz/index.html" },
+
+  { id:"do-or-drink", title:"Do or Drink: Ultimate", tag:"Do the dare or take the penalty",
+    cats:["drinking","party"], minP:2, maxP:10, time:"20–40m", drink:true, icon:"alert",
+    path:"games/do-or-drink/index.html" },
+
+  { id:"five-second-rule", title:"5-Second Rule", tag:"Name three things before time runs out",
+    cats:["quick","drinking"], minP:3, maxP:10, time:"10–20m", drink:true, icon:"timer",
+    path:"games/five-second-rule/index.html" },
+
+  { id:"infiltrator", title:"The Infiltrator", tag:"Find the impostor in the room",
+    cats:["party","quick","drinking"], minP:3, maxP:10, time:"10–15m", drink:true, icon:"mask",
+    path:"games/infiltrator/index.html" },
+
+  { id:"kings-chalice", title:"King's Chalice", tag:"The digital ring-of-fire deck",
+    cats:["drinking","party"], minP:2, maxP:12, time:"20–40m", drink:true, icon:"beer",
+    path:"games/kings-chalice/index.html" },
+
+  { id:"liars-dice", title:"Liar's Dice", tag:"Bluff, bid, and call the bluff",
+    cats:["quick","party"], minP:2, maxP:6, time:"15–25m", drink:false, icon:"dice",
+    path:"games/liars-dice/index.html" },
+
+  { id:"medusa-eye", title:"Medusa: Eye Contact", tag:"Look up and react fast",
+    cats:["arcade","party"], minP:4, maxP:12, time:"5–10m", drink:true, icon:"alert",
+    path:"games/medusa-eye/index.html" },
+
+  { id:"one-night-wolf", title:"One Night Werewolf", tag:"One night, one vote, who survives?",
+    cats:["party","quick"], minP:3, maxP:10, time:"10m", drink:false, icon:"mask",
+    path:"games/one-night-wolf/index.html" },
+
+  { id:"rapid-buzzer", title:"Rapid Buzzer", tag:"Pass the ticking bomb",
+    cats:["arcade","drinking","party"], minP:4, maxP:12, time:"10–15m", drink:true, icon:"bomb",
+    path:"games/rapid-buzzer/index.html" },
+
+  { id:"resistance-cell", title:"Resistance: Mini-Cell", tag:"Lead missions or sabotage from within",
+    cats:["party","multi"], minP:5, maxP:10, time:"20–30m", drink:false, icon:"signal",
+    path:"games/resistance-cell/index.html" },
+
+  { id:"social-roulette", title:"Social Roulette", tag:"Dynamic prompts and group dares",
+    cats:["drinking","party"], minP:3, maxP:15, time:"15–30m", drink:true, icon:"beer",
+    path:"games/social-roulette/index.html" },
+
+  { id:"sound-bites", title:"Sound Bites (Heads Up)", tag:"Forehead charades and clues",
+    cats:["arcade","quick"], minP:2, maxP:10, time:"5–15m", drink:false, icon:"signal",
+    path:"games/sound-bites/index.html" },
+
+  { id:"two-rooms-lite", title:"Two Rooms & A Boom Lite", tag:"Split rooms, secret agendas",
+    cats:["party","multi"], minP:6, maxP:16, time:"15–20m", drink:false, icon:"relay",
+    path:"games/two-rooms-lite/index.html" },
+
+  { id:"wits-wagers", title:"Wits & Wagers: Micro", tag:"Bet on the best guess",
+    cats:["party","quick"], minP:3, maxP:10, time:"15–25m", drink:false, icon:"dice",
+    path:"games/wits-wagers/index.html" },
+
+  { id:"brick-breaker-blitz", title:"Neon Breaker Blitz", tag:"Smash the neon wall and chase a high score",
+    cats:["arcade","quick"], minP:2, maxP:8, time:"3–8m", drink:false, icon:"gamepad",
+    path:"games/brick-breaker-blitz/index.html" },
+  { id:"cheat-bullshit", title:"Bullshit / Cheat Digital", tag:"Play your cards carefully and catch a bluff",
+    cats:["party","quick"], minP:3, maxP:8, time:"10–20m", drink:false, icon:"skull",
+    path:"games/cheat-bullshit/index.html" },
+  { id:"cyber-mole-smash", title:"Cyber Mole Reflex", tag:"Tap fast before the targets disappear",
+    cats:["arcade","quick"], minP:2, maxP:12, time:"1–5m", drink:true, icon:"bolt",
+    path:"games/cyber-mole-smash/index.html" },
+  { id:"cyber-stacker", title:"Arcade Tower Stacker", tag:"Stack higher without losing your balance",
+    cats:["arcade","quick"], minP:2, maxP:10, time:"2–6m", drink:true, icon:"grid",
+    path:"games/cyber-stacker/index.html" },
+  { id:"finger-guillotine", title:"Finger Guillotine Reflex", tag:"Test your nerve and pull away in time",
+    cats:["arcade","drinking"], minP:2, maxP:6, time:"1–3m", drink:true, icon:"finger",
+    path:"games/finger-guillotine/index.html" },
+  { id:"five-second-blitz", title:"5-Second Blitz", tag:"Take the hot seat and answer under pressure",
+    cats:["quick","drinking","party"], minP:2, maxP:10, time:"5–15m", drink:true, icon:"timer",
+    path:"games/five-second-blitz/index.html" },
+  { id:"forehead-charades", title:"Forehead Heads-Up", tag:"Hold the phone up and guess the clue",
+    cats:["arcade","party"], minP:2, maxP:10, time:"5–15m", drink:false, icon:"users",
+    path:"games/forehead-charades/index.html" },
+  { id:"gravity-lander", title:"Lunar Thruster Gauntlet", tag:"Guide your lander safely onto the moon",
+    cats:["arcade","quick"], minP:2, maxP:12, time:"2–8m", drink:true, icon:"plane",
+    path:"games/gravity-lander/index.html" },
+  { id:"gyro-tilt-maze", title:"Gyro Labyrinth Run", tag:"Tilt through the maze without losing control",
+    cats:["arcade","quick"], minP:2, maxP:8, time:"2–8m", drink:false, icon:"dial",
+    path:"games/gyro-tilt-maze/index.html" },
+  { id:"higher-lower-death", title:"Higher/Lower Sudden Death", tag:"Guess higher or lower to survive the gauntlet",
+    cats:["arcade","party"], minP:2, maxP:12, time:"3–10m", drink:true, icon:"alert",
+    path:"games/higher-lower-death/index.html" },
+  { id:"irish-gauge-poker", title:"Irish Poker Showdown", tag:"Deal a hand and read the table",
+    cats:["party","drinking"], minP:2, maxP:8, time:"10–20m", drink:true, icon:"crown",
+    path:"games/irish-gauge-poker/index.html" },
+  { id:"kings-chalice-deluxe", title:"King's Cup: The Royal Chalice", tag:"A deluxe ring-of-fire drinking deck",
+    cats:["drinking","party"], minP:2, maxP:12, time:"15–30m", drink:true, icon:"beer",
+    path:"games/kings-chalice-deluxe/index.html" },
+  { id:"laser-bullet-hell", title:"Vector Barrage Dodger", tag:"Dodge the incoming barrage for as long as you can",
+    cats:["arcade","quick"], minP:2, maxP:12, time:"1–5m", drink:true, icon:"bolt",
+    path:"games/laser-bullet-hell/index.html" },
+  { id:"liars-dice-3d", title:"Liar's Dice: 3D Pocket", tag:"Shake the cups, bid, and call the bluff",
+    cats:["quick","party"], minP:2, maxP:6, time:"10–20m", drink:false, icon:"dice",
+    path:"games/liars-dice-3d/index.html" },
+  { id:"medusa-360-gaze", title:"Medusa 360 Gaze", tag:"Enter the arena and avoid the deadly gaze",
+    cats:["arcade","party"], minP:3, maxP:12, time:"3–8m", drink:true, icon:"mask",
+    path:"games/medusa-360-gaze/index.html" },
+  { id:"neon-shuffleboard", title:"Neon Table Shuffleboard", tag:"Slide for points and outscore your rivals",
+    cats:["party","quick"], minP:2, maxP:8, time:"5–15m", drink:false, icon:"dial",
+    path:"games/neon-shuffleboard/index.html" },
+  { id:"neon-snake-survival", title:"Neon Snake Gauntlet", tag:"Survive the growing snake challenge",
+    cats:["arcade","quick"], minP:2, maxP:12, time:"2–6m", drink:true, icon:"grid",
+    path:"games/neon-snake-survival/index.html" },
+  { id:"never-have-i-ever-arcade", title:"Never Have I Ever: 3 Lives", tag:"Share a confession or lose a life",
+    cats:["drinking","party"], minP:2, maxP:12, time:"10–25m", drink:true, icon:"beer",
+    path:"games/never-have-i-ever-arcade/index.html" },
+  { id:"pachinko-drop", title:"Cyber Plinko", tag:"Drop a chip and see where it lands",
+    cats:["arcade","quick"], minP:2, maxP:12, time:"2–6m", drink:false, icon:"grid",
+    path:"games/pachinko-drop/index.html" },
+  { id:"pinball-plunger", title:"Neon Pinball Gauntlet", tag:"Launch the ball and chase the high score",
+    cats:["arcade","quick"], minP:2, maxP:12, time:"2–8m", drink:true, icon:"bolt",
+    path:"games/pinball-plunger/index.html" },
+  { id:"president-scum", title:"President & Scum", tag:"Climb the hierarchy by shedding your cards",
+    cats:["party","quick"], minP:3, maxP:8, time:"15–30m", drink:true, icon:"crown",
+    path:"games/president-scum/index.html" },
+  { id:"radio-morse-intercept", title:"Coded Radio Intercept", tag:"Transmit and intercept coded messages",
+    cats:["multi","party"], minP:4, maxP:8, time:"10–20m", drink:false, icon:"signal",
+    path:"games/radio-morse-intercept/index.html" },
+  { id:"rapid-heartbeat-buzzer", title:"Ticking Heartbeat Buzzer", tag:"Arm the fuse and pass before it goes off",
+    cats:["arcade","party","drinking"], minP:3, maxP:12, time:"5–10m", drink:true, icon:"bomb",
+    path:"games/rapid-heartbeat-buzzer/index.html" },
+  { id:"retro-lane-racer", title:"Highway Drift 1984", tag:"Dodge traffic and chase the longest run",
+    cats:["arcade","quick"], minP:2, maxP:8, time:"2–8m", drink:false, icon:"plane",
+    path:"games/retro-lane-racer/index.html" },
+  { id:"rhythm-beat-smasher", title:"Neon Beat Smasher", tag:"Hit the beat and keep your streak alive",
+    cats:["arcade","quick"], minP:2, maxP:12, time:"2–6m", drink:true, icon:"bolt",
+    path:"games/rhythm-beat-smasher/index.html" },
+  { id:"ride-the-bus", title:"Ride the Bus: Deluxe", tag:"Survive the four-phase card ride",
+    cats:["drinking","party"], minP:2, maxP:8, time:"10–25m", drink:true, icon:"phones",
+    path:"games/ride-the-bus/index.html" },
+  { id:"space-team-relay", title:"Starship Crisis Relay", tag:"Coordinate with your crew before the ship fails",
+    cats:["multi","party"], minP:3, maxP:8, time:"5–15m", drink:false, icon:"signal",
+    path:"games/space-team-relay/index.html" },
+  { id:"truth-or-drink-vault", title:"Truth or Drink: The Vault", tag:"Answer honestly or take the penalty",
+    cats:["drinking","party"], minP:2, maxP:12, time:"10–25m", drink:true, icon:"crown",
+    path:"games/truth-or-drink-vault/index.html" },
+  { id:"wheel-of-forfeits", title:"Arcade Forfeit Wheel", tag:"Spin the wheel and take the dare",
+    cats:["arcade","drinking","party"], minP:2, maxP:12, time:"5–15m", drink:true, icon:"dial",
+    path:"games/wheel-of-forfeits/index.html" },
+  { id:"wits-wagers-felt", title:"Wits & Wagers: Micro Felt", tag:"Guess the number and bet on the best answer",
+    cats:["party","quick"], minP:3, maxP:10, time:"15–25m", drink:false, icon:"dice",
+    path:"games/wits-wagers-felt/index.html" }
+];
+
+/* ---------- THEMES ---------- */
+const THEMES = [
+  { id:"nordic-slate",   name:"Nordic Slate",   dots:["#0e1117","#1f2633","#38bdf8"], meta:"#0e1117" },
+  { id:"tokyo-sunset",   name:"Tokyo Sunset",   dots:["#120e24","#281f4a","#f97316"], meta:"#120e24" },
+  { id:"terracotta-clay",name:"Terracotta",     dots:["#1c1815","#362f2a","#e07a5f"], meta:"#1c1815" },
+  { id:"emerald-lounge", name:"Emerald Lounge", dots:["#071712","#15352b","#eab308"], meta:"#071712" },
+  { id:"alpine-mist",    name:"Alpine Mist",    dots:["#f3f6fa","#e7edf5","#2563eb"], meta:"#f3f6fa" },
+  { id:"synthwave-84",   name:"Synthwave '84",  dots:["#100b1a","#291a43","#f43f8e"], meta:"#100b1a" }
+];
+
+/* ---------- SHORTHANDS ---------- */
+const $ = function(id){ return document.getElementById(id); };
+function esc(s){
+  return String(s).replace(/[&<>"']/g, function(c){
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+  });
+}
+let activeCat = "all";
+let roster = [];
+let lastFocused = null;
+
+/* ---------- TOAST ---------- */
+let toastTimer = null;
+function toast(msg){
+  const t = $("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2000);
+}
+
+/* ---------- STORAGE (fails loudly instead of silently) ---------- */
+function readJSON(key, fallback){
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    const v = JSON.parse(raw);
+    return Array.isArray(v) ? v : fallback;
+  } catch(e){ return fallback; }
+}
+function writeJSON(key, value){
+  try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+  catch(e){ toast("Storage blocked — names won't persist"); return false; }
+}
+
+/* ---------- THEME ---------- */
+function setTheme(id, announce){
+  const th = THEMES.find(function(t){ return t.id === id; }) || THEMES[0];
+  document.documentElement.setAttribute("data-theme", th.id);
+  const meta = $("metaThemeColor");
+  if (meta) meta.setAttribute("content", th.meta);
+  try { localStorage.setItem("partydeck_theme", th.id); } catch(e){}
+  document.querySelectorAll(".theme-choice").forEach(function(btn){
+    const on = btn.dataset.theme === th.id;
+    btn.classList.toggle("is-active", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  if (announce) toast(th.name + " applied");
+}
+function renderThemes(){
+  $("themeGrid").innerHTML = THEMES.map(function(t){
+    return '<button type="button" class="btn theme-choice" data-theme="' + t.id + '" aria-pressed="false">' +
+             '<strong>' + esc(t.name) + '</strong>' +
+             '<span class="theme-dots">' +
+               t.dots.map(function(c){ return '<span class="theme-dot" style="background:' + c + '"></span>'; }).join("") +
+             '</span></button>';
+  }).join("");
+}
+
+/* ---------- ROSTER ---------- */
+function normalizeRoster(value){
+  if (!Array.isArray(value)) return [];
+  const seen = new Set();
+  const names = [];
+  value.forEach(function(item){
+    if (typeof item !== "string") return;
+    const name = item
+      .replace(/[\u0000-\u001F\u007F]/g, "")
+      .replace(/&/g, " and ")
+      .replace(/</g, "‹")
+      .replace(/>/g, "›")
+      .replace(/"/g, "”")
+      .replace(/'/g, "’")
+      .trim()
+      .replace(/\s+/g, " ")
+      .slice(0, 14);
+    const key = name.toLowerCase();
+    if (name && !seen.has(key) && names.length < 16){
+      seen.add(key);
+      names.push(name);
+    }
+  });
+  return names;
+}
+function loadRoster(){
+  roster = normalizeRoster(readJSON("partydeck_players", []));
+  try {
+    const serialized = JSON.stringify(roster);
+    if (localStorage.getItem("partydeck_players") !== serialized) localStorage.setItem("partydeck_players", serialized);
+  } catch(e){}
+}
+function saveRoster(){ writeJSON("partydeck_players", roster); }
+
+function renderRoster(){
+  $("rosterBadge").textContent = roster.length;
+  $("rosterBadge").style.display = roster.length ? "flex" : "none";
+  $("rosterHeroLabel").textContent = roster.length
+    ? roster.length + (roster.length === 1 ? " Player" : " Players")
+    : "Set Up Players";
+
+  const list = $("rosterList");
+  if (!roster.length){
+    list.innerHTML = '<li class="roster-empty">No players yet. Add names so every game starts instantly.</li>';
+    return;
+  }
+  list.innerHTML = roster.map(function(p, i){
+    return '<li class="roster-item">' +
+             '<span><span class="seat-no">' + (i + 1) + '</span>' + esc(p) + '</span>' +
+             '<button type="button" class="btn btn-ghost btn-icon-only" data-remove="' + esc(p) + '" ' +
+               'aria-label="Remove ' + esc(p) + '"><span class="ico ico-sm" data-ic="close"></span></button>' +
+           '</li>';
+  }).join("");
+  paintIcons(list);
+}
+
+function addPlayer(raw){
+  const name = String(raw || "").trim().replace(/\s+/g, " ");
+  if (!name) return;
+  if (roster.length >= 16){ toast("16 players is the cap"); return; }
+  const dupe = roster.some(function(p){ return p.toLowerCase() === name.toLowerCase(); });
+  if (dupe){ toast(name + " is already seated"); return; }
+  roster.push(name);
+  saveRoster();
+  renderRoster();
+  renderGames();
+  toast("Added " + name);
+}
+function removePlayer(name){
+  const i = roster.findIndex(function(p){ return p === name; });
+  if (i < 0) return;
+  roster.splice(i, 1);
+  saveRoster();
+  renderRoster();
+  renderGames();
+}
+
+/* ---------- FILTERS ---------- */
+function countFor(catId){
+  if (catId === "all") return GAMES.length;
+  return GAMES.filter(function(g){ return g.cats.indexOf(catId) >= 0; }).length;
+}
+function renderFilters(){
+  $("filterScroller").innerHTML = CATEGORIES.map(function(c){
+    return '<button type="button" class="filter-btn' + (c.id === activeCat ? " is-active" : "") + '" ' +
+             'data-cat="' + c.id + '" aria-pressed="' + (c.id === activeCat) + '">' +
+             '<span class="ico" data-ic="' + c.icon + '"></span>' + esc(c.label) +
+             '<span class="filter-count">' + countFor(c.id) + '</span></button>';
+  }).join("");
+  paintIcons($("filterScroller"));
+}
+
+/* ---------- GAME GRID ---------- */
+function visibleGames(){
+  if (activeCat === "all") return GAMES.slice();
+  return GAMES.filter(function(g){ return g.cats.indexOf(activeCat) >= 0; });
+}
+function renderGames(){
+  const list = visibleGames();
+  const host = $("gamesContainer");
+
+  if (!list.length){
+    host.innerHTML =
+      '<div class="empty-state">' +
+        '<span class="ico ico-xl" data-ic="alert"></span>' +
+        '<h3>Nothing in this category yet</h3>' +
+        '<p>Tap “All Games” to see the full library.</p>' +
+      '</div>';
+    paintIcons(host);
+    return;
+  }
+
+  const n = roster.length;
+  host.innerHTML = list.map(function(g){
+    const short = n > 0 && n < g.minP;
+    const primaryCat = CAT_LABEL[g.cats[0]] || g.cats[0];
+    return '<a class="game-card' + (short ? " is-short" : "") + '" href="' + g.path + '">' +
+      '<div class="card-head">' +
+        '<span class="card-icon-box"><span class="ico" data-ic="' + g.icon + '"></span></span>' +
+        '<span class="card-badge">' + esc(primaryCat) + '</span>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<h3>' + esc(g.title) + '</h3>' +
+        '<p class="card-tagline">' + esc(g.tag) + '</p>' +
+      '</div>' +
+      '<div class="card-meta">' +
+        '<span class="meta-tag"><span class="ico" data-ic="users"></span>' + g.minP + '–' + g.maxP + '</span>' +
+        '<span class="meta-tag"><span class="ico" data-ic="clock"></span>' + esc(g.time) + '</span>' +
+        (g.drink ? '<span class="meta-tag drink-tag"><span class="ico" data-ic="beer"></span>Drinks</span>' : '') +
+        (short ? '<span class="short-note"><span class="ico" data-ic="alert"></span>Needs ' + g.minP + '+</span>' : '') +
+      '</div>' +
+    '</a>';
+  }).join("");
+  paintIcons(host);
+
+  $("footerStat").textContent = GAMES.length + " games \u00B7 " +
+    (n ? n + " players seated" : "all client-side");
+}
+
+/* ---------- DRAWERS ---------- */
+function openDrawer(el){
+  lastFocused = document.activeElement;
+  el.classList.add("is-open");
+  document.documentElement.classList.add("pd-locked");
+  document.body.classList.add("pd-locked");
+  const focusable = el.querySelector("input, button");
+  if (focusable) setTimeout(function(){ focusable.focus(); }, 180);
+}
+function closeDrawer(el){
+  el.classList.remove("is-open");
+  if (!document.querySelector(".pd-drawer.is-open")){
+    document.documentElement.classList.remove("pd-locked");
+    document.body.classList.remove("pd-locked");
+  }
+  if (lastFocused && lastFocused.focus) lastFocused.focus();
+}
+function closeAllDrawers(){
+  document.querySelectorAll(".pd-drawer.is-open").forEach(closeDrawer);
+}
+
+/* ---------- FULLSCREEN ---------- */
+function isFullscreen(){
+  return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+function syncFullscreenIcon(){
+  const span = $("btnFullscreen").querySelector(".ico");
+  span.innerHTML = "";
+  span.setAttribute("data-ic", isFullscreen() ? "collapse" : "expand");
+  paintIcons($("btnFullscreen"));
+}
+function toggleFullscreen(){
+  const el = document.documentElement;
+  if (!isFullscreen()){
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req){
+      Promise.resolve(req.call(el)).catch(function(){
+        toast("Add to Home Screen for fullscreen on iOS");
+      });
+    } else {
+      toast("Add to Home Screen for fullscreen on iOS");
+    }
+  } else {
+    const exit = document.exitFullscreen || document.webkitExitFullscreen;
+    if (exit) exit.call(document);
+  }
+}
+
+/* ---------- SURPRISE ME ---------- */
+function surpriseMe(){
+  const n = roster.length;
+  let pool = visibleGames();
+  if (n > 0){
+    const fits = pool.filter(function(g){ return n >= g.minP && n <= g.maxP; });
+    if (fits.length) pool = fits;
+  }
+  if (!pool.length) pool = GAMES;
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  toast("Launching " + pick.title);
+  setTimeout(function(){ window.location.href = pick.path; }, 320);
+}
+
+/* ==========================================================================
+   BOOT
+   ========================================================================== */
+document.addEventListener("DOMContentLoaded", function () {
+  paintIcons(document);
+  renderThemes();
+
+  let savedTheme = "nordic-slate";
+  try { savedTheme = localStorage.getItem("partydeck_theme") || savedTheme; } catch(e){}
+  setTheme(savedTheme, false);
+
+  loadRoster();
+  renderRoster();
+  renderFilters();
+  renderGames();
+  syncFullscreenIcon();
+
+  /* Filters */
+  $("filterScroller").addEventListener("click", function(e){
+    const b = e.target.closest("[data-cat]");
+    if (!b) return;
+    activeCat = b.dataset.cat;
+    renderFilters();
+    renderGames();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  /* Drawers */
+  $("btnRoster").addEventListener("click", function(){ openDrawer($("rosterDrawer")); });
+  $("btnRosterHero").addEventListener("click", function(){ openDrawer($("rosterDrawer")); });
+  $("btnTheme").addEventListener("click", function(){ openDrawer($("themeDrawer")); });
+
+  document.querySelectorAll("[data-close-drawer]").forEach(function(btn){
+    btn.addEventListener("click", function(){ closeDrawer(btn.closest(".pd-drawer")); });
+  });
+  document.querySelectorAll(".pd-drawer").forEach(function(d){
+    d.addEventListener("click", function(e){ if (e.target === d) closeDrawer(d); });
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape") closeAllDrawers();
+  });
+
+  /* Theme picking */
+  $("themeGrid").addEventListener("click", function(e){
+    const b = e.target.closest("[data-theme]");
+    if (!b) return;
+    setTheme(b.dataset.theme, true);
+  });
+
+  /* Roster */
+  $("rosterForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    addPlayer($("rosterInput").value);
+    $("rosterInput").value = "";
+    $("rosterInput").focus();
+  });
+  $("rosterList").addEventListener("click", function(e){
+    const b = e.target.closest("[data-remove]");
+    if (!b) return;
+    removePlayer(b.dataset.remove);
+  });
+  $("btnClearRoster").addEventListener("click", function(){
+    if (!roster.length) return;
+    roster = [];
+    saveRoster();
+    renderRoster();
+    renderGames();
+    toast("Roster cleared");
+  });
+
+  /* Chrome */
+  $("btnFullscreen").addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", syncFullscreenIcon);
+  document.addEventListener("webkitfullscreenchange", syncFullscreenIcon);
+  $("btnSurprise").addEventListener("click", surpriseMe);
+
+  /* Cross-tab + returning-from-game sync */
+  window.addEventListener("storage", function(e){
+    if (e.key === "partydeck_theme") setTheme(e.newValue, false);
+    if (e.key === "partydeck_players"){ loadRoster(); renderRoster(); renderGames(); }
+  });
+  function syncHubState(){
+    loadRoster(); renderRoster(); renderGames();
+    let t = "nordic-slate";
+    try { t = localStorage.getItem("partydeck_theme") || t; } catch(e){}
+    setTheme(t, false);
+  }
+  window.addEventListener("pageshow", syncHubState);
+  document.addEventListener("visibilitychange", function(){
+    if (!document.hidden) syncHubState();
+  });
+});
+})();
+</script>
 </body>
 </html>

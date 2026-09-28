@@ -1,27 +1,40 @@
 /* ==========================================================================
-   PARTYDECK GLOBAL THEME ENGINE
-   6 Eye-Friendly, Refined Aesthetic Palettes
+   PARTYDECK — THEME TOKEN CONTRACT
+   Every game consumes these variables. Nothing else.
+   Specificity note: :root holds the DEFAULT set. Each [data-theme] block
+   overrides it. They are never combined in one selector (that was the bug).
    ========================================================================== */
 
 :root {
+  /* Typography */
   --font-display: 'Space Grotesk', system-ui, -apple-system, sans-serif;
   --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  --font-mono: 'Space Mono', monospace;
+  --font-mono: 'Space Mono', ui-monospace, monospace;
 
+  /* Radii */
   --r-xs: 4px;
   --r-sm: 8px;
   --r-md: 14px;
   --r-lg: 20px;
   --r-full: 9999px;
 
-  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.15);
-  --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-fast: 0.15s var(--ease-smooth);
-  --transition-normal: 0.25s var(--ease-smooth);
-}
+  /* Motion */
+  --ease-spring: cubic-bezier(.175,.885,.32,1.15);
+  --ease-smooth: cubic-bezier(.16,1,.3,1);
+  --transition-fast: .15s var(--ease-smooth);
+  --transition-normal: .25s var(--ease-smooth);
 
-/* 1. NORDIC SLATE (Default: Cold steel, matte obsidian, ice-blue accent) */
-[data-theme="nordic-slate"], :root {
+  /* Safe-area shorthands */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+
+  /* Minimum tap target — enforced globally */
+  --tap: 48px;
+
+  /* ---- DEFAULT PALETTE (nordic-slate) ---- */
+  color-scheme: dark;
   --bg-primary: #0e1117;
   --bg-surface: #161b24;
   --bg-elevated: #1f2633;
@@ -29,107 +42,196 @@
   --text-secondary: #94a3b8;
   --text-muted: #627288;
   --accent: #38bdf8;
-  --accent-glow: rgba(56, 189, 248, 0.25);
+  --accent-glow: rgba(56,189,248,.25);
   --accent-contrast: #031525;
-  --border-ui: rgba(148, 163, 184, 0.14);
-  --border-ui-active: rgba(56, 189, 248, 0.45);
-  --card-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.35);
+  --border-ui: rgba(148,163,184,.16);
+  --border-color: var(--border-ui);
+  --border-ui-active: rgba(56,189,248,.45);
+  --card-shadow: 0 12px 30px -8px rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.35);
   --danger: #f43f5e;
   --success: #10b981;
   --warning: #f59e0b;
+  --paper: #FAFAF7;
+  --scrim: rgba(3,8,15,.68);
 }
 
-/* 2. TOKYO SUNSET (Deep indigo twilight, warm ember orange, soft peach glow) */
+/* 1. NORDIC SLATE — matte obsidian, cold steel, ice-blue */
+[data-theme="nordic-slate"] {
+  color-scheme: dark;
+  --bg-primary: #0e1117;
+  --bg-surface: #161b24;
+  --bg-elevated: #1f2633;
+  --text-primary: #f0f4f8;
+  --text-secondary: #94a3b8;
+  --text-muted: #627288;
+  --accent: #38bdf8;
+  --accent-glow: rgba(56,189,248,.25);
+  --accent-contrast: #031525;
+  --border-ui: rgba(148,163,184,.16);
+  --border-ui-active: rgba(56,189,248,.45);
+  --card-shadow: 0 12px 30px -8px rgba(0,0,0,.55), 0 4px 12px rgba(0,0,0,.35);
+  --danger: #f43f5e;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --paper: #FAFAF7;
+  --scrim: rgba(3,8,15,.68);
+}
+
+/* 2. TOKYO SUNSET — indigo twilight, ember orange, peach glow */
 [data-theme="tokyo-sunset"] {
+  color-scheme: dark;
   --bg-primary: #120e24;
   --bg-surface: #1b1535;
   --bg-elevated: #281f4a;
   --text-primary: #fdf2f8;
   --text-secondary: #d8b4e2;
-  --text-muted: #8d73a8;
+  --text-muted: #9079ab;
   --accent: #f97316;
-  --accent-glow: rgba(249, 115, 22, 0.32);
+  --accent-glow: rgba(249,115,22,.32);
   --accent-contrast: #270d02;
-  --border-ui: rgba(216, 180, 226, 0.15);
-  --border-ui-active: rgba(249, 115, 22, 0.5);
-  --card-shadow: 0 12px 30px -8px rgba(10, 4, 25, 0.65), 0 4px 12px rgba(249, 115, 22, 0.12);
+  --border-ui: rgba(216,180,226,.17);
+  --border-ui-active: rgba(249,115,22,.5);
+  --card-shadow: 0 12px 30px -8px rgba(10,4,25,.65), 0 4px 12px rgba(249,115,22,.12);
   --danger: #fb7185;
   --success: #34d399;
   --warning: #fbbf24;
+  --paper: #FDF6EE;
+  --scrim: rgba(8,4,18,.72);
 }
 
-/* 3. TERRACOTTA CLAY (Warm organic editorial paper, muted clay, charcoal) */
+/* 3. TERRACOTTA CLAY — warm editorial paper, muted clay, charcoal */
 [data-theme="terracotta-clay"] {
+  color-scheme: dark;
   --bg-primary: #1c1815;
   --bg-surface: #27221e;
   --bg-elevated: #362f2a;
   --text-primary: #f5efe6;
   --text-secondary: #c7b9ab;
-  --text-muted: #8a7a6c;
+  --text-muted: #8d7d6f;
   --accent: #e07a5f;
-  --accent-glow: rgba(224, 122, 95, 0.28);
+  --accent-glow: rgba(224,122,95,.28);
   --accent-contrast: #260f08;
-  --border-ui: rgba(199, 185, 171, 0.14);
-  --border-ui-active: rgba(224, 122, 95, 0.45);
-  --card-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.45), 0 4px 10px rgba(0, 0, 0, 0.3);
+  --border-ui: rgba(199,185,171,.16);
+  --border-ui-active: rgba(224,122,95,.45);
+  --card-shadow: 0 12px 28px -6px rgba(0,0,0,.45), 0 4px 10px rgba(0,0,0,.3);
   --danger: #e63946;
   --success: #81b29a;
   --warning: #f2cc8f;
+  --paper: #F8F2E7;
+  --scrim: rgba(12,9,7,.7);
 }
 
-/* 4. EMERALD LOUNGE (Deep luxury green, polished brass gold, dark glass) */
+/* 4. EMERALD LOUNGE — racing green, polished brass, dark glass */
 [data-theme="emerald-lounge"] {
+  color-scheme: dark;
   --bg-primary: #071712;
   --bg-surface: #0e241d;
   --bg-elevated: #15352b;
   --text-primary: #edfbf4;
   --text-secondary: #97c9b6;
-  --text-muted: #578a76;
+  --text-muted: #5c907c;
   --accent: #eab308;
-  --accent-glow: rgba(234, 179, 8, 0.3);
+  --accent-glow: rgba(234,179,8,.3);
   --accent-contrast: #241a02;
-  --border-ui: rgba(151, 201, 182, 0.15);
-  --border-ui-active: rgba(234, 179, 8, 0.45);
-  --card-shadow: 0 12px 32px -8px rgba(2, 12, 9, 0.7), 0 4px 12px rgba(234, 179, 8, 0.1);
+  --border-ui: rgba(151,201,182,.17);
+  --border-ui-active: rgba(234,179,8,.45);
+  --card-shadow: 0 12px 32px -8px rgba(2,12,9,.7), 0 4px 12px rgba(234,179,8,.1);
   --danger: #f87171;
   --success: #34d399;
   --warning: #fbbf24;
+  --paper: #F3F8F4;
+  --scrim: rgba(2,10,8,.72);
 }
 
-/* 5. ALPINE MIST (Clean high-contrast light mode, crisp slate) */
+/* 5. ALPINE MIST — crisp high-contrast light */
 [data-theme="alpine-mist"] {
+  color-scheme: light;
   --bg-primary: #f3f6fa;
   --bg-surface: #ffffff;
-  --bg-elevated: #e3eaf3;
+  --bg-elevated: #e7edf5;
   --text-primary: #0f172a;
   --text-secondary: #475569;
-  --text-muted: #8493a8;
+  --text-muted: #7b8ca3;
   --accent: #2563eb;
-  --accent-glow: rgba(37, 99, 235, 0.2);
+  --accent-glow: rgba(37,99,235,.2);
   --accent-contrast: #ffffff;
-  --border-ui: rgba(71, 85, 105, 0.14);
-  --border-ui-active: rgba(37, 99, 235, 0.45);
-  --card-shadow: 0 10px 24px -6px rgba(15, 23, 42, 0.08), 0 2px 8px rgba(15, 23, 42, 0.04);
+  --border-ui: rgba(71,85,105,.18);
+  --border-ui-active: rgba(37,99,235,.45);
+  --card-shadow: 0 10px 24px -6px rgba(15,23,42,.1), 0 2px 8px rgba(15,23,42,.05);
   --danger: #e11d48;
   --success: #059669;
   --warning: #d97706;
+  --paper: #FFFFFF;
+  --scrim: rgba(15,23,42,.45);
 }
 
-/* 6. SYNTHWAVE '84 (Dark arcade, neon violet/coral, subtle bloom) */
+/* 6. SYNTHWAVE '84 — dark arcade, refined neon violet/coral */
 [data-theme="synthwave-84"] {
+  color-scheme: dark;
   --bg-primary: #100b1a;
   --bg-surface: #1b122c;
   --bg-elevated: #291a43;
   --text-primary: #ffffff;
   --text-secondary: #cfb9ee;
-  --text-muted: #7f64a8;
+  --text-muted: #8a6eb4;
   --accent: #f43f8e;
-  --accent-glow: rgba(244, 63, 142, 0.38);
+  --accent-glow: rgba(244,63,142,.38);
   --accent-contrast: #ffffff;
-  --border-ui: rgba(207, 185, 238, 0.18);
-  --border-ui-active: rgba(244, 63, 142, 0.55);
-  --card-shadow: 0 14px 34px -6px rgba(0, 0, 0, 0.8), 0 0 16px rgba(244, 63, 142, 0.18);
-  --danger: #ff0055;
-  --success: #00ffaa;
+  --border-ui: rgba(207,185,238,.2);
+  --border-ui-active: rgba(244,63,142,.55);
+  --card-shadow: 0 14px 34px -6px rgba(0,0,0,.8), 0 0 16px rgba(244,63,142,.18);
+  --danger: #ff3b6b;
+  --success: #00e5a0;
   --warning: #ffd000;
+  --paper: #FBF7FF;
+  --scrim: rgba(8,4,14,.74);
+}
+
+html[data-theme="nordic-slate"] {
+  --bg-primary:#0e1117; --bg-surface:#161b24; --bg-elevated:#1f2633;
+  --text-primary:#f0f4f8; --text-secondary:#94a3b8; --text-muted:#627288;
+  --accent:#38bdf8; --accent-glow:rgba(56,189,248,.25); --accent-contrast:#031525;
+  --border-ui:rgba(148,163,184,.16); --border-color:var(--border-ui);
+  --card-shadow:0 12px 30px -8px rgba(0,0,0,.55),0 4px 12px rgba(0,0,0,.35);
+  --danger:#f43f5e; --success:#10b981; --warning:#f59e0b; --paper:#FAFAF7;
+}
+html[data-theme="tokyo-sunset"] {
+  --bg-primary:#120e24; --bg-surface:#1b1535; --bg-elevated:#281f4a;
+  --text-primary:#fdf2f8; --text-secondary:#d8b4e2; --text-muted:#9079ab;
+  --accent:#f97316; --accent-glow:rgba(249,115,22,.32); --accent-contrast:#270d02;
+  --border-ui:rgba(216,180,226,.17); --border-color:var(--border-ui);
+  --card-shadow:0 12px 30px -8px rgba(10,4,25,.65),0 4px 12px rgba(249,115,22,.12);
+  --danger:#fb7185; --success:#34d399; --warning:#fbbf24; --paper:#FDF6EE;
+}
+html[data-theme="terracotta-clay"] {
+  --bg-primary:#1c1815; --bg-surface:#27221e; --bg-elevated:#362f2a;
+  --text-primary:#f5efe6; --text-secondary:#c7b9ab; --text-muted:#8d7d6f;
+  --accent:#e07a5f; --accent-glow:rgba(224,122,95,.28); --accent-contrast:#260f08;
+  --border-ui:rgba(199,185,171,.16); --border-color:var(--border-ui);
+  --card-shadow:0 12px 28px -6px rgba(0,0,0,.45),0 4px 10px rgba(0,0,0,.3);
+  --danger:#e63946; --success:#81b29a; --warning:#f2cc8f; --paper:#F8F2E7;
+}
+html[data-theme="emerald-lounge"] {
+  --bg-primary:#071712; --bg-surface:#0e241d; --bg-elevated:#15352b;
+  --text-primary:#edfbf4; --text-secondary:#97c9b6; --text-muted:#5c907c;
+  --accent:#eab308; --accent-glow:rgba(234,179,8,.3); --accent-contrast:#241a02;
+  --border-ui:rgba(151,201,182,.17); --border-color:var(--border-ui);
+  --card-shadow:0 12px 32px -8px rgba(2,12,9,.7),0 4px 12px rgba(234,179,8,.1);
+  --danger:#f87171; --success:#34d399; --warning:#fbbf24; --paper:#F3F8F4;
+}
+html[data-theme="alpine-mist"] {
+  --bg-primary:#f3f6fa; --bg-surface:#ffffff; --bg-elevated:#e7edf5;
+  --text-primary:#0f172a; --text-secondary:#475569; --text-muted:#7b8ca3;
+  --accent:#2563eb; --accent-glow:rgba(37,99,235,.2); --accent-contrast:#ffffff;
+  --border-ui:rgba(71,85,105,.18); --border-color:var(--border-ui);
+  --card-shadow:0 10px 24px -6px rgba(15,23,42,.1),0 2px 8px rgba(15,23,42,.05);
+  --danger:#e11d48; --success:#059669; --warning:#d97706; --paper:#FFFFFF;
+}
+html[data-theme="synthwave-84"] {
+  --bg-primary:#100b1a; --bg-surface:#1b122c; --bg-elevated:#291a43;
+  --text-primary:#ffffff; --text-secondary:#cfb9ee; --text-muted:#8a6eb4;
+  --accent:#f43f8e; --accent-glow:rgba(244,63,142,.38); --accent-contrast:#ffffff;
+  --border-ui:rgba(207,185,238,.2); --border-color:var(--border-ui);
+  --card-shadow:0 14px 34px -6px rgba(0,0,0,.8),0 0 16px rgba(244,63,142,.18);
+  --danger:#ff3b6b; --success:#00e5a0; --warning:#ffd000; --paper:#FBF7FF;
 }

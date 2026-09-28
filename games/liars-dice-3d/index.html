@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald-lounge">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#071712" id="metaThemeColor" />
+<title>Liar's Dice: 3D Pocket | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #071712; --bg-surface: #0e241d; --bg-elevated: #16362c;
+    --text-primary: #ffffff; --text-secondary: #a3cfbe; --text-muted: #5e9481;
+    --accent: #10b981; --accent-glow: rgba(16,185,129,0.38); --accent-contrast: #031c14;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(16,185,129,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow-x: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+  }
+  .screen.is-active { display: flex; }
+
+  /* 3D Dice Renderers */
+  .dice-tray {
+    display: flex; gap: 8px; justify-content: center; align-items: center;
+    padding: 1rem; background: var(--bg-elevated); border-radius: var(--r-md);
+    border: 1px solid var(--border-ui); flex-wrap: wrap;
+  }
+  .die-cube {
+    width: 46px; height: 46px; background: #ffffff; color: #111827;
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); font-family: 'Space Mono', monospace;
+    font-size: 1.4rem; font-weight: 900;
+  }
+  .die-cube.wild { color: var(--danger); border: 2px solid var(--danger); }
+
+  /* Bidding Console */
+  .bid-ladder {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-surface); border: 2px solid var(--border-ui);
+    border-radius: var(--r-md); padding: .8rem 1rem;
+  }
+  .face-selector {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin: .5rem 0;
+  }
+  .face-btn {
+    min-height: 46px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); color: #fff; font-family: 'Space Mono', monospace;
+    font-size: 1rem; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .face-btn.is-active {
+    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+
+  /* Panels */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,85,.4); }
+  .btn.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-ui); box-shadow: none; }
+
+  /* 3-Stage Privacy Curtain */
+  .curtain {
+    position: fixed; inset: 0; z-index: 100; background: rgba(7, 23, 18, 0.96);
+    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
+  }
+  .curtain.is-open { display: flex; }
+  .cur-card {
+    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
+    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
+  }
+  .hold-btn {
+    position: relative; overflow: hidden; width: 100%; min-height: 60px;
+    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
+    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
+    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
+  }
+  .hold-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: var(--accent); opacity: .85; transition: width .04s linear;
+  }
+  .hold-label { position: relative; z-index: 2; pointer-events: none; }
+  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Liar's Dice: 3D Pocket</span>
+    <span class="gm-sub" id="topSub">Bidding Round</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Liar's Dice Rules</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • Each player starts with <strong>5 Secret Dice</strong>.<br>
+        • <strong>1s (Ones) are Wild</strong> (unless 1s are bid directly).<br>
+        • Bid higher on quantity or face value across all hidden cups in the room.<br>
+        • Tap <strong>"LIAR!"</strong> to challenge the previous bid. Loser forfeits a die and drinks 2 sips!
+      </p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Seated Rollers</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:25vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+    <button class="btn" id="btnStartGame" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Shake All Dice Cups
+    </button>
+  </section>
+
+  <!-- 2. PRIVATE PEEK & BID SCREEN -->
+  <section class="screen" id="scrPlay">
+    <div class="panel" style="text-align:center;">
+      <div style="font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">CURRENT BID TO BEAT</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0;" id="currentBidText">Opening Bid</h2>
+      <p style="font-size:.82rem;color:var(--text-secondary);" id="bidderWho">Lead player must open bidding.</p>
+    </div>
+
+    <!-- Private Dice Tray -->
+    <div class="panel">
+      <div class="panel-title" id="trayTitle">Alex's Secret Cup (Keep Private)</div>
+      <div class="dice-tray" id="myDiceTray"></div>
+    </div>
+
+    <!-- Bid Builder -->
+    <div class="panel">
+      <div class="panel-title">Raise The Bid</div>
+      <div class="bid-ladder">
+        <button class="btn-icon-only" id="btnQtyMinus"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+        <div style="font-family:'Space Mono',monospace;font-size:1.4rem;font-weight:900;color:var(--accent);" id="bidQtyDisplay">3×</div>
+        <button class="btn-icon-only" id="btnQtyPlus"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button>
+      </div>
+
+      <div class="face-selector" id="faceSelector">
+        <button class="face-btn" data-f="1">1</button>
+        <button class="face-btn is-active" data-f="2">2</button>
+        <button class="face-btn" data-f="3">3</button>
+        <button class="face-btn" data-f="4">4</button>
+        <button class="face-btn" data-f="5">5</button>
+        <button class="face-btn" data-f="6">6</button>
+      </div>
+    </div>
+
+    <div class="btn-grid" style="margin-top:auto;">
+      <button class="btn danger" id="btnCallLiar" disabled>CALL LIAR!</button>
+      <button class="btn" id="btnSubmitBid">RAISE BID</button>
+    </div>
+  </section>
+
+  <!-- 3. SHOWDOWN VERDICT -->
+  <section class="screen" id="scrShowdown">
+    <div class="panel" style="text-align:center;padding:1.4rem 1rem;">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);" id="showdownKicker">LIAR CHALLENGE RESOLUTION</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:900;margin:.2rem 0;" id="showdownWinnerTitle">CHALLENGER WINS!</h2>
+      <div style="font-family:'Space Mono',monospace;font-size:1.1rem;font-weight:800;margin:.4rem 0;" id="showdownActualCount">Actual Count: 4× (Needed 5×)</div>
+      
+      <!-- All Revealed Dice -->
+      <div class="panel-title" style="margin-top:.8rem;">Table Dice Revealed</div>
+      <div class="dice-tray" id="allRevealedDice"></div>
+
+      <div style="background:rgba(255,0,85,0.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:.9rem;margin-top:1rem;">
+        <p style="font-size:.95rem;font-weight:800;color:#fff;" id="showdownPenalty">Alex loses 1 die and drinks 2 sips!</p>
+      </div>
+    </div>
+    <button class="btn" id="btnNextRoundShake" style="margin-top:auto;">Shake For Next Round</button>
+  </section>
+</div>
+
+<!-- 4. PRIVACY CURTAIN -->
+<div class="curtain" id="curtain">
+  <div class="cur-card">
+    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/></svg>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">PRIVATE CUP</div>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
+    <p style="font-size:.82rem;color:var(--text-secondary);">Nobody else may peek under your cup.</p>
+    <button class="hold-btn" id="btnCurtainHold">
+      <span class="hold-fill" id="holdFill"></span>
+      <span class="hold-label">HOLD 700MS TO UNLOCK</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const Synth = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  diceShake(){
+    try {
+      this.init();
+      for(let i = 0; i < 4; i++){
+        setTimeout(() => {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = "triangle"; o.frequency.setValueAtTime(700 + Math.random()*500, this.ctx.currentTime);
+          g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(); o.stop(this.ctx.currentTime + 0.04);
+        }, i * 65);
+      }
+    }catch(e){}
+  },
+  liarBuzzer(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(160, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(45, this.ctx.currentTime + 0.35);
+      g.gain.setValueAtTime(0.3, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.35);
+    }catch(e){}
+  },
+  bidBeep(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "square"; o.frequency.setValueAtTime(580, this.ctx.currentTime);
+      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.04);
+    }catch(e){}
+  }
+};
+
+/* ================= STATE & ROSTER ================= */
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 2) roster = ["Alex", "Jordan", "Taylor"];
+
+const S = {
+  playerIdx: 0,
+  diceCounts: {}, // player -> number of dice (starts at 5)
+  diceRolls: {},  // player -> array of rolled ints [1..6]
+  currentBid: null, // { player, qty, face }
+  proposedQty: 2,
+  proposedFace: 2
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+/* ================= PRIVACY CURTAIN ================= */
+let holdTimer = null, holdStart = 0;
+const HOLD_MS = 700;
+
+function openCurtain(pName, onUnlock){
+  $("curName").textContent = pName;
+  $("holdFill").style.width = "0%";
+  $("btnCurtainHold").classList.remove("armed");
+  $("curtain").classList.add("is-open");
+
+  const btn = $("btnCurtainHold");
+  const cancel = () => {
+    if(holdTimer) cancelAnimationFrame(holdTimer);
+    holdTimer = null;
+    $("holdFill").style.width = "0%";
+    btn.classList.remove("armed");
+  };
+  const start = e => {
+    e.preventDefault();
+    btn.classList.add("armed");
+    holdStart = performance.now();
+    const tick = now => {
+      const el = now - holdStart;
+      const pct = Math.min(100, (el / HOLD_MS) * 100);
+      $("holdFill").style.width = pct + "%";
+      if(el >= HOLD_MS){
+        cancel();
+        $("curtain").classList.remove("is-open");
+        onUnlock();
+      } else {
+        holdTimer = requestAnimationFrame(tick);
+      }
+    };
+    holdTimer = requestAnimationFrame(tick);
+  };
+
+  btn.onpointerdown = start;
+  btn.onpointerup = cancel;
+  btn.onpointercancel = cancel;
+  btn.onpointerleave = cancel;
+}
+
+/* ================= GAMEPLAY ENGINE ================= */
+function startNewRound(){
+  Synth.diceShake();
+  // Roll dice for each active player
+  S.diceRolls = {};
+  roster.forEach(p => {
+    const count = S.diceCounts[p] || 0;
+    if(count > 0){
+      S.diceRolls[p] = Array.from({ length: count }, () => Math.floor(Math.random() * 6) + 1);
+    }
+  });
+
+  S.currentBid = null;
+  S.proposedQty = 2;
+  S.proposedFace = 2;
+  startTurn();
+}
+
+function startTurn(){
+  // Skip eliminated players
+  while((S.diceCounts[roster[S.playerIdx]] || 0) <= 0){
+    S.playerIdx = (S.playerIdx + 1) % roster.length;
+  }
+
+  const p = roster[S.playerIdx];
+  $("topSub").textContent = `${p}'s Turn`;
+  openCurtain(p, () => {
+    showScreen("scrPlay");
+    renderPlayerConsole();
+  });
+}
+
+function renderPlayerConsole(){
+  const p = roster[S.playerIdx];
+  $("trayTitle").textContent = `${p}'s Secret Cup (${S.diceRolls[p].length} Dice)`;
+  
+  // Render dice tray
+  $("myDiceTray").innerHTML = S.diceRolls[p].map(d => `
+    <div class="die-cube ${d === 1 ? 'wild' : ''}">${d}</div>
+  `).join("");
+
+  // Update current bid status
+  if(S.currentBid){
+    $("currentBidText").textContent = `${S.currentBid.qty}× [${S.currentBid.face}s]`;
+    $("bidderWho").textContent = `Bid placed by ${S.currentBid.player}`;
+    $("btnCallLiar").disabled = false;
+
+    // Minimum valid proposal is next step
+    S.proposedQty = S.currentBid.qty;
+    S.proposedFace = S.currentBid.face;
+  } else {
+    $("currentBidText").textContent = "Opening Bid";
+    $("bidderWho").textContent = `${p} must open bidding.`;
+    $("btnCallLiar").disabled = true;
+    S.proposedQty = 2;
+    S.proposedFace = 2;
+  }
+
+  updateBidControls();
+}
+
+function updateBidControls(){
+  $("bidQtyDisplay").textContent = `${S.proposedQty}×`;
+  document.querySelectorAll("#faceSelector .face-btn").forEach(b => {
+    b.classList.toggle("is-active", parseInt(b.dataset.f, 10) === S.proposedFace);
+  });
+}
+
+$("btnQtyPlus").onclick = () => {
+  S.proposedQty++;
+  Synth.bidBeep();
+  updateBidControls();
+};
+$("btnQtyMinus").onclick = () => {
+  if(S.currentBid){
+    if(S.proposedQty > S.currentBid.qty) S.proposedQty--;
+  } else {
+    if(S.proposedQty > 1) S.proposedQty--;
+  }
+  Synth.bidBeep();
+  updateBidControls();
+};
+
+$("faceSelector").onclick = e => {
+  const b = e.target.closest(".face-btn"); if(!b) return;
+  S.proposedFace = parseInt(b.dataset.f, 10);
+  Synth.bidBeep();
+  updateBidControls();
+};
+
+$("btnSubmitBid").onclick = () => {
+  // Validate strictly higher bid
+  if(S.currentBid){
+    const valid = (S.proposedQty > S.currentBid.qty) || 
+                  (S.proposedQty === S.currentBid.qty && S.proposedFace > S.currentBid.face);
+    if(!valid){
+      showPartyDeckMessage("Bid must be strictly higher in quantity or face value!");
+      return;
+    }
+  }
+
+  S.currentBid = {
+    player: roster[S.playerIdx],
+    qty: S.proposedQty,
+    face: S.proposedFace
+  };
+
+  S.playerIdx = (S.playerIdx + 1) % roster.length;
+  startTurn();
+};
+
+/* ================= LIAR SHOWDOWN RESOLUTION ================= */
+$("btnCallLiar").onclick = () => {
+  Synth.liarBuzzer();
+  const accuser = roster[S.playerIdx];
+  const bidder = S.currentBid.player;
+  const targetFace = S.currentBid.face;
+  const targetQty = S.currentBid.qty;
+
+  // Count total matching dice across entire table (1s are Wild unless 1 was bid)
+  let actualCount = 0;
+  const allDice = [];
+
+  roster.forEach(p => {
+    if(S.diceRolls[p]){
+      S.diceRolls[p].forEach(val => {
+        allDice.push(val);
+        if(val === targetFace || (targetFace !== 1 && val === 1)){
+          actualCount++;
+        }
+      });
+    }
+  });
+
+  // Render all dice to showdown tray
+  $("allRevealedDice").innerHTML = allDice.map(d => `
+    <div class="die-cube ${(d === targetFace || (targetFace !== 1 && d === 1)) ? 'wild' : ''}">${d}</div>
+  `).join("");
+
+  $("showdownActualCount").textContent = `Actual Count: ${actualCount}× [${targetFace}s] (Needed: ${targetQty}×)`;
+
+  if(actualCount >= targetQty){
+    // Bidder was truthful! Accuser loses a die
+    $("showdownWinnerTitle").textContent = `${bidder.toUpperCase()} WAS HONEST!`;
+    $("showdownWinnerTitle").style.color = "var(--success)";
+    $("showdownPenalty").textContent = `${accuser} challenged wrongly, loses 1 die and drinks 2 sips!`;
+    S.diceCounts[accuser]--;
+  } else {
+    // Bidder lied! Bidder loses a die
+    $("showdownWinnerTitle").textContent = `${bidder.toUpperCase()} WAS BLUFFING!`;
+    $("showdownWinnerTitle").style.color = "var(--danger)";
+    $("showdownPenalty").textContent = `${bidder} was caught lying, loses 1 die and drinks 2 sips!`;
+    S.diceCounts[bidder]--;
+  }
+
+  showScreen("scrShowdown");
+};
+
+$("btnNextRoundShake").onclick = startNewRound;
+
+/* ================= SETUP & ROSTER ================= */
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${p}</span>
+      <span style="color:var(--accent);">5 DICE</span>
+    </li>
+  `).join("");
+}
+
+$("btnStartGame").onclick = () => {
+  roster.forEach(p => { S.diceCounts[p] = 5; });
+  S.playerIdx = 0;
+  startNewRound();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+<script src="../../js/feedback-dialog.js"></script>
+</body>
+</html>

@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#08090c" id="metaThemeColor" />
 <title>Wits & Wagers | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(!/^(nordic-slate|tokyo-sunset|terracotta-clay|emerald-lounge|alpine-mist|synthwave-84)$/.test(t||""))t="nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","nordic-slate");}})();
+</script>
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -101,6 +106,7 @@ p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:4
 .ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
 .ico svg{width:100%;height:100%;display:block;}
 </style>
+<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
 <header class="pd-hud">
@@ -445,9 +451,9 @@ function revealAnswer(){
   <div class="mat-row ${i===winIdx?'winner':''}">
    <span class="mat-val">${slot.v}</span>
    <span class="mat-owner">${slot.p}</span>
-   <span class="mat-odds">${slot.odds}:1${i===winIdx?' 🏆':''}</span>
+  <span class="mat-odds">${slot.odds}:1${i===winIdx?'<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 0 1-10 0V4Z"/><path d="M7 6H4v2a4 4 0 0 0 4 4M17 6h3v2a4 4 0 0 1-4 4"/></svg>':''}</span>
   </div>
- `).join('').replace(/🏆/g,'');
+ `).join('');
 
  $('bankStrip').innerHTML=roster.map(p=>`<div class="bank-chip">${p}<b>${S.bank[p]}</b></div>`).join('');
 
@@ -463,5 +469,6 @@ $('btnExit').onclick=()=>PD.exitToHub();
 renderRoster();
 })();
 </script>
+<script src="../../js/theme-sync.js"></script>
 </body>
 </html>

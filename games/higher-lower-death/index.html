@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="synthwave-84">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#100b1a" id="metaThemeColor" />
+<title>Higher/Lower Sudden Death | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #100b1a; --bg-surface: #1a1228; --bg-elevated: #281b3d;
+    --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+    --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-contrast: #ffffff;
+    --danger: #ff0044; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(255,0,127,0.28); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow-x: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+  }
+  .screen.is-active { display: flex; }
+
+  /* Pot HUD Strip */
+  .pot-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+  }
+  .pot-stat {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); padding: .3rem .4rem;
+  }
+  .pot-lbl { font-family: 'Space Mono', monospace; font-size: .55rem; color: var(--text-muted); text-transform: uppercase; }
+  .pot-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 900; color: var(--accent); }
+
+  /* 3D Card Display */
+  .card-stage {
+    perspective: 800px; width: 140px; height: 195px; margin: 0.6rem auto;
+  }
+  .card-3d {
+    width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(.2,.8,.3,1); border-radius: var(--r-md);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  }
+  .card-3d.flipped { transform: rotateY(180deg); }
+  .c-face {
+    position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    border-radius: var(--r-md); display: flex; flex-direction: column; align-items: center;
+    justify-content: space-between; padding: 12px; font-family: 'Space Mono', monospace; font-weight: 900;
+  }
+  .c-face.front {
+    background: #ffffff; color: #111827; transform: rotateY(180deg);
+    border: 2px solid rgba(255,255,255,0.4);
+  }
+  .c-face.front.red { color: #e11d48; }
+
+  /* Buttons & Panels */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: #fff; border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-ui); box-shadow: none; }
+  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,68,.4); }
+
+  /* 3-Stage Privacy Curtain */
+  .curtain {
+    position: fixed; inset: 0; z-index: 100; background: rgba(16, 11, 26, 0.96);
+    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
+  }
+  .curtain.is-open { display: flex; }
+  .cur-card {
+    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
+    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
+  }
+  .hold-btn {
+    position: relative; overflow: hidden; width: 100%; min-height: 60px;
+    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
+    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
+    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
+  }
+  .hold-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: var(--accent); opacity: .85; transition: width .04s linear;
+  }
+  .hold-label { position: relative; z-index: 2; pointer-events: none; }
+  .hold-btn.armed .hold-label { color: #fff; }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Higher/Lower Sudden Death</span>
+    <span class="gm-sub" id="topSub">Pot: 1 Sip</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP SCREEN -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Sudden Death Directives</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • Call whether the next card is <strong>HIGHER</strong> or <strong>LOWER</strong>.<br>
+        • Every correct guess adds <strong>+1 SIP</strong> to the communal pot.<br>
+        • Pass after 3 correct calls, or keep riding to build the pot.<br>
+        • <strong>Incorrect call = Chug the ENTIRE POT instantly!</strong>
+      </p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Active Roster</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:25vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+    <button class="btn" id="btnStartGame" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Start Gauntlet
+    </button>
+  </section>
+
+  <!-- 2. GAMEPLAY FLIP SCREEN -->
+  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
+    <div class="pot-strip">
+      <div class="pot-stat">
+        <span class="pot-lbl">Active Caller</span>
+        <span class="pot-val" id="hudPlayer" style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
+      </div>
+      <div class="pot-stat">
+        <span class="pot-lbl">Streak</span>
+        <span class="pot-val" id="hudStreak" style="color:var(--success);">0x</span>
+      </div>
+      <div class="pot-stat">
+        <span class="pot-lbl">Communal Pot</span>
+        <span class="pot-val" id="hudPot" style="color:var(--warning);">1 SIP</span>
+      </div>
+    </div>
+
+    <div style="padding:1.1rem;display:flex;flex-direction:column;gap:1rem;max-width:600px;margin:0 auto;width:100%;flex:1;">
+      <div class="card-stage">
+        <div class="card-3d flipped" id="flipCard">
+          <div class="c-face front" id="cardFace">
+            <span style="font-size:1.8rem;" id="cRank">7</span>
+            <span style="font-size:2.6rem;" id="cSuit">♠</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--accent);letter-spacing:.14em;text-transform:uppercase;" id="callPrompt">IS THE NEXT CARD...</div>
+      </div>
+
+      <div class="btn-grid">
+        <button class="btn" id="btnHigher">HIGHER</button>
+        <button class="btn" id="btnLower">LOWER</button>
+      </div>
+
+      <button class="btn ghost" id="btnPassTurn" style="margin-top:auto;display:none;">
+        Bank Pot & Pass Turn (Streak 3+)
+      </button>
+    </div>
+  </section>
+
+  <!-- 3. POT DETONATION SCREEN (SUDDEN DEATH CHUG) -->
+  <section class="screen" id="scrChug">
+    <div class="panel" style="text-align:center;padding:1.8rem 1rem;border-color:var(--danger);">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--danger);">POT DETONATION</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="loserName">Alex</h2>
+      <div style="font-family:'Space Mono',monospace;font-size:2.4rem;font-weight:900;color:var(--danger);margin-bottom:.4rem;" id="potChugAmount">8 SIPS</div>
+      <p style="font-size:.9rem;color:var(--text-secondary);line-height:1.4;">
+        Incorrect call on the streak! Drink the entire accumulated pot.
+      </p>
+    </div>
+    <button class="btn" id="btnNextCaller" style="margin-top:auto;">Next Sudden Death Runner</button>
+  </section>
+</div>
+
+<!-- 4. PRIVACY CURTAIN -->
+<div class="curtain" id="curtain">
+  <div class="cur-card">
+    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT CALLER</div>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
+    <p style="font-size:.82rem;color:var(--text-secondary);">Pot: <strong id="curPot" style="color:var(--warning);">1 Sip</strong></p>
+    <button class="hold-btn" id="btnCurtainHold">
+      <span class="hold-fill" id="holdFill"></span>
+      <span class="hold-label">HOLD 700MS TO UNLOCK</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const Synth = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  tone(freq, dur, type="sine", gain=0.15, slide=null){
+    try {
+      this.init();
+      const t0 = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t0);
+      if(slide) o.frequency.exponentialRampToValueAtTime(slide, t0 + dur);
+      g.gain.setValueAtTime(gain, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(t0); o.stop(t0 + dur);
+    }catch(e){}
+  },
+  flip(){ this.tone(550, 0.05, "triangle", 0.12, 850); },
+  streakUp(streak){ this.tone(440 + streak * 60, 0.1, "sine", 0.16); },
+  detonation(){ this.tone(160, 0.45, "sawtooth", 0.3, 35); }
+};
+
+/* ================= STATE & DECK ================= */
+const SUITS = [
+  { s: "♠", red: false },
+  { s: "♥", red: true },
+  { s: "♦", red: true },
+  { s: "♣", red: false }
+];
+const RANKS = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 2) roster = ["Player 1", "Player 2"];
+
+const S = {
+  deck: [],
+  playerIdx: 0,
+  pot: 1,
+  streak: 0,
+  currentCard: null
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+function createDeck(){
+  const d = [];
+  SUITS.forEach(st => {
+    RANKS.forEach((rk, idx) => {
+      d.push({ rank: rk, val: idx + 2, suit: st.s, red: st.red });
+    });
+  });
+  return d.sort(() => Math.random() - 0.5);
+}
+
+/* ================= 3-STAGE PRIVACY CURTAIN ================= */
+let holdTimer = null, holdStart = 0;
+const HOLD_MS = 700;
+
+function openCurtain(pName, onUnlock){
+  $("curName").textContent = pName;
+  $("curPot").textContent = `${S.pot} ${S.pot === 1 ? 'Sip' : 'Sips'}`;
+  $("holdFill").style.width = "0%";
+  $("btnCurtainHold").classList.remove("armed");
+  $("curtain").classList.add("is-open");
+
+  const btn = $("btnCurtainHold");
+  const cancel = () => {
+    if(holdTimer) cancelAnimationFrame(holdTimer);
+    holdTimer = null;
+    $("holdFill").style.width = "0%";
+    btn.classList.remove("armed");
+  };
+  const start = e => {
+    e.preventDefault();
+    btn.classList.add("armed");
+    holdStart = performance.now();
+    const tick = now => {
+      const el = now - holdStart;
+      const pct = Math.min(100, (el / HOLD_MS) * 100);
+      $("holdFill").style.width = pct + "%";
+      if(el >= HOLD_MS){
+        cancel();
+        $("curtain").classList.remove("is-open");
+        onUnlock();
+      } else {
+        holdTimer = requestAnimationFrame(tick);
+      }
+    };
+    holdTimer = requestAnimationFrame(tick);
+  };
+
+  btn.onpointerdown = start;
+  btn.onpointerup = cancel;
+  btn.onpointercancel = cancel;
+  btn.onpointerleave = cancel;
+}
+
+/* ================= GAMEPLAY ENGINE ================= */
+function startTurn(){
+  const player = roster[S.playerIdx];
+  $("topSub").textContent = `Pot: ${S.pot} ${S.pot === 1 ? 'Sip' : 'Sips'}`;
+  $("hudPlayer").textContent = player;
+  openCurtain(player, () => {
+    showScreen("scrPlay");
+    updateHUD();
+  });
+}
+
+function updateHUD(){
+  $("hudPlayer").textContent = roster[S.playerIdx];
+  $("hudStreak").textContent = `${S.streak}x`;
+  $("hudPot").textContent = `${S.pot} ${S.pot === 1 ? 'SIP' : 'SIPS'}`;
+  $("btnPassTurn").style.display = S.streak >= 3 ? "block" : "none";
+}
+
+function setDisplayedCard(card){
+  S.currentCard = card;
+  $("cRank").textContent = card.rank;
+  $("cSuit").textContent = card.suit;
+  $("cardFace").className = `c-face front ${card.red ? 'red' : ''}`;
+}
+
+function handleCall(call){
+  if(S.deck.length === 0) S.deck = createDeck();
+  const nextCard = S.deck.pop();
+
+  Synth.flip();
+  const curVal = S.currentCard.val;
+  const nextVal = nextCard.val;
+
+  setDisplayedCard(nextCard);
+
+  const correct = (call === "higher" && nextVal >= curVal) ||
+                  (call === "lower" && nextVal <= curVal);
+
+  if(correct){
+    S.streak++;
+    S.pot++;
+    Synth.streakUp(S.streak);
+    updateHUD();
+  } else {
+    // Detonate!
+    Synth.detonation();
+    $("loserName").textContent = roster[S.playerIdx];
+    $("potChugAmount").textContent = `${S.pot} SIPS`;
+    showScreen("scrChug");
+    S.pot = 1;
+    S.streak = 0;
+  }
+}
+
+$("btnHigher").onclick = () => handleCall("higher");
+$("btnLower").onclick = () => handleCall("lower");
+
+$("btnPassTurn").onclick = () => {
+  S.streak = 0;
+  S.playerIdx = (S.playerIdx + 1) % roster.length;
+  startTurn();
+};
+
+$("btnNextCaller").onclick = () => {
+  S.playerIdx = (S.playerIdx + 1) % roster.length;
+  startTurn();
+};
+
+/* ================= SETUP & BOOT ================= */
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${p}</span>
+      <span style="color:var(--accent);">CALLER</span>
+    </li>
+  `).join("");
+}
+
+$("btnStartGame").onclick = () => {
+  S.deck = createDeck();
+  S.pot = 1;
+  S.streak = 0;
+  S.playerIdx = 0;
+  setDisplayedCard(S.deck.pop());
+  startTurn();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

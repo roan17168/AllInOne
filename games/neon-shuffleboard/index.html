@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nordic-slate">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<title>Neon Table Shuffleboard | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #08090d; --bg-surface: #10141d; --bg-elevated: #18202d;
+    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #57657a;
+    --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.35); --accent-contrast: #031525;
+    --p1-color: #00e5ff; --p2-color: #ff007f;
+    --danger: #ff0055; --success: #00ff66; --warning: #ffd000;
+    --border-ui: rgba(56,189,248,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.is-active { display: flex; }
+
+  /* HUD Strip */
+  .hud-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+  }
+  .hud-stat {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); padding: .3rem .4rem;
+  }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .55rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 800; color: var(--accent); }
+
+  /* Table Stage */
+  .table-stage { flex: 1; position: relative; width: 100%; height: 100%; background: #030508; touch-action: none; }
+  #shuffleCanvas { width: 100%; height: 100%; display: block; }
+
+  /* Drag Indicator Banner */
+  .drag-hint {
+    position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+    background: rgba(16, 20, 29, 0.85); border: 1px solid var(--border-ui);
+    padding: .4rem .8rem; border-radius: var(--r-sm); font-family: 'Space Mono', monospace;
+    font-size: .68rem; color: var(--text-secondary); pointer-events: none; z-index: 10;
+  }
+
+  /* Panels & Controls */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .opt-btn {
+    min-height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
+    font-size: .78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .opt-btn.is-active {
+    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow);
+  }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+
+  /* 3-Stage Privacy Curtain */
+  .curtain {
+    position: fixed; inset: 0; z-index: 100; background: rgba(8, 9, 13, 0.96);
+    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
+  }
+  .curtain.is-open { display: flex; }
+  .cur-card {
+    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
+    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
+  }
+  .hold-btn {
+    position: relative; overflow: hidden; width: 100%; min-height: 60px;
+    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
+    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
+    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
+  }
+  .hold-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: var(--accent); opacity: .85; transition: width .04s linear;
+  }
+  .hold-label { position: relative; z-index: 2; pointer-events: none; }
+  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Neon Table Shuffleboard</span>
+    <span class="gm-sub" id="topSub">Setup</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Target Points Quota</div>
+      <div class="opt-grid" id="quotaGrid">
+        <button class="opt-btn" data-q="6">6 Pts (Quick)</button>
+        <button class="opt-btn is-active" data-q="10">10 Pts (Standard)</button>
+        <button class="opt-btn" data-q="15">15 Pts (Pro)</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Shuffleboard Rules</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • <strong>4 Puck Slides</strong> per player turn.<br>
+        • Drag backwards from the launch pad and release to slide.<br>
+        • Score zones: <strong>1, 2, 3, and 4 PTS (Hanger)</strong>.<br>
+        • Over-shooting or falling into side gutters = 0 PTS.<br>
+        • Missing quota = Drink penalty scaled to the deficit!
+      </p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Tournament Roster</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+    <button class="btn" id="btnStartTourney" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Start Shuffleboard Gauntlet
+    </button>
+  </section>
+
+  <!-- 2. GAMEPLAY CANVAS -->
+  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
+    <div class="hud-bar">
+      <div class="hud-stat">
+        <span class="hud-lbl">Player</span>
+        <span class="hud-val" id="hudPlayer" style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-lbl">Score / Target</span>
+        <span class="hud-val" id="hudScore">0 / 10</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-lbl">Pucks</span>
+        <span class="hud-val" id="hudPucks">4 Left</span>
+      </div>
+    </div>
+
+    <div class="table-stage" id="stageWrap">
+      <canvas id="shuffleCanvas"></canvas>
+      <div class="drag-hint" id="dragHint">PULL BACK & RELEASE TO SLIDE</div>
+    </div>
+  </section>
+
+  <!-- 3. VERDICT -->
+  <section class="screen" id="scrVerdict">
+    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">TABLE RESOLUTION</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="verdictPlayer">Player</h2>
+      <div style="font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:900;color:var(--accent);margin-bottom:.6rem;" id="verdictScore">0 PTS</div>
+
+      <div id="forfeitBox" style="background:rgba(255,0,85,.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
+        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--danger);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">MISSED SHUFFLE QUOTA</span>
+        <p style="font-size:1.05rem;font-weight:800;color:#fff;margin-top:.4rem;" id="forfeitText">Take 3 sips!</p>
+      </div>
+
+      <div id="passBox" style="background:rgba(0,255,102,.1);border:2px solid var(--success);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
+        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--success);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">TABLE MASTER</span>
+        <p style="font-size:1rem;font-weight:800;color:#fff;margin-top:.4rem;">Target crushed! Hand out 3 penalty sips.</p>
+      </div>
+    </div>
+    <button class="btn" id="btnNextRunner" style="margin-top:auto;">Next Slider</button>
+  </section>
+</div>
+
+<!-- 4. PRIVACY CURTAIN -->
+<div class="curtain" id="curtain">
+  <div class="cur-card">
+    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/></svg>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT SLIDER</div>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
+    <p style="font-size:.82rem;color:var(--text-secondary);">Target: <strong id="curQuota" style="color:var(--accent);">10</strong> PTS</p>
+    <button class="hold-btn" id="btnCurtainHold">
+      <span class="hold-fill" id="holdFill"></span>
+      <span class="hold-label">HOLD 700MS TO ENTER TABLE</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const AudioShuffle = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  slideWhoosh(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(320, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(140, this.ctx.currentTime + 0.25);
+      g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.25);
+    }catch(e){}
+  },
+  clack(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "triangle"; o.frequency.setValueAtTime(950 + Math.random()*400, this.ctx.currentTime);
+      g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.04);
+    }catch(e){}
+  },
+  gutter(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(120, this.ctx.currentTime);
+      g.gain.setValueAtTime(0.18, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.2);
+    }catch(e){}
+  },
+  scoreChime(){
+    try {
+      this.init();
+      [523, 659, 784, 1046].forEach((f, i) => {
+        setTimeout(() => {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
+          g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(); o.stop(this.ctx.currentTime + 0.15);
+        }, i * 60);
+      });
+    }catch(e){}
+  }
+};
+
+/* ================= STATE & DATA ================= */
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 2) roster = ["Player 1", "Player 2"];
+
+const S = {
+  quota: 10,
+  playerIdx: 0,
+  score: 0,
+  pucksRemaining: 4,
+  pucks: [], // active/locked pucks on table
+  currentPuck: null,
+  isAiming: false,
+  aimStart: { x: 0, y: 0 },
+  aimCurrent: { x: 0, y: 0 },
+  running: false
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+/* ================= PRIVACY CURTAIN ================= */
+let holdTimer = null, holdStart = 0;
+const HOLD_MS = 700;
+
+function openCurtain(pName, onUnlock){
+  $("curName").textContent = pName;
+  $("curQuota").textContent = S.quota;
+  $("holdFill").style.width = "0%";
+  $("btnCurtainHold").classList.remove("armed");
+  $("curtain").classList.add("is-open");
+
+  const btn = $("btnCurtainHold");
+  const cancel = () => {
+    if(holdTimer) cancelAnimationFrame(holdTimer);
+    holdTimer = null;
+    $("holdFill").style.width = "0%";
+    btn.classList.remove("armed");
+  };
+  const start = e => {
+    e.preventDefault();
+    btn.classList.add("armed");
+    holdStart = performance.now();
+    const tick = now => {
+      const el = now - holdStart;
+      const pct = Math.min(100, (el / HOLD_MS) * 100);
+      $("holdFill").style.width = pct + "%";
+      if(el >= HOLD_MS){
+        cancel();
+        $("curtain").classList.remove("is-open");
+        onUnlock();
+      } else {
+        holdTimer = requestAnimationFrame(tick);
+      }
+    };
+    holdTimer = requestAnimationFrame(tick);
+  };
+
+  btn.onpointerdown = start;
+  btn.onpointerup = cancel;
+  btn.onpointercancel = cancel;
+  btn.onpointerleave = cancel;
+}
+
+/* ================= CANVAS PHYSICS ENGINE ================= */
+const cvs = $("shuffleCanvas");
+const ctx = cvs.getContext("2d");
+let W = 360, H = 540, DPR = 1;
+
+function resizeCanvas(){
+  const wrap = cvs.parentElement;
+  DPR = Math.min(window.devicePixelRatio || 1, 3);
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  cvs.width = W * DPR;
+  cvs.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+window.addEventListener("resize", resizeCanvas);
+
+function resetGameForPlayer(){
+  S.score = 0;
+  S.pucksRemaining = 4;
+  S.pucks = [];
+  S.currentPuck = null;
+  S.isAiming = false;
+  spawnReadyPuck();
+  updateHUD();
+  S.running = true;
+}
+
+function spawnReadyPuck(){
+  if(S.pucksRemaining <= 0) return;
+  S.currentPuck = {
+    x: W / 2,
+    y: H - 45,
+    vx: 0,
+    vy: 0,
+    r: 14,
+    active: false,
+    inGutter: false,
+    scoreZone: 0
+  };
+  $("dragHint").style.display = "block";
+}
+
+function updateHUD(){
+  $("hudScore").textContent = `${S.score} / ${S.quota}`;
+  $("hudPucks").textContent = `${S.pucksRemaining} Left`;
+}
+
+let lastT = performance.now();
+function loop(t){
+  if(!S.running) return;
+  const dt = Math.min((t - lastT) / 1000, 0.033);
+  lastT = t;
+
+  // Clear Surface
+  ctx.fillStyle = "#04060a";
+  ctx.fillRect(0, 0, W, H);
+
+  // Table Geometry
+  const tableX = W * 0.12, tableW = W * 0.76;
+  const gutterW = W * 0.12;
+
+  // Gutters (Sides & Far End)
+  ctx.fillStyle = "#0a0d14";
+  ctx.fillRect(0, 0, gutterW, H);
+  ctx.fillRect(W - gutterW, 0, gutterW, H);
+  ctx.fillRect(0, 0, W, 22);
+
+  // Wooden / Metallic Matte Surface
+  ctx.fillStyle = "#121824";
+  ctx.fillRect(tableX, 22, tableW, H - 22);
+
+  // Scoring Zone Dividers & Labels
+  const z4 = 55, z3 = 115, z2 = 185, z1 = 265;
+  ctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
+  ctx.lineWidth = 2;
+
+  const drawZone = (y, pts, color) => {
+    ctx.beginPath(); ctx.moveTo(tableX, y); ctx.lineTo(tableX + tableW, y); ctx.stroke();
+    ctx.fillStyle = color;
+    ctx.font = "800 13px 'Space Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`${pts} PTS`, W / 2, y + 24);
+  };
+
+  drawZone(z4, 4, "#ff007f");
+  drawZone(z3, 3, "#ffd000");
+  drawZone(z2, 2, "#00e5ff");
+  drawZone(z1, 1, "#38bdf8");
+
+  // Launch Foul Line
+  ctx.strokeStyle = "rgba(255, 0, 85, 0.4)";
+  ctx.beginPath(); ctx.moveTo(tableX, H - 90); ctx.lineTo(tableX + tableW, H - 90); ctx.stroke();
+
+  // Update Active Pucks Physics
+  let anyMoving = false;
+  const allPucks = [...S.pucks];
+  if(S.currentPuck && S.currentPuck.active) allPucks.push(S.currentPuck);
+
+  allPucks.forEach(p => {
+    if(!p.inGutter && (Math.abs(p.vx) > 0.05 || Math.abs(p.vy) > 0.05)){
+      anyMoving = true;
+      p.x += p.vx * dt * 60;
+      p.y += p.vy * dt * 60;
+      p.vx *= 0.982; // Table friction
+      p.vy *= 0.982;
+
+      // Check Gutter Drop
+      if(p.x - p.r < tableX || p.x + p.r > tableX + tableW || p.y - p.r < 22){
+        p.inGutter = true;
+        p.vx = 0; p.vy = 0;
+        AudioShuffle.gutter();
+      }
+    } else {
+      p.vx = 0; p.vy = 0;
+    }
+  });
+
+  // Puck-on-Puck Elastic Collisions
+  for(let i = 0; i < allPucks.length; i++){
+    for(let j = i + 1; j < allPucks.length; j++){
+      const p1 = allPucks[i], p2 = allPucks[j];
+      if(p1.inGutter || p2.inGutter) continue;
+      const dx = p2.x - p1.x, dy = p2.y - p1.y;
+      const dist = Math.hypot(dx, dy);
+      if(dist < p1.r + p2.r){
+        // Elastic impulse
+        const nx = dx / dist, ny = dy / dist;
+        const kx = p1.vx - p2.vx, ky = p1.vy - p2.vy;
+        const p = 2 * (nx * kx + ny * ky) / 2;
+        p1.vx -= p * nx; p1.vy -= p * ny;
+        p2.vx += p * nx; p2.vy += p * ny;
+        AudioShuffle.clack();
+      }
+    }
+  }
+
+  // Draw Aim Trajectory Line
+  if(S.isAiming && S.currentPuck){
+    const pullX = S.aimStart.x - S.aimCurrent.x;
+    const pullY = S.aimStart.y - S.aimCurrent.y;
+    ctx.strokeStyle = "#00e5ff";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(S.currentPuck.x, S.currentPuck.y);
+    ctx.lineTo(S.currentPuck.x + pullX * 1.8, S.currentPuck.y + pullY * 1.8);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Render Pucks
+  allPucks.forEach(p => {
+    ctx.fillStyle = p.inGutter ? "#4a5568" : "#00e5ff";
+    ctx.shadowColor = p.inGutter ? "transparent" : "#00e5ff";
+    ctx.shadowBlur = p.inGutter ? 0 : 10;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 0.45, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  // Check if Launched Puck Stopped Moving
+  if(S.currentPuck && S.currentPuck.active && !anyMoving){
+    S.currentPuck.active = false;
+    S.pucks.push(S.currentPuck);
+    S.currentPuck = null;
+    S.pucksRemaining--;
+    updateScoreTally();
+    updateHUD();
+
+    if(S.pucksRemaining > 0){
+      spawnReadyPuck();
+    } else {
+      setTimeout(endGauntlet, 700);
+      return;
+    }
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function updateScoreTally(){
+  let total = 0;
+  const z4 = 55, z3 = 115, z2 = 185, z1 = 265;
+
+  S.pucks.forEach(p => {
+    if(p.inGutter) return;
+    if(p.y >= 22 && p.y < z4) total += 4;
+    else if(p.y >= z4 && p.y < z3) total += 3;
+    else if(p.y >= z3 && p.y < z2) total += 2;
+    else if(p.y >= z2 && p.y < z1) total += 1;
+  });
+
+  if(total > S.score) AudioShuffle.scoreChime();
+  S.score = total;
+}
+
+function endGauntlet(){
+  S.running = false;
+  const pName = roster[S.playerIdx];
+  const passed = S.score >= S.quota;
+
+  $("verdictPlayer").textContent = pName;
+  $("verdictScore").textContent = `${S.score} PTS`;
+
+  if(passed){
+    $("passBox").style.display = "block";
+    $("forfeitBox").style.display = "none";
+  } else {
+    $("passBox").style.display = "none";
+    $("forfeitBox").style.display = "block";
+    const sips = Math.max(2, S.quota - S.score);
+    $("forfeitText").textContent = `Fell ${S.quota - S.score} pts below quota. Take ${sips} penalty sips!`;
+  }
+  showScreen("scrVerdict");
+}
+
+/* ================= TOUCH / SLIDE INTERACTION ================= */
+const wrap = $("stageWrap");
+
+wrap.addEventListener("pointerdown", e => {
+  if(!S.currentPuck || S.currentPuck.active || S.pucksRemaining <= 0) return;
+  const r = wrap.getBoundingClientRect();
+  const px = e.clientX - r.left, py = e.clientY - r.top;
+  if(Math.hypot(px - S.currentPuck.x, py - S.currentPuck.y) < 36){
+    S.isAiming = true;
+    S.aimStart = { x: px, y: py };
+    S.aimCurrent = { x: px, y: py };
+    wrap.setPointerCapture(e.pointerId);
+  }
+});
+
+wrap.addEventListener("pointermove", e => {
+  if(!S.isAiming) return;
+  const r = wrap.getBoundingClientRect();
+  S.aimCurrent = { x: e.clientX - r.left, y: e.clientY - r.top };
+});
+
+const releaseSlide = () => {
+  if(!S.isAiming || !S.currentPuck) return;
+  S.isAiming = false;
+  $("dragHint").style.display = "none";
+
+  const pullX = S.aimStart.x - S.aimCurrent.x;
+  const pullY = S.aimStart.y - S.aimCurrent.y;
+  const power = Math.hypot(pullX, pullY);
+
+  if(power > 12){
+    S.currentPuck.vx = (pullX / power) * Math.min(22, power * 0.18);
+    S.currentPuck.vy = (pullY / power) * Math.min(22, power * 0.18);
+    S.currentPuck.active = true;
+    AudioShuffle.slideWhoosh();
+  }
+};
+wrap.addEventListener("pointerup", releaseSlide);
+wrap.addEventListener("pointercancel", releaseSlide);
+
+// Quota Select
+$("quotaGrid").onclick = e => {
+  const b = e.target.closest(".opt-btn"); if(!b) return;
+  document.querySelectorAll("#quotaGrid .opt-btn").forEach(x => x.classList.remove("is-active"));
+  b.classList.add("is-active");
+  S.quota = parseInt(b.dataset.q, 10);
+};
+
+// Roster
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${p}</span>
+      <span style="color:var(--accent);">4 PUCKS</span>
+    </li>
+  `).join("");
+}
+
+$("btnStartTourney").onclick = () => {
+  S.playerIdx = 0;
+  startTurn();
+};
+
+function startTurn(){
+  const player = roster[S.playerIdx];
+  $("topSub").textContent = `${player}'s Turn`;
+  $("hudPlayer").textContent = player;
+  openCurtain(player, () => {
+    showScreen("scrPlay");
+    resizeCanvas();
+    resetGameForPlayer();
+    lastT = performance.now();
+    requestAnimationFrame(loop);
+  });
+}
+
+$("btnNextRunner").onclick = () => {
+  S.playerIdx = (S.playerIdx + 1) % roster.length;
+  startTurn();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

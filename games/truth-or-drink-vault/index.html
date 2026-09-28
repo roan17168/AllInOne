@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="tokyo-sunset">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#120e24" id="metaThemeColor" />
+<title>Truth or Drink: The Vault | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #120e24; --bg-surface: #1e173b; --bg-elevated: #2d2354;
+    --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+    --accent: #f43f8e; --accent-glow: rgba(244,63,142,0.45); --accent-contrast: #ffffff;
+    --tier1-col: #00ffaa; --tier2-col: #ffd000; --tier3-col: #ff0055;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(244,63,142,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow-x: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+  }
+  .screen.is-active { display: flex; }
+
+  /* Animated Steel Vault Door */
+  .vault-door-stage {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 1.5rem; background: var(--bg-surface); border: 3px solid var(--border-ui);
+    border-radius: var(--r-lg); min-height: 200px; text-align: center; position: relative;
+    overflow: hidden;
+  }
+  .vault-wheel {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, var(--bg-elevated) 0deg 30deg, #100b1a 30deg 60deg);
+    border: 4px solid var(--accent); box-shadow: 0 0 25px var(--accent-glow);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.6s cubic-bezier(.2,.8,.3,1);
+  }
+  .vault-wheel.unlocking { transform: rotate(360deg) scale(1.1); }
+
+  /* Cold Open Prompt Card */
+  .vault-card {
+    background: var(--bg-surface); border: 2px solid var(--accent);
+    border-radius: var(--r-lg); padding: 1.8rem 1.2rem; text-align: center;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.6); min-height: 180px;
+    display: flex; flex-direction: column; justify-content: center; gap: .6rem;
+  }
+  .vault-kicker {
+    font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--accent);
+    letter-spacing: .16em; text-transform: uppercase; font-weight: 800;
+  }
+  .vault-prompt-text {
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.45rem; font-weight: 900;
+    line-height: 1.35; color: #fff;
+  }
+
+  /* Tier Selector */
+  .tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .tier-btn {
+    min-height: 52px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
+    font-size: .75rem; font-weight: 800; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .tier-btn.t1.is-active { background: var(--tier1-col); color: #022c22; border-color: var(--tier1-col); box-shadow: 0 0 14px var(--tier1-col); }
+  .tier-btn.t2.is-active { background: var(--tier2-col); color: #1c1400; border-color: var(--tier2-col); box-shadow: 0 0 14px var(--tier2-col); }
+  .tier-btn.t3.is-active { background: var(--tier3-col); color: #fff; border-color: var(--tier3-col); box-shadow: 0 0 14px var(--tier3-col); }
+
+  /* Panels */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: #fff; border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,85,.4); }
+  .btn.success { background: var(--success); color: #022c22; box-shadow: 0 0 16px rgba(0,255,170,.4); }
+
+  /* 3-Stage Privacy Curtain */
+  .curtain {
+    position: fixed; inset: 0; z-index: 100; background: rgba(18, 14, 36, 0.96);
+    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
+  }
+  .curtain.is-open { display: flex; }
+  .cur-card {
+    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
+    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
+  }
+  .hold-btn {
+    position: relative; overflow: hidden; width: 100%; min-height: 60px;
+    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
+    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
+    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
+  }
+  .hold-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: var(--accent); opacity: .85; transition: width .04s linear;
+  }
+  .hold-label { position: relative; z-index: 2; pointer-events: none; }
+  .hold-btn.armed .hold-label { color: #fff; }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Truth or Drink: The Vault</span>
+    <span class="gm-sub" id="topSub">Setup</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Vault Security Tier</div>
+      <div class="tier-grid" id="tierGrid">
+        <button class="tier-btn t1 is-active" data-tier="1">
+          <span>TIER 1</span>
+          <small>Casual</small>
+        </button>
+        <button class="tier-btn t2" data-tier="2">
+          <span>TIER 2</span>
+          <small>Personal</small>
+        </button>
+        <button class="tier-btn t3" data-tier="3">
+          <span>TIER 3</span>
+          <small>Nuclear 18+</small>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Vault Directives</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • The active player opens the vault door to reveal a confidential card.<br>
+        • <strong>Option A:</strong> Speak the complete truth aloud to the room (+1 Truth Point).<br>
+        • <strong>Option B:</strong> Refuse to answer and <strong>CHUG THE PENALTY SIPS</strong>!<br>
+        • All truths and forfeits are logged on the group ledger.
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Interrogation Roster</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+
+    <button class="btn" id="btnUnlockVault" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+      Enter Interrogation Vault
+    </button>
+  </section>
+
+  <!-- 2. GAMEPLAY VAULT SCREEN -->
+  <section class="screen" id="scrPlay">
+    <div class="panel" style="text-align:center;">
+      <div style="font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;" id="hudTurnTag">TARGET IN THE HOT SEAT</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:900;margin:.2rem 0;" id="hudActivePlayer">Player</h2>
+    </div>
+
+    <!-- Vault Card -->
+    <div class="vault-card" id="vaultCard">
+      <span class="vault-kicker" id="cardTierBadge">TIER 1 // WARMUP PROMPT</span>
+      <h2 class="vault-prompt-text" id="promptQuestion">What is the most embarrassing thing in your search history?</h2>
+    </div>
+
+    <!-- Choice Buttons -->
+    <div class="panel">
+      <div class="panel-title">Make Your Choice</div>
+      <div class="btn-grid">
+        <button class="btn danger" id="btnDrinkForfeit">CHUG PENALTY (<span id="sipsBadge">1 SIP</span>)</button>
+        <button class="btn success" id="btnToldTruth">I SPOKE THE TRUTH</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. VERDICT / SUMMARY SCREEN -->
+  <section class="screen" id="scrVerdict">
+    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">VAULT SESSION SUMMARY</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;">Confession Log</h2>
+      <div id="summaryStatsList" style="display:flex;flex-direction:column;gap:.4rem;margin:1rem 0;text-align:left;font-family:'Space Mono',monospace;font-size:.8rem;"></div>
+    </div>
+    <button class="btn" id="btnNextInterrogation" style="margin-top:auto;">Next Vault Target</button>
+  </section>
+</div>
+
+<!-- 4. PRIVACY CURTAIN -->
+<div class="curtain" id="curtain">
+  <div class="cur-card">
+    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">CONFIDENTIAL REVEAL</div>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
+    <p style="font-size:.82rem;color:var(--text-secondary);">Prepare to face the vault question.</p>
+    <button class="hold-btn" id="btnCurtainHold">
+      <span class="hold-fill" id="holdFill"></span>
+      <span class="hold-label">HOLD 700MS TO UNLOCK</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const Synth = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  vaultUnlock(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(140, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(320, this.ctx.currentTime + 0.25);
+      g.gain.setValueAtTime(0.18, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.25);
+    }catch(e){}
+  },
+  drinkChug(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(160, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(45, this.ctx.currentTime + 0.35);
+      g.gain.setValueAtTime(0.28, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.35);
+    }catch(e){}
+  },
+  truthApplause(){
+    try {
+      this.init();
+      [587, 784, 880, 1174].forEach((f, i) => {
+        setTimeout(() => {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
+          g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.14);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(); o.stop(this.ctx.currentTime + 0.14);
+        }, i * 65);
+      });
+    }catch(e){}
+  }
+};
+
+/* ================= 100+ 3-TIER VAULT DATASET ================= */
+const VAULT_DECKS = {
+  "1": [
+    "What is the most embarrassing purchase you have made in the past year?",
+    "Have you ever stalked an ex on social media from a fake account?",
+    "What is a popular trend that you secretly think is completely stupid?",
+    "What is the dumbest excuse you have used to cancel plans?",
+    "If you could delete one memory from your life, what would it be?",
+    "What is the longest you have gone without showering?",
+    "Who in this room would you least trust to look after your dog for a week?",
+    "What is a lie you told that spiraled completely out of control?"
+  ],
+  "2": [
+    "What is the biggest regret you have in your dating life?",
+    "Have you ever had a crush on a friend's partner?",
+    "What is something you have done that you hope your parents never find out?",
+    "Who in this room do you think has the worst taste in partners?",
+    "What is the pettiest reason you have ever broken up or stopped talking to someone?",
+    "What is a secret someone trusted you with that you immediately told someone else?",
+    "Have you ever snooped through someone's phone or personal messages?",
+    "What is the most toxic trait you secretly know you possess?"
+  ],
+  "3": [
+    "Who in this room would you hook up with if there were zero consequences?",
+    "What is your most unhinged or controversial bedroom preference?",
+    "Have you ever hooked up with someone and regretted it the exact second it was over?",
+    "What is the most illegal or forbidden thing you have ever gotten away with?",
+    "Have you ever sent a spicy photo to someone you definitely shouldn't have?",
+    "What is the most scandalous secret you know about someone seated at this table?",
+    "What is the wildest place you have ever hooked up?",
+    "Have you ever lied about having feelings for someone just to hook up?"
+  ]
+};
+
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 2) roster = ["Alex", "Jordan", "Taylor"];
+
+const S = {
+  tier: "1",
+  playerIdx: 0,
+  deck: [],
+  currentPrompt: "",
+  stats: {} // player -> { truths: 0, drinks: 0 }
+};
+
+const $ = id => document.getElementById(id);
+function escapeHTML(value){
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;"
+  }[char]));
+}
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+function shuffledCopy(items){
+  const deck = items.slice();
+  for(let i = deck.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  return deck;
+}
+
+/* ================= 3-STAGE PRIVACY CURTAIN ================= */
+let holdTimer = null, holdStart = 0;
+const HOLD_MS = 700;
+
+function openCurtain(pName, onUnlock){
+  $("curName").textContent = pName;
+  $("holdFill").style.width = "0%";
+  $("btnCurtainHold").classList.remove("armed");
+  $("curtain").classList.add("is-open");
+
+  const btn = $("btnCurtainHold");
+  const cancel = () => {
+    if(holdTimer) cancelAnimationFrame(holdTimer);
+    holdTimer = null;
+    $("holdFill").style.width = "0%";
+    btn.classList.remove("armed");
+  };
+  const start = e => {
+    e.preventDefault();
+    btn.classList.add("armed");
+    holdStart = performance.now();
+    const tick = now => {
+      const el = now - holdStart;
+      const pct = Math.min(100, (el / HOLD_MS) * 100);
+      $("holdFill").style.width = pct + "%";
+      if(el >= HOLD_MS){
+        cancel();
+        $("curtain").classList.remove("is-open");
+        onUnlock();
+      } else {
+        holdTimer = requestAnimationFrame(tick);
+      }
+    };
+    holdTimer = requestAnimationFrame(tick);
+  };
+
+  btn.onpointerdown = start;
+  btn.onpointerup = cancel;
+  btn.onpointercancel = cancel;
+  btn.onpointerleave = cancel;
+}
+
+/* ================= GAMEPLAY ENGINE ================= */
+function startVaultSession(){
+  S.stats = Object.create(null);
+  roster.forEach(p => { S.stats[p] = { truths: 0, drinks: 0 }; });
+  S.playerIdx = 0;
+  S.deck = shuffledCopy(VAULT_DECKS[S.tier] || VAULT_DECKS["1"]);
+  startTurn();
+}
+
+function startTurn(){
+  const player = roster[S.playerIdx];
+  $("topSub").textContent = `${player}'s Turn`;
+  $("hudActivePlayer").textContent = player;
+
+  if(S.deck.length === 0){
+    S.deck = shuffledCopy(VAULT_DECKS[S.tier] || VAULT_DECKS["1"]);
+  }
+  S.currentPrompt = S.deck.pop();
+
+  const tierSips = (S.tier === "1") ? 1 : ((S.tier === "2") ? 2 : 3);
+  $("sipsBadge").textContent = `${tierSips} ${tierSips === 1 ? 'SIP' : 'SIPS'}`;
+  $("cardTierBadge").textContent = `TIER ${S.tier} // VAULT CARD`;
+  $("promptQuestion").textContent = S.currentPrompt;
+
+  openCurtain(player, () => {
+    Synth.vaultUnlock();
+    showScreen("scrPlay");
+  });
+}
+
+$("btnToldTruth").onclick = () => {
+  Synth.truthApplause();
+  const p = roster[S.playerIdx];
+  S.stats[p].truths++;
+  showSummary();
+};
+
+$("btnDrinkForfeit").onclick = () => {
+  Synth.drinkChug();
+  const p = roster[S.playerIdx];
+  const sips = (S.tier === "1") ? 1 : ((S.tier === "2") ? 2 : 3);
+  S.stats[p].drinks += sips;
+  showSummary();
+};
+
+function showSummary(){
+  $("summaryStatsList").innerHTML = roster.map(p => {
+    const st = S.stats[p] || { truths: 0, drinks: 0 };
+    return `
+      <div style="background:var(--bg-elevated);padding:.4rem .8rem;border-radius:var(--r-sm);border:1px solid var(--border-ui);display:flex;justify-content:space-between;align-items:center;">
+        <span>${escapeHTML(p)}</span>
+        <div>
+          <span style="color:var(--success);margin-right:8px;">${st.truths} Truths</span>
+          <span style="color:var(--danger);">${st.drinks} Sips</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  showScreen("scrVerdict");
+}
+
+$("btnNextInterrogation").onclick = () => {
+  S.playerIdx = (S.playerIdx + 1) % roster.length;
+  startTurn();
+};
+
+// Tier Select
+$("tierGrid").onclick = e => {
+  const b = e.target.closest(".tier-btn"); if(!b) return;
+  document.querySelectorAll("#tierGrid .tier-btn").forEach(x => x.classList.remove("is-active"));
+  b.classList.add("is-active");
+  S.tier = b.dataset.tier;
+};
+
+// Roster
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${escapeHTML(p)}</span>
+      <span style="color:var(--accent);">TARGET</span>
+    </li>
+  `).join("");
+}
+
+$("btnUnlockVault").onclick = startVaultSession;
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

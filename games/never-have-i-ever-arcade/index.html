@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald-lounge">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#071712" id="metaThemeColor" />
+<title>Never Have I Ever: 3 Lives | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #071712; --bg-surface: #0e241d; --bg-elevated: #16362c;
+    --text-primary: #ffffff; --text-secondary: #a3cfbe; --text-muted: #5e9481;
+    --accent: #10b981; --accent-glow: rgba(16,185,129,0.38); --accent-contrast: #031c14;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(16,185,129,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow-x: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+  }
+  .screen.is-active { display: flex; }
+
+  /* Life HUD Cards */
+  .lives-matrix {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: .5rem; margin: .6rem 0;
+  }
+  .player-life-card {
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); padding: .6rem .7rem; display: flex;
+    flex-direction: column; gap: 4px; transition: all .15s;
+  }
+  .player-life-card.is-dead {
+    opacity: 0.4; border-color: var(--danger); background: rgba(255,0,85,0.05);
+  }
+  .p-name-row {
+    display: flex; justify-content: space-between; font-family: 'Space Mono', monospace;
+    font-size: .75rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .p-hearts { display: flex; gap: 4px; }
+  .heart-pip {
+    width: 14px; height: 14px; color: var(--accent);
+    filter: drop-shadow(0 0 4px var(--accent-glow));
+  }
+  .heart-pip.lost { color: var(--text-muted); opacity: 0.3; filter: none; }
+
+  /* Prompt Card */
+  .prompt-card {
+    background: var(--bg-surface); border: 2px solid var(--border-ui);
+    border-radius: var(--r-lg); padding: 1.8rem 1.2rem; text-align: center;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.6); min-height: 180px;
+    display: flex; flex-direction: column; justify-content: center; gap: .6rem;
+  }
+  .prompt-kicker {
+    font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--accent);
+    letter-spacing: .16em; text-transform: uppercase; font-weight: 800;
+  }
+  .prompt-text {
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.45rem; font-weight: 900;
+    line-height: 1.35; color: #fff;
+  }
+
+  /* Category Pack Selector */
+  .pack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .pack-btn {
+    min-height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
+    font-size: .75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .pack-btn.is-active {
+    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow);
+  }
+
+  /* Panels & Action Buttons */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,85,.4); }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Never Have I Ever: 3 Lives</span>
+    <span class="gm-sub" id="topSub">Setup</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Select Spice Intensity</div>
+      <div class="pack-grid" id="packGrid">
+        <button class="pack-btn is-active" data-pack="mild">Mild (Warmup)</button>
+        <button class="pack-btn" data-pack="wild">Wild (Party)</button>
+        <button class="pack-btn" data-pack="spicy">18+ (Spicy)</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Survival Directives</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • Everyone starts with <strong>3 Glowing Lives</strong>.<br>
+        • When a statement applies to you: Tap <strong>"I HAVE / GUILTY"</strong>.<br>
+        • You forfeit 1 life and take 1 sip of your drink.<br>
+        • Last player standing with surviving lives wins the championship!
+      </p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Combatants Roster</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+    <button class="btn" id="btnStartArcade" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Start 3-Lives Battle
+    </button>
+  </section>
+
+  <!-- 2. GAMEPLAY SCREEN -->
+  <section class="screen" id="scrPlay">
+    <div class="panel">
+      <div class="panel-title">Active Health Matrix</div>
+      <div class="lives-matrix" id="livesMatrix"></div>
+    </div>
+
+    <div class="prompt-card">
+      <span class="prompt-kicker" id="cardPackBadge">WILD PARTY // STATEMENT</span>
+      <h2 class="prompt-text" id="promptText">Never have I ever...</h2>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Deduct Life: Tap Guilty Players</div>
+      <div id="guiltyButtonsGrid" style="display:flex;flex-wrap:wrap;gap:.4rem;"></div>
+    </div>
+
+    <button class="btn" id="btnNextPrompt" style="margin-top:auto;">Next Statement</button>
+  </section>
+
+  <!-- 3. VICTORY / ELIMINATION SCREEN -->
+  <section class="screen" id="scrVictory">
+    <div class="panel" style="text-align:center;padding:2rem 1rem;">
+      <div class="ico" style="width:48px;height:48px;color:var(--accent);margin-bottom:.5rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1h10v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34"/><path d="M6 4h12v6c0 3.31-2.69 6-6 6s-6-2.69-6-6V4z"/></svg>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">SOLE SURVIVOR</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="winnerName">Player</h2>
+      <p style="font-size:.9rem;color:var(--text-secondary);">Outlasted all rivals and preserved their lives!</p>
+    </div>
+    <button class="btn" id="btnPlayAgain" style="margin-top:auto;">Play Again</button>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const Synth = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  cardNext(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "triangle"; o.frequency.setValueAtTime(600, this.ctx.currentTime);
+      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.05);
+    }catch(e){}
+  },
+  lifeLost(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(220, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.25);
+      g.gain.setValueAtTime(0.25, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.25);
+    }catch(e){}
+  },
+  eliminated(){
+    try {
+      this.init();
+      [180, 140, 100, 60].forEach((f, i) => {
+        setTimeout(() => {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = "sawtooth"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
+          g.gain.setValueAtTime(0.2, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(); o.stop(this.ctx.currentTime + 0.15);
+        }, i * 70);
+      });
+    }catch(e){}
+  },
+  victory(){
+    try {
+      this.init();
+      [523, 659, 784, 1046, 1318].forEach((f, i) => {
+        setTimeout(() => {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
+          g.gain.setValueAtTime(0.2, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(); o.stop(this.ctx.currentTime + 0.2);
+        }, i * 70);
+      });
+    }catch(e){}
+  }
+};
+
+/* ================= 150+ CATEGORIZED PROMPT DECK ================= */
+const PROMPT_DECKS = {
+  mild: [
+    "Never have I ever re-gifted a present.",
+    "Never have I ever pretended to be sick to avoid hanging out.",
+    "Never have I ever cried during an animated movie.",
+    "Never have I ever sung in the shower at full volume.",
+    "Never have I ever googled my own name.",
+    "Never have I ever dropped food on the floor and ate it after 5 seconds.",
+    "Never have I ever locked myself out of my own home.",
+    "Never have I ever waved back at someone who wasn't waving at me.",
+    "Never have I ever stayed in bed for an entire day bingeing a show.",
+    "Never have I ever accidentally liked an ex's old social media post.",
+    "Never have I ever worn socks with sandals in public.",
+    "Never have I ever eaten dessert before dinner.",
+    "Never have I ever fallen asleep in a movie theater.",
+    "Never have I ever pretended to know a song that I didn't know.",
+    "Never have I ever lied about my age."
+  ],
+  wild: [
+    "Never have I ever been kicked out of a bar or venue.",
+    "Never have I ever ghosted someone after more than 3 dates.",
+    "Never have I ever sent a risky text to the completely wrong person.",
+    "Never have I ever lied during a game of Truth or Dare.",
+    "Never have I ever sneaked into a VIP section or concert.",
+    "Never have I ever broken a piece of furniture while partying.",
+    "Never have I ever woken up somewhere and had no idea where I was.",
+    "Never have I ever lied on my resume or job interview.",
+    "Never have I ever lost a bet and had to do a humiliating dare.",
+    "Never have I ever walked into the wrong public restroom.",
+    "Never have I ever called an ex while completely drunk.",
+    "Never have I ever dined and dashed or taken something without paying.",
+    "Never have I ever ruined a surprise party.",
+    "Never have I ever cheated at a board game to win.",
+    "Never have I ever kissed someone whose name I didn't remember."
+  ],
+  spicy: [
+    "Never have I ever had a secret crush on someone in this room.",
+    "Never have I ever sent a spicy photo that I immediately regretted.",
+    "Never have I ever gone skinny dipping in public waters.",
+    "Never have I ever hooked up with someone on a first date.",
+    "Never have I ever kissed more than two people in a single night.",
+    "Never have I ever lied about body count.",
+    "Never have I ever hooked up in a public or semi-public place.",
+    "Never have I ever had a friends-with-benefits situation turn messy.",
+    "Never have I ever slid into a verified celebrity's DMs.",
+    "Never have I ever been caught making out somewhere inappropriate.",
+    "Never have I ever walked in on someone else being intimate.",
+    "Never have I ever used a ridiculous fake name at a nightclub.",
+    "Never have I ever had a one-night stand while traveling abroad.",
+    "Never have I ever stalked someone's location through an app."
+  ]
+};
+
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 2) roster = ["Alex", "Jordan", "Taylor"];
+
+const S = {
+  pack: "mild",
+  lives: {},
+  deck: [],
+  currentPrompt: ""
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+function startArcadeBattle(){
+  S.lives = {};
+  roster.forEach(p => { S.lives[p] = 3; });
+  S.deck = [...(PROMPT_DECKS[S.pack] || PROMPT_DECKS.mild)].sort(() => Math.random() - 0.5);
+  showScreen("scrPlay");
+  renderLivesMatrix();
+  renderGuiltyButtons();
+  nextPrompt();
+}
+
+function nextPrompt(){
+  if(S.deck.length === 0){
+    S.deck = [...(PROMPT_DECKS[S.pack] || PROMPT_DECKS.mild)].sort(() => Math.random() - 0.5);
+  }
+  S.currentPrompt = S.deck.pop();
+  $("promptText").textContent = S.currentPrompt;
+  $("cardPackBadge").textContent = `${S.pack.toUpperCase()} PACK // STATEMENT`;
+  Synth.cardNext();
+}
+
+function renderLivesMatrix(){
+  $("livesMatrix").innerHTML = roster.map(p => {
+    const hp = S.lives[p] || 0;
+    const isDead = hp <= 0;
+    return `
+      <div class="player-life-card ${isDead ? 'is-dead' : ''}">
+        <div class="p-name-row">
+          <span>${p}</span>
+          <span style="color:${isDead ? 'var(--danger)' : 'var(--accent)'}">${isDead ? 'OUT' : hp + ' HP'}</span>
+        </div>
+        <div class="p-hearts">
+          <svg class="heart-pip ${hp < 1 ? 'lost' : ''}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg class="heart-pip ${hp < 2 ? 'lost' : ''}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg class="heart-pip ${hp < 3 ? 'lost' : ''}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderGuiltyButtons(){
+  $("guiltyButtonsGrid").innerHTML = roster.map(p => {
+    const isDead = (S.lives[p] || 0) <= 0;
+    if(isDead) return "";
+    return `
+      <button class="btn danger" style="flex:1;min-width:110px;min-height:46px;font-size:.75rem;" data-player="${p}">
+        ${p} (Guilty)
+      </button>
+    `;
+  }).join("");
+
+  $("guiltyButtonsGrid").onclick = e => {
+    const b = e.target.closest("button"); if(!b) return;
+    const p = b.dataset.player;
+    deductLife(p);
+  };
+}
+
+function deductLife(playerName){
+  if((S.lives[playerName] || 0) <= 0) return;
+  S.lives[playerName]--;
+  
+  if(S.lives[playerName] === 0){
+    Synth.eliminated();
+  } else {
+    Synth.lifeLost();
+  }
+
+  renderLivesMatrix();
+  renderGuiltyButtons();
+  checkSurvivorVictory();
+}
+
+function checkSurvivorVictory(){
+  const survivors = roster.filter(p => S.lives[p] > 0);
+  if(survivors.length === 1){
+    Synth.victory();
+    $("winnerName").textContent = survivors[0];
+    showScreen("scrVictory");
+  } else if(survivors.length === 0){
+    $("winnerName").textContent = "Mutual Destruction!";
+    showScreen("scrVictory");
+  }
+}
+
+$("btnNextPrompt").onclick = nextPrompt;
+$("btnPlayAgain").onclick = () => showScreen("scrSetup");
+
+// Pack Selection
+$("packGrid").onclick = e => {
+  const b = e.target.closest(".pack-btn"); if(!b) return;
+  document.querySelectorAll("#packGrid .pack-btn").forEach(x => x.classList.remove("is-active"));
+  b.classList.add("is-active");
+  S.pack = b.dataset.pack;
+};
+
+// Roster
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${p}</span>
+      <span style="color:var(--accent);">3 LIVES</span>
+    </li>
+  `).join("");
+}
+
+$("btnStartArcade").onclick = startArcadeBattle;
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

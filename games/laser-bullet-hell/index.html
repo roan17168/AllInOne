@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="tokyo-sunset">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#120e24" id="metaThemeColor" />
+<title>Vector Barrage Dodger | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #120e24; --bg-surface: #1e173b; --bg-elevated: #2d2354;
+    --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+    --accent: #f43f8e; --accent-glow: rgba(244,63,142,0.38); --accent-contrast: #ffffff;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(244,63,142,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.is-active { display: flex; }
+
+  /* HUD */
+  .hud-strip {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+  }
+  .hud-stat {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); padding: .3rem .4rem;
+  }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .55rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 900; color: var(--accent); }
+
+  /* Bullet Hell Viewport */
+  .arena-stage { flex: 1; position: relative; width: 100%; height: 100%; background: #080512; touch-action: none; }
+  #arenaCanvas { width: 100%; height: 100%; display: block; }
+
+  /* Panels */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .opt-btn {
+    min-height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
+    font-size: .78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .opt-btn.is-active {
+    background: var(--accent); color: #fff; border-color: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow);
+  }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: #fff; border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+
+  /* 3-Stage Privacy Curtain */
+  .curtain {
+    position: fixed; inset: 0; z-index: 100; background: rgba(18, 14, 36, 0.96);
+    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
+  }
+  .curtain.is-open { display: flex; }
+  .cur-card {
+    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
+    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
+  }
+  .hold-btn {
+    position: relative; overflow: hidden; width: 100%; min-height: 60px;
+    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
+    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
+    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
+  }
+  .hold-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: var(--accent); opacity: .85; transition: width .04s linear;
+  }
+  .hold-label { position: relative; z-index: 2; pointer-events: none; }
+  .hold-btn.armed .hold-label { color: #fff; }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Vector Barrage Dodger</span>
+    <span class="gm-sub" id="topSub">Survival Trial</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Survival Time Quota</div>
+      <div class="opt-grid" id="quotaGrid">
+        <button class="opt-btn" data-q="20">20.0s (Easy)</button>
+        <button class="opt-btn is-active" data-q="35">35.0s (Normal)</button>
+        <button class="opt-btn" data-q="50">50.0s (Hell)</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Arena Directives</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • Drag your finger anywhere on screen to pilot your glowing neon craft.<br>
+        • Dodge spiral lasers, homing missiles, and shockwaves.<br>
+        • Precise center core hitbox ($\text{radius} = 4\text{px}$).<br>
+        • Crashing before the quota triggers randomized forfeit penalties!
+      </p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Active Pilots</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+    <button class="btn" id="btnStartGauntlet" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Enter Barrage Arena
+    </button>
+  </section>
+
+  <!-- GAMEPLAY ARENA -->
+  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
+    <div class="hud-strip">
+      <div class="hud-stat">
+        <span class="hud-lbl">Pilot</span>
+        <span class="hud-val" id="hudPlayer" style="font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-lbl">Survived</span>
+        <span class="hud-val" id="hudTime">0.00s</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-lbl">Target Quota</span>
+        <span class="hud-val" id="hudQuota" style="color:var(--warning);">35.0s</span>
+      </div>
+    </div>
+
+    <div class="arena-stage" id="arenaWrap">
+      <canvas id="arenaCanvas"></canvas>
+    </div>
+  </section>
+
+  <!-- VERDICT -->
+  <section class="screen" id="scrVerdict">
+    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">SURVIVAL LOG</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="verdictPlayer">Player</h2>
+      <div style="font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:900;color:var(--accent);margin-bottom:.4rem;" id="verdictTime">0.00s</div>
+
+      <div id="forfeitBox" style="background:rgba(255,0,85,.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
+        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--danger);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">VAPORIZED IN THE BARRAGE</span>
+        <p style="font-size:1rem;font-weight:800;color:#fff;margin-top:.4rem;" id="forfeitText">Take 3 sips!</p>
+      </div>
+
+      <div id="passBox" style="background:rgba(0,255,170,.1);border:2px solid var(--success);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
+        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--success);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">BULLET HELL SURVIVOR</span>
+        <p style="font-size:1rem;font-weight:800;color:#fff;margin-top:.4rem;">Untouchable! Nominate 2 players to drink.</p>
+      </div>
+    </div>
+    <button class="btn" id="btnNextPilot" style="margin-top:auto;">Next Gauntlet Runner</button>
+  </section>
+</div>
+
+<!-- 4. PRIVACY CURTAIN -->
+<div class="curtain" id="curtain">
+  <div class="cur-card">
+    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT DODGER</div>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
+    <p style="font-size:.82rem;color:var(--text-secondary);">Goal: Survive <strong id="curQuota" style="color:var(--accent);">35.0s</strong></p>
+    <button class="hold-btn" id="btnCurtainHold">
+      <span class="hold-fill" id="holdFill"></span>
+      <span class="hold-label">HOLD 700MS TO ENTER ARENA</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const SynthHell = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  laserShot(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(900, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.05);
+      g.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.05);
+    }catch(e){}
+  },
+  explosion(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(160, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.45);
+      g.gain.setValueAtTime(0.3, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.45);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.45);
+    }catch(e){}
+  }
+};
+
+/* ================= STATE & FORFEITS ================= */
+const FORFEITS = [
+  "Take 3 sips of your drink.",
+  "Take 1 sip for every 5 seconds you fell short.",
+  "Do 8 jumping jacks right now.",
+  "Speak in third person for the next 2 rounds.",
+  "Let the group pick your forfeit dare."
+];
+
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 2) roster = ["Pilot 1", "Pilot 2"];
+
+const S = {
+  quota: 35,
+  playerIdx: 0,
+  timeSurvived: 0,
+  running: false,
+  ship: { x: 180, y: 360, targetX: 180, targetY: 360, r: 4 },
+  bullets: [],
+  spiralAngle: 0
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+/* ================= PRIVACY CURTAIN ================= */
+let holdTimer = null, holdStart = 0;
+const HOLD_MS = 700;
+
+function openCurtain(pName, onUnlock){
+  $("curName").textContent = pName;
+  $("curQuota").textContent = `${S.quota}.0s`;
+  $("holdFill").style.width = "0%";
+  $("btnCurtainHold").classList.remove("armed");
+  $("curtain").classList.add("is-open");
+
+  const btn = $("btnCurtainHold");
+  const cancel = () => {
+    if(holdTimer) cancelAnimationFrame(holdTimer);
+    holdTimer = null;
+    $("holdFill").style.width = "0%";
+    btn.classList.remove("armed");
+  };
+  const start = e => {
+    e.preventDefault();
+    btn.classList.add("armed");
+    holdStart = performance.now();
+    const tick = now => {
+      const el = now - holdStart;
+      const pct = Math.min(100, (el / HOLD_MS) * 100);
+      $("holdFill").style.width = pct + "%";
+      if(el >= HOLD_MS){
+        cancel();
+        $("curtain").classList.remove("is-open");
+        onUnlock();
+      } else {
+        holdTimer = requestAnimationFrame(tick);
+      }
+    };
+    holdTimer = requestAnimationFrame(tick);
+  };
+
+  btn.onpointerdown = start;
+  btn.onpointerup = cancel;
+  btn.onpointercancel = cancel;
+  btn.onpointerleave = cancel;
+}
+
+/* ================= CANVAS ENGINE ================= */
+const cvs = $("arenaCanvas");
+const ctx = cvs.getContext("2d");
+let W = 360, H = 540, DPR = 1;
+
+function resizeCanvas(){
+  const wrap = cvs.parentElement;
+  DPR = Math.min(window.devicePixelRatio || 1, 3);
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  cvs.width = W * DPR;
+  cvs.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  S.ship.x = W / 2; S.ship.y = H * 0.75;
+  S.ship.targetX = S.ship.x; S.ship.targetY = S.ship.y;
+}
+window.addEventListener("resize", resizeCanvas);
+
+function resetArena(){
+  S.timeSurvived = 0;
+  S.bullets = [];
+  S.spiralAngle = 0;
+  S.ship.x = W / 2;
+  S.ship.y = H * 0.75;
+  S.ship.targetX = S.ship.x;
+  S.ship.targetY = S.ship.y;
+  $("hudQuota").textContent = `${S.quota}.0s`;
+  S.running = true;
+}
+
+let lastT = performance.now();
+let spiralTimer = 0, ringTimer = 0;
+
+function loop(t){
+  if(!S.running) return;
+  const dt = Math.min((t - lastT) / 1000, 0.033);
+  lastT = t;
+
+  S.timeSurvived += dt;
+  $("hudTime").textContent = `${S.timeSurvived.toFixed(2)}s`;
+
+  // Smooth Ship Movement
+  S.ship.x += (S.ship.targetX - S.ship.x) * 16 * dt;
+  S.ship.y += (S.ship.targetY - S.ship.y) * 16 * dt;
+
+  // Clear Arena
+  ctx.fillStyle = "#070410";
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw Grid Lines
+  ctx.strokeStyle = "rgba(244, 63, 142, 0.1)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(let x = 0; x < W; x += 24){ ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+  for(let y = 0; y < H; y += 24){ ctx.moveTo(0, y); ctx.lineTo(W, y); }
+  ctx.stroke();
+
+  // Pattern 1: Spiral Rotating Lasers from Arena Top
+  spiralTimer += dt;
+  const spiralRate = Math.max(0.08, 0.18 - (S.timeSurvived / 200));
+  if(spiralTimer > spiralRate){
+    spiralTimer = 0;
+    S.spiralAngle += 0.35;
+    const speed = 160 + Math.min(100, S.timeSurvived * 3);
+    for(let arm = 0; arm < 3; arm++){
+      const a = S.spiralAngle + (arm * (Math.PI * 2 / 3));
+      S.bullets.push({
+        x: W / 2,
+        y: 45,
+        vx: Math.cos(a) * speed,
+        vy: Math.sin(a) * speed,
+        r: 3.5,
+        color: "#f43f8e"
+      });
+    }
+    SynthHell.laserShot();
+  }
+
+  // Pattern 2: Expanding Shockwave Rings
+  ringTimer += dt;
+  if(ringTimer > 2.8){
+    ringTimer = 0;
+    const count = 12;
+    for(let i = 0; i < count; i++){
+      const a = (i / count) * Math.PI * 2;
+      S.bullets.push({
+        x: W / 2,
+        y: H * 0.35,
+        vx: Math.cos(a) * 120,
+        vy: Math.sin(a) * 120,
+        r: 4.5,
+        color: "#00ffaa"
+      });
+    }
+  }
+
+  // Update & Draw Bullets
+  for(let i = S.bullets.length - 1; i >= 0; i--){
+    const b = S.bullets[i];
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+
+    ctx.fillStyle = b.color;
+    ctx.shadowColor = b.color; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Hitbox Circle Collision Check
+    const dist = Math.hypot(b.x - S.ship.x, b.y - S.ship.y);
+    if(dist < b.r + S.ship.r){
+      triggerVaporize();
+      return;
+    }
+
+    // Remove Offscreen
+    if(b.x < -20 || b.x > W + 20 || b.y < -20 || b.y > H + 20){
+      S.bullets.splice(i, 1);
+    }
+  }
+
+  // Draw Player Ship (Vector Triangle + Glowing Hitbox)
+  ctx.save();
+  ctx.translate(S.ship.x, S.ship.y);
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2;
+  ctx.shadowColor = "#f43f8e"; ctx.shadowBlur = 10;
+  ctx.beginPath();
+  ctx.moveTo(0, -12);
+  ctx.lineTo(9, 10);
+  ctx.lineTo(0, 6);
+  ctx.lineTo(-9, 10);
+  ctx.closePath();
+  ctx.stroke();
+
+  // Red Precision Hitbox Core
+  ctx.fillStyle = "#ff0055";
+  ctx.beginPath(); ctx.arc(0, 0, S.ship.r, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+  ctx.shadowBlur = 0;
+
+  requestAnimationFrame(loop);
+}
+
+function triggerVaporize(){
+  S.running = false;
+  SynthHell.explosion();
+
+  const pName = roster[S.playerIdx];
+  const passed = S.timeSurvived >= S.quota;
+
+  $("verdictPlayer").textContent = pName;
+  $("verdictTime").textContent = `${S.timeSurvived.toFixed(2)}s`;
+
+  if(passed){
+    $("passBox").style.display = "block";
+    $("forfeitBox").style.display = "none";
+  } else {
+    $("passBox").style.display = "none";
+    $("forfeitBox").style.display = "block";
+    const dare = FORFEITS[Math.floor(Math.random() * FORFEITS.length)];
+    $("forfeitText").textContent = dare;
+  }
+  showScreen("scrVerdict");
+}
+
+/* ================= TOUCH / DRAG CONTROLS ================= */
+const arena = $("arenaWrap");
+arena.addEventListener("pointermove", e => {
+  const r = arena.getBoundingClientRect();
+  S.ship.targetX = Math.max(12, Math.min(W - 12, e.clientX - r.left));
+  S.ship.targetY = Math.max(12, Math.min(H - 12, e.clientY - r.top));
+});
+arena.addEventListener("touchmove", e => {
+  e.preventDefault();
+  if(e.touches.length > 0){
+    const r = arena.getBoundingClientRect();
+    S.ship.targetX = Math.max(12, Math.min(W - 12, e.touches[0].clientX - r.left));
+    S.ship.targetY = Math.max(12, Math.min(H - 12, e.touches[0].clientY - r.top));
+  }
+}, { passive: false });
+
+// Quota Select
+$("quotaGrid").onclick = e => {
+  const b = e.target.closest(".opt-btn"); if(!b) return;
+  document.querySelectorAll("#quotaGrid .opt-btn").forEach(x => x.classList.remove("is-active"));
+  b.classList.add("is-active");
+  S.quota = parseInt(b.dataset.q, 10);
+};
+
+// Roster
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${p}</span>
+      <span style="color:var(--accent);">DODGER</span>
+    </li>
+  `).join("");
+}
+
+$("btnStartGauntlet").onclick = () => {
+  S.playerIdx = 0;
+  startTurn();
+};
+
+function startTurn(){
+  const player = roster[S.playerIdx];
+  $("topSub").textContent = `${player}'s Survival`;
+  $("hudPlayer").textContent = player;
+  openCurtain(player, () => {
+    showScreen("scrPlay");
+    resizeCanvas();
+    resetArena();
+    lastT = performance.now();
+    requestAnimationFrame(loop);
+  });
+}
+
+$("btnNextPilot").onclick = () => {
+  S.playerIdx = (S.playerIdx + 1) % roster.length;
+  startTurn();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

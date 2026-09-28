@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nordic-slate">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Mind Dial | PartyDeck</title>
+
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme")||"nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+
+<style>
+  body { overflow: hidden; height: 100dvh; }
+  .gm-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui); flex-shrink: 0; }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: var(--font-display); font-size: .98rem; font-weight: 900; }
+  .gm-sub { font-family: var(--font-mono); font-size: .64rem; color: var(--text-muted); }
+  .gm-actions { display: flex; gap: .4rem; }
+  .gm-actions .btn-icon-only { width: 48px; height: 48px; min-height: 48px; }
+
+  .stage { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .screen { display: none; flex-direction: column; gap: 1rem; padding: 1.1rem; max-width: 680px; margin: 0 auto; width: 100%; }
+  .screen.is-active { display: flex; }
+
+  .panel { background: var(--bg-surface); border: 1px solid var(--border-ui); border-radius: var(--r-lg); padding: 1.1rem; box-shadow: var(--card-shadow); }
+  .panel-label { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem; }
+  h2.sec { font-size: 1.45rem; line-height: 1.2; }
+  p.lede { font-size: .88rem; color: var(--text-secondary); line-height: 1.5; }
+
+  .score-strip { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+  .team-card { background: var(--bg-elevated); border: 2px solid var(--border-ui); border-radius: var(--r-md); padding: .75rem .9rem; display: flex; align-items: center; justify-content: space-between; }
+  .team-card.is-active { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+  .team-name { font-family: var(--font-display); font-weight: 800; font-size: .95rem; }
+  .team-score { font-family: var(--font-display); font-size: 1.6rem; font-weight: 900; color: var(--accent); line-height: 1; }
+
+  .spectrum-banner { display: flex; flex-direction: column; gap: .5rem; background: var(--bg-elevated); border: 1px solid var(--border-ui); border-radius: var(--r-lg); padding: 1rem; text-align: center; }
+  .spectrum-labels { display: flex; justify-content: space-between; align-items: center; gap: 1rem; font-family: var(--font-display); font-size: 1.05rem; font-weight: 900; }
+  .spectrum-left { color: var(--danger); text-align: left; flex: 1; }
+  .spectrum-right { color: var(--accent); text-align: right; flex: 1; }
+
+  .dial-container { position: relative; width: 100%; aspect-ratio: 2 / 1; max-height: 240px; margin: 1rem auto .5rem; touch-action: none; user-select: none; }
+  .dial-svg { width: 100%; height: 100%; overflow: visible; }
+
+  .curtain { position: fixed; inset: 0; z-index: 900; background: var(--bg-primary); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem; padding: 2rem 1.5rem; text-align: center; }
+  .curtain.is-open { display: flex; }
+  .curtain-name { font-family: var(--font-display); font-size: 2.2rem; font-weight: 900; }
+  .hold-btn { position: relative; overflow: hidden; width: 100%; max-width: 340px; min-height: 62px; font-size: .95rem; border-radius: var(--r-lg); background: var(--bg-elevated); border: 1px solid var(--border-ui-active); }
+  .hold-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--accent); opacity: .9; transition: width .06s linear; }
+  .hold-label { position: relative; z-index: 2; display: inline-flex; align-items: center; gap:.5rem; }
+  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
+
+  .result-banner { text-align: center; padding: 1.5rem; border-radius: var(--r-lg); border: 2px solid var(--accent); background: var(--bg-surface); }
+  .pts-pill { font-family: var(--font-display); font-size: 3rem; font-weight: 900; color: var(--accent); line-height: 1; margin: .35rem 0; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Mind Dial</span>
+    <span class="gm-sub" id="topSub">Spectrum Guessing</span>
+  </div>
+  <div class="gm-actions">
+    <button class="btn btn-ghost btn-icon-only" id="btnRules"><span class="ico" data-ic="help"></span></button>
+    <a class="btn btn-ghost btn-icon-only" href="../../index.html"><span class="ico" data-ic="home"></span></a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div>
+      <h2 class="sec">Tune into the Spectrum</h2>
+      <p class="lede">One Psychic gives a clue along a binary spectrum. Their team rotates the dial to find the hidden sweet spot.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Victory Goal</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem" id="goalGrid">
+        <button class="btn opt-btn" data-pts="7">7 Pts (Fast)</button>
+        <button class="btn opt-btn is-active" data-pts="10">10 Pts (Standard)</button>
+        <button class="btn opt-btn" data-pts="14">14 Pts (Long)</button>
+      </div>
+    </div>
+
+    <button class="btn btn-accent" id="btnStartGame" style="min-height:56px;font-size:1rem"><span class="ico" data-ic="play"></span> Begin Match</button>
+  </section>
+
+  <!-- PSYCHIC SECRET VIEW -->
+  <section class="screen" id="scrPsychic">
+    <div class="panel">
+      <div class="panel-label">Psychic Target &middot; Secret</div>
+      <div class="spectrum-banner">
+        <div class="spectrum-labels">
+          <span class="spectrum-left" id="psyLeft">Cold</span>
+          <span style="font-size:.8rem;color:var(--text-muted)">VS</span>
+          <span class="spectrum-right" id="psyRight">Hot</span>
+        </div>
+      </div>
+      <div class="dial-container">
+        <svg class="dial-svg" viewBox="0 0 200 110" id="dialSecretSvg"></svg>
+      </div>
+      <p style="font-size:.85rem;color:var(--text-secondary);text-align:center;margin-top:.4rem">
+        Give your team <strong>one conceptual clue</strong> that fits this exact dial position.
+      </p>
+    </div>
+    <button class="btn btn-accent" id="btnClueGiven" style="min-height:56px"><span class="ico" data-ic="check"></span> Clue Given &mdash; Pass to Team</button>
+  </section>
+
+  <!-- TEAM GUESSING DIAL -->
+  <section class="screen" id="scrGuess">
+    <div class="score-strip">
+      <div class="team-card is-active" id="cardTeamA">
+        <span class="team-name">Team Left</span>
+        <span class="team-score" id="scoreTeamA">0</span>
+      </div>
+      <div class="team-card" id="cardTeamB">
+        <span class="team-name">Team Right</span>
+        <span class="team-score" id="scoreTeamB">0</span>
+      </div>
+    </div>
+
+    <div class="spectrum-banner">
+      <span class="panel-label">Team Spectrum Dial</span>
+      <div class="spectrum-labels">
+        <span class="spectrum-left" id="guessLeft">Cold</span>
+        <span style="font-size:.8rem;color:var(--text-muted)">VS</span>
+        <span class="spectrum-right" id="guessRight">Hot</span>
+      </div>
+    </div>
+
+    <div class="dial-container" id="dialInteractive">
+      <svg class="dial-svg" viewBox="0 0 200 110" id="dialGuessSvg"></svg>
+    </div>
+    
+    <p style="text-align:center;font-size:.85rem;color:var(--text-secondary);font-family:var(--font-mono)">Drag the needle to match the Psychic's clue.</p>
+    <button class="btn btn-accent" id="btnLockGuess" style="min-height:56px"><span class="ico" data-ic="lock"></span> Lock In Dial Position</button>
+  </section>
+
+  <!-- REVEAL & SCORE -->
+  <section class="screen" id="scrReveal">
+    <div class="result-banner">
+      <span class="panel-label">Target Revealed</span>
+      <div class="pts-pill" id="ptsEarned">+4 PTS</div>
+      <h3 style="font-size:1.2rem;margin-bottom:.4rem" id="resultDesc">Bullseye! Perfect intuition.</h3>
+    </div>
+
+    <div class="dial-container">
+      <svg class="dial-svg" viewBox="0 0 200 110" id="dialRevealSvg"></svg>
+    </div>
+
+    <button class="btn btn-accent" id="btnNextRound" style="min-height:56px"><span class="ico" data-ic="right"></span> Next Round</button>
+  </section>
+
+  <!-- MATCH VICTORY SCREEN -->
+  <section class="screen" id="scrMatchWin" style="text-align:center;justify-content:center">
+    <div class="panel" style="border-color:var(--accent);padding:2rem 1.5rem">
+      <span style="font-family:var(--font-mono);font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.2em;text-transform:uppercase">MATCH WON</span>
+      <h2 style="font-family:var(--font-display);font-size:2.5rem;font-weight:900;margin:.4rem 0" id="matchWinnerTitle">Team Left Wins!</h2>
+      <p style="color:var(--text-secondary);font-size:1rem" id="matchWinnerDesc">First squad to cross the threshold. Loser buys the next round!</p>
+      <button class="btn btn-accent" id="btnPlayAgain" style="min-height:54px;width:100%;margin-top:1.5rem">Play Again</button>
+    </div>
+  </section>
+</div>
+
+<!-- CURTAIN -->
+<div class="curtain" id="curtain">
+  <div style="width:72px;height:72px;border-radius:var(--r-lg);background:var(--bg-elevated);border:1px solid var(--border-ui);display:flex;align-items:center;justify-content:center;color:var(--accent)">
+    <span class="ico ico-xl" data-ic="eye"></span>
+  </div>
+  <span style="font-family:var(--font-mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted)">PSYCHIC SECRET VIEW</span>
+  <span class="curtain-name" id="curtainWho">Psychic</span>
+  <p style="font-size:.85rem;color:var(--text-secondary);max-width:32ch">No one else may look at the screen while the secret target is visible!</p>
+  <button class="hold-btn" id="holdBtn">
+    <span class="hold-fill" id="holdFill"></span>
+    <span class="hold-label"><span class="ico" data-ic="finger"></span> Hold to reveal secret target</span>
+  </button>
+</div>
+
+<script>
+"use strict";
+(function(){
+  const ICONS = {
+    help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    play:'<polygon points="6 3 20 12 6 21 6 3"/>',
+    check:'<polyline points="20 6 9 17 4 12"/>',
+    eye:'<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    finger:'<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 11.5v-2a1.5 1.5 0 1 1 3 0V12"/><path d="M14 10.5a1.5 1.5 0 0 1 3 0V13"/><path d="M17 12a1.5 1.5 0 0 1 3 0v3a6 6 0 0 1-6 6h-2a7 7 0 0 1-7-7v-1a1.5 1.5 0 1 1 3 0"/>',
+    right:'<path d="m9 18 6-6-6-6"/>'
+  };
+  function paintIcons(){ document.querySelectorAll("[data-ic]").forEach(el=>{ const k=el.getAttribute("data-ic"); if(ICONS[k]) el.innerHTML=`<svg viewBox="0 0 24 24">${ICONS[k]}</svg>`; }); }
+
+  const SFX = {
+    ctx: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext||window.webkitAudioContext)(); },
+    tone(f,d,type="sine"){ this.init(); const o=this.ctx.createOscillator(), g=this.ctx.createGain(); o.type=type; o.frequency.value=f; o.connect(g); g.connect(this.ctx.destination); g.gain.setValueAtTime(0.1, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime+d); o.start(); o.stop(this.ctx.currentTime+d); },
+    dial(){ this.tone(450, 0.04, "triangle"); },
+    bullseye(){ this.tone(523, 0.1); setTimeout(()=>this.tone(659, 0.1), 90); setTimeout(()=>this.tone(784, 0.25), 180); },
+    miss(){ this.tone(220, 0.3, "sawtooth"); }
+  };
+
+  const SPECTRUMS = [
+    ["Cold", "Hot"], ["Useless Superpower", "Overpowered Superpower"],
+    ["Guilty Pleasure", "High Art"], ["Overrated", "Underrated"],
+    ["Harmless", "Lethal"], ["Mildly Annoying", "Pure Evil"],
+    ["Uncool", "Extremely Cool"], ["Bad Movie", "Masterpiece"],
+    ["Low Calorie", "Pure Sugar"], ["Smart Decision", "Terrible Idea"],
+    ["Cheap", "Priceless"], ["Easy to Do", "Nearly Impossible"],
+    ["Normal Pet", "Terrifying Pet"], ["Casual Lie", "Unforgivable Lie"]
+  ];
+
+  let state = { targetScore: 10, turnTeam: "A", scoreA: 0, scoreB: 0, pair: ["Cold", "Hot"], targetAngle: 90, guessAngle: 90 };
+
+  const $ = id => document.getElementById(id);
+  function showScreen(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("is-active", s.id===id)); }
+
+  function polarToCartesian(cx, cy, r, angleDeg) {
+    const rad = (180 - angleDeg) * Math.PI / 180;
+    return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
+  }
+
+  function describeArc(cx, cy, r, startAngle, endAngle) {
+    const start = polarToCartesian(cx, cy, r, endAngle);
+    const end = polarToCartesian(cx, cy, r, startAngle);
+    const largeArc = endAngle - startAngle <= 180 ? "0" : "1";
+    return ["M", start.x, start.y, "A", r, r, 0, largeArc, 0, end.x, end.y, "L", cx, cy, "Z"].join(" ");
+  }
+
+  function renderDialSVG(svgId, opts = {}) {
+    const svg = $(svgId);
+    let html = `<path d="M 20 100 A 80 80 0 0 1 180 100 Z" fill="var(--bg-elevated)" stroke="var(--border-ui)" stroke-width="3" />`;
+    if (opts.showTarget) {
+      const t = state.targetAngle;
+      html += `
+        <path d="${describeArc(100, 100, 80, t - 16, t + 16)}" fill="rgba(244, 63, 94, 0.35)" />
+        <path d="${describeArc(100, 100, 80, t - 10, t + 10)}" fill="rgba(234, 179, 8, 0.45)" />
+        <path d="${describeArc(100, 100, 80, t - 4, t + 4)}" fill="var(--accent)" />
+      `;
+    }
+    if (opts.showNeedle) {
+      const pt = polarToCartesian(100, 100, 82, state.guessAngle);
+      html += `
+        <line x1="100" y1="100" x2="${pt.x}" y2="${pt.y}" stroke="#ffffff" stroke-width="4" stroke-linecap="round" />
+        <circle cx="100" cy="100" r="10" fill="var(--accent)" stroke="#ffffff" stroke-width="2" />
+        <circle cx="${pt.x}" cy="${pt.y}" r="5" fill="#ffffff" />
+      `;
+    }
+    svg.innerHTML = html;
+  }
+
+  function startRound() {
+    state.pair = SPECTRUMS[Math.floor(Math.random() * SPECTRUMS.length)];
+    state.targetAngle = Math.floor(Math.random() * 120) + 30;
+    state.guessAngle = 90;
+
+    $("psyLeft").textContent = state.pair[0];
+    $("psyRight").textContent = state.pair[1];
+    $("guessLeft").textContent = state.pair[0];
+    $("guessRight").textContent = state.pair[1];
+
+    $("cardTeamA").classList.toggle("is-active", state.turnTeam === "A");
+    $("cardTeamB").classList.toggle("is-active", state.turnTeam === "B");
+
+    $("curtainWho").textContent = state.turnTeam === "A" ? "Team Left Psychic" : "Team Right Psychic";
+    $("curtain").classList.add("is-open");
+
+    let holdStart = 0, raf = null;
+    const btn = $("holdBtn");
+    const cancel = () => { if (raf) cancelAnimationFrame(raf); raf = null; $("holdFill").style.width = "0%"; btn.classList.remove("armed"); };
+
+    btn.onpointerdown = e => {
+      e.preventDefault();
+      holdStart = performance.now();
+      btn.classList.add("armed");
+      const tick = () => {
+        const p = Math.min(1, (performance.now() - holdStart) / 700);
+        $("holdFill").style.width = (p * 100) + "%";
+        if (p >= 1) {
+          cancel();
+          $("curtain").classList.remove("is-open");
+          showScreen("scrPsychic");
+          renderDialSVG("dialSecretSvg", { showTarget: true });
+        } else raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
+    btn.onpointerup = cancel;
+    btn.onpointercancel = cancel;
+    btn.onpointerleave = cancel;
+  }
+
+  function handleDialDrag(e) {
+    const rect = $("dialInteractive").getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height;
+    const dx = e.clientX - cx;
+    const dy = cy - e.clientY;
+    let rad = Math.atan2(dy, dx);
+    let deg = 180 - (rad * 180 / Math.PI);
+    deg = Math.max(10, Math.min(170, deg));
+    if (Math.abs(state.guessAngle - deg) > 2) {
+      state.guessAngle = deg;
+      renderDialSVG("dialGuessSvg", { showNeedle: true });
+      SFX.dial();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    paintIcons();
+    $("goalGrid").onclick = e => {
+      const b = e.target.closest(".opt-btn"); if (!b) return;
+      document.querySelectorAll("#goalGrid .opt-btn").forEach(x => x.classList.remove("is-active"));
+      b.classList.add("is-active");
+      state.targetScore = parseInt(b.dataset.pts, 10);
+    };
+
+    $("btnStartGame").onclick = () => {
+      state.scoreA = 0; state.scoreB = 0;
+      $("scoreTeamA").textContent = "0";
+      $("scoreTeamB").textContent = "0";
+      startRound();
+    };
+
+    $("btnClueGiven").onclick = () => {
+      showScreen("scrGuess");
+      renderDialSVG("dialGuessSvg", { showNeedle: true });
+    };
+
+    const dialEl = $("dialInteractive");
+    let dragging = false;
+    dialEl.onpointerdown = e => { dragging = true; handleDialDrag(e); };
+    window.onpointermove = e => { if (dragging) handleDialDrag(e); };
+    window.onpointerup = () => { dragging = false; };
+
+    $("btnLockGuess").onclick = () => {
+      const diff = Math.abs(state.guessAngle - state.targetAngle);
+      let pts = 0, desc = "Missed the target wedge completely.";
+
+      if (diff <= 4) { pts = 4; desc = "Bullseye! Flawless mind-meld (+4 Pts)."; SFX.bullseye(); }
+      else if (diff <= 10) { pts = 3; desc = "Inner Target! Great intuition (+3 Pts)."; SFX.bullseye(); }
+      else if (diff <= 16) { pts = 2; desc = "Outer Wedge! Scraped by (+2 Pts)."; SFX.bullseye(); }
+      else { SFX.miss(); }
+
+      if (state.turnTeam === "A") state.scoreA += pts;
+      else state.scoreB += pts;
+
+      $("scoreTeamA").textContent = state.scoreA;
+      $("scoreTeamB").textContent = state.scoreB;
+      $("ptsEarned").textContent = `+${pts} PTS`;
+      $("resultDesc").textContent = desc;
+
+      showScreen("scrReveal");
+      renderDialSVG("dialRevealSvg", { showTarget: true, showNeedle: true });
+    };
+
+    $("btnNextRound").onclick = () => {
+      if (state.scoreA >= state.targetScore || state.scoreB >= state.targetScore) {
+        const winner = state.scoreA >= state.targetScore ? "Team Left" : "Team Right";
+        $("matchWinnerTitle").textContent = `${winner} Wins!`;
+        $("matchWinnerDesc").textContent = `Surpassed ${state.targetScore} points with brilliant conceptual alignment!`;
+        showScreen("scrMatchWin");
+      } else {
+        state.turnTeam = state.turnTeam === "A" ? "B" : "A";
+        startRound();
+      }
+    };
+
+    $("btnPlayAgain").onclick = () => showScreen("scrSetup");
+  });
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

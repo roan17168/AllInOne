@@ -1,170 +1,898 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cyber-neon">
+<html lang="en" data-theme="nordic-slate">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#08090c" id="metaThemeColor" />
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>Tele-Sketch | PartyDeck</title>
+
+<script>
+/* Pre-paint theme bootstrap — prevents flash of wrong palette */
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-
-<!-- Global tokens (optional — style.css carries fallbacks if these 404) -->
 <link rel="stylesheet" href="../../css/themes.css" />
 <link rel="stylesheet" href="../../css/base.css" />
-<!-- Module styles: fully self-sufficient -->
-<link rel="stylesheet" href="style.css" />
+
+<style>
+  input, textarea { user-select: text; -webkit-user-select: text; }
+  body { overflow: hidden; height: 100dvh; }
+
+  /* ---------- Shell ---------- */
+  .gm-top{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.55rem .9rem;background:var(--bg-surface);border-bottom:1px solid var(--border-ui);flex-shrink:0}
+  .gm-idblock{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+  .gm-title{font-family:var(--font-display);font-size:.98rem;font-weight:900;letter-spacing:-.01em}
+  .gm-sub{font-family:var(--font-mono);font-size:.64rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gm-actions{display:flex;gap:.4rem;flex-shrink:0}
+  .gm-actions .btn-icon-only{width:48px;height:48px;min-height:48px}
+
+  .stage{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+  .screen{display:none;flex-direction:column;gap:1rem;padding:1.1rem;max-width:680px;margin:0 auto;width:100%}
+  .screen.is-active{display:flex}
+
+  .panel{background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-lg);padding:1.1rem;box-shadow:var(--card-shadow)}
+  .panel-label{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.6rem}
+  .hr-soft{height:1px;background:var(--border-ui);margin:1rem 0;border:0}
+
+  h2.sec{font-size:1.45rem;line-height:1.2}
+  p.lede{font-size:.88rem;color:var(--text-secondary);line-height:1.5}
+
+  /* ---------- Roster ---------- */
+  .ros-row{display:flex;gap:.5rem;margin-bottom:.75rem}
+  .ros-row input{flex:1;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-md);color:var(--text-primary);font-family:var(--font-mono);font-size:16px;padding:.7rem .9rem;outline:none;min-height:48px}
+  .ros-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+  .ros-list{list-style:none;display:flex;flex-direction:column;gap:.45rem;max-height:32vh;overflow-y:auto}
+  .ros-item{display:flex;align-items:center;justify-content:space-between;gap:.5rem;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-sm);padding:.45rem .5rem .45rem .8rem;font-family:var(--font-mono);font-size:.84rem}
+  .seat-no{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-contrast);font-size:.65rem;font-weight:700;margin-right:.55rem}
+  .mini-x{width:48px;height:48px;min-height:48px;padding:0;border-radius:var(--r-sm)}
+
+  .opt-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+  .opt-btn{padding:.6rem .3rem;font-size:.78rem;border-radius:var(--r-sm)}
+  .opt-btn.is-active{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent);box-shadow:0 2px 10px var(--accent-glow)}
+
+  /* ---------- Curtain ---------- */
+  .curtain{position:fixed;inset:0;z-index:900;background:var(--bg-primary);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:2rem 1.5rem;text-align:center;padding-bottom:max(2rem,env(safe-area-inset-bottom))}
+  .curtain.is-open{display:flex;animation:curtainIn .28s var(--ease-smooth)}
+  @keyframes curtainIn{from{opacity:0}to{opacity:1}}
+  .curtain-eye{width:76px;height:76px;border-radius:var(--r-lg);background:var(--bg-elevated);border:1px solid var(--border-ui);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+  .curtain-kicker{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted)}
+  .curtain-name{font-family:var(--font-display);font-size:2.25rem;font-weight:900;line-height:1.1;color:var(--text-primary);word-break:break-word}
+  .curtain-note{font-size:.85rem;color:var(--text-secondary);max-width:30ch}
+
+  .hold-btn{position:relative;overflow:hidden;width:100%;max-width:340px;min-height:62px;font-size:.95rem;border-radius:var(--r-lg);background:var(--bg-elevated);border:1px solid var(--border-ui-active);color:var(--text-primary)}
+  .hold-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--accent);opacity:.9;transition:width .06s linear}
+  .hold-label{position:relative;z-index:2;display:inline-flex;align-items:center;gap:.5rem;mix-blend-mode:normal}
+  .hold-btn.armed .hold-label{color:var(--accent-contrast)}
+
+  /* ---------- Task ---------- */
+  .task-bar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:.65rem .9rem}
+  .task-word{font-family:var(--font-display);font-size:1.35rem;font-weight:900;letter-spacing:-.01em;word-break:break-word}
+  .task-cap{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:.15rem}
+  .timer-chip{font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--accent);flex-shrink:0;min-width:48px;text-align:right}
+  .timer-chip.danger{color:var(--danger);animation:pulseT .5s infinite alternate}
+  @keyframes pulseT{from{opacity:.55}to{opacity:1}}
+  .timer-track{height:3px;background:var(--border-ui);border-radius:2px;overflow:hidden;margin-top:.5rem}
+  .timer-bar{height:100%;width:100%;background:var(--accent);transition:width .25s linear}
+
+  /* ---------- Sketch pad ---------- */
+  .pad-wrap{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--border-ui);box-shadow:var(--card-shadow);background:#FAFAF7}
+  canvas.pad{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+  .pad-tools{display:flex;flex-direction:column;gap:.6rem}
+  .swatches{display:grid;grid-template-columns:repeat(9,1fr);gap:.4rem}
+  .sw{position:relative;aspect-ratio:1;border-radius:50%;border:2px solid var(--border-ui);cursor:pointer;padding:0;min-height:0;transition:transform .15s var(--ease-spring),box-shadow .15s}
+  .sw:active{transform:scale(.88)}
+  .sw.is-active{transform:scale(1.14);border-color:var(--text-primary);box-shadow:0 0 0 2px var(--bg-surface),0 0 0 4px var(--accent)}
+  .sw.eraser{background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;color:var(--text-secondary)}
+  .tool-row{display:flex;gap:.5rem;align-items:center}
+  .size-group{display:flex;gap:.35rem;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:.25rem}
+  .size-btn{width:42px;height:42px;min-height:42px;padding:0;border-radius:var(--r-sm);background:transparent;border:none;display:flex;align-items:center;justify-content:center}
+  .size-btn.is-active{background:var(--accent);color:var(--accent-contrast)}
+  .size-dot{border-radius:50%;background:currentColor}
+  .tool-spacer{flex:1}
+
+  /* ---------- Guess ---------- */
+  .guess-input{width:100%;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-md);color:var(--text-primary);font-family:var(--font-display);font-size:1.15rem;font-weight:700;text-align:center;padding:1rem;outline:none;min-height:60px}
+  .guess-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+
+  /* ---------- Seed picker ---------- */
+  .seed-btn{width:100%;justify-content:space-between;text-align:left;padding:1.05rem 1.1rem;font-size:1.05rem;font-family:var(--font-display);font-weight:800;border-radius:var(--r-md);background:var(--bg-elevated)}
+  .seed-btn .ico{color:var(--text-muted)}
+  .seed-btn:hover{border-color:var(--border-ui-active)}
+
+  /* ---------- Finale ---------- */
+  .chain-chips{display:flex;gap:.45rem;overflow-x:auto;padding-bottom:.4rem;scrollbar-width:none}
+  .chain-chips::-webkit-scrollbar{display:none}
+  .chain-chip{flex-shrink:0;font-family:var(--font-mono);font-size:.74rem;padding:.5rem .8rem;min-height:40px;border-radius:var(--r-full)}
+  .chain-chip.is-active{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent)}
+  .slide{display:flex;flex-direction:column;gap:.75rem;animation:slideIn .3s var(--ease-smooth)}
+  @keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .slide-author{display:flex;align-items:center;gap:.55rem;font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted)}
+  .slide-text{font-family:var(--font-display);font-size:1.7rem;font-weight:900;text-align:center;padding:1.75rem 1rem;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-md);word-break:break-word}
+  .slide-text.seed{color:var(--accent)}
+  .nav-row{display:flex;gap:.6rem;align-items:center}
+  .nav-row .btn{flex:1}
+  .step-count{font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);min-width:56px;text-align:center}
+
+  /* ---------- Rules modal ---------- */
+  .rules-list{list-style:none;display:flex;flex-direction:column;gap:.85rem}
+  .rules-list li{display:flex;gap:.75rem;align-items:flex-start}
+  .rules-n{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-contrast);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.72rem;font-weight:700}
+  .rules-list p{font-size:.88rem;color:var(--text-secondary);line-height:1.45}
+  .rules-list strong{color:var(--text-primary)}
+  .example-box{background:var(--bg-elevated);border:1px dashed var(--border-ui);border-radius:var(--r-sm);padding:.75rem .85rem;font-family:var(--font-mono);font-size:.74rem;color:var(--text-secondary);line-height:1.6;margin-top:.35rem}
+  .example-box b{color:var(--accent)}
+</style>
+<script src="../../js/roster-normalize.js"></script>
+<script src="../../js/roster-normalize.js"></script>
 </head>
+<body>
 
-<body class="ts-body">
-
-<!-- ================= HUD HEADER ================= -->
-<header class="ts-hud">
-  <button class="hud-exit" id="btnExit" type="button" aria-label="Exit to hub">
-    <span class="ico" data-icon="home"></span><span class="hud-exit-txt">HUB</span>
-  </button>
-
-  <div class="hud-status">
-    <span class="hud-badge" id="hudBadge">SETUP // PHASE</span>
-    <span class="hud-label" id="hudLabel">Roster</span>
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Tele-Sketch</span>
+    <span class="gm-sub" id="topSub">Setup</span>
   </div>
-
-  <div class="hud-timer" id="hudTimer">--</div>
+  <div class="gm-actions">
+    <button class="btn btn-ghost btn-icon-only" id="btnRules" aria-label="How to play"><span class="ico" data-ic="help"></span></button>
+    <button class="btn btn-ghost btn-icon-only" id="btnFs" aria-label="Fullscreen"><span class="ico" data-ic="fullscreen"></span></button>
+    <a class="btn btn-ghost btn-icon-only" href="../../index.html" aria-label="Back to hub"><span class="ico" data-ic="home"></span></a>
+  </div>
 </header>
 
-<main class="ts-main">
+<div class="stage">
 
-  <!-- ================= PHASE 1 · SETUP ================= -->
-  <section class="phase is-active" id="phSetup">
-    <div class="hero-ico"><span class="ico ico-lg" data-icon="palette"></span></div>
-    <h1 class="phase-title">Tele-Sketch</h1>
-    <p class="phase-sub">
-      Draw your secret prompt. Pass the device. The next player only sees the drawing
-      and has to guess it — then the chain mutates into beautiful nonsense.
-    </p>
-
-    <div class="panel">
-      <p class="panel-title">Game length</p>
-      <div class="chip-row" id="modeRow">
-        <button class="chip is-on" type="button" data-mode="full">Every player gets a prompt</button>
-        <button class="chip" type="button" data-mode="quick">Quick — one shared chain</button>
-      </div>
-      <p class="panel-note" id="modeNote">Longest and funniest. Turn count scales with the group.</p>
+  <!-- ============ SETUP ============ -->
+  <section class="screen is-active" id="scrSetup">
+    <div>
+      <h2 class="sec">Draw it. Guess it. Watch it fall apart.</h2>
+      <p class="lede">Each player secretly picks a word, then drawings and guesses alternate down the line. Nobody sees the original until the finale.</p>
     </div>
 
     <div class="panel">
-      <p class="panel-title">Seconds per turn</p>
-      <div class="chip-row" id="timeRow">
-        <button class="chip" type="button" data-time="30">30s</button>
-        <button class="chip is-on" type="button" data-time="60">60s</button>
-        <button class="chip" type="button" data-time="90">90s</button>
-        <button class="chip" type="button" data-time="0">No timer</button>
-      </div>
-    </div>
-
-    <div class="panel">
-      <p class="panel-title">Turn order · 3 to 10 players</p>
-      <form class="roster-add" id="rosterForm">
-        <input type="text" id="rosterInput" placeholder="ADD_PLAYER..." maxlength="14" autocomplete="off" />
-        <button type="submit" aria-label="Add player"><span class="ico" data-icon="plus"></span></button>
+      <div class="panel-label">Party Roster &middot; <span id="rosterCount">0</span> seated</div>
+      <form class="ros-row" id="rosForm">
+        <input type="text" id="rosInput" placeholder="Add player name..." maxlength="14" autocomplete="off" />
+        <button type="submit" class="btn btn-accent">Add</button>
       </form>
-      <ol class="roster-list" id="rosterList"></ol>
-      <p class="roster-warn is-hidden" id="rosterWarn"></p>
-      <p class="panel-note" id="turnForecast"></p>
+      <ul class="ros-list" id="rosList"></ul>
+      <p style="font-size:.74rem;color:var(--text-muted);margin-top:.7rem;font-family:var(--font-mono)">Syncs to every PartyDeck game on this device.</p>
     </div>
 
-    <button class="btn-primary btn-push" id="btnStart" type="button">
-      <span class="ico" data-icon="play"></span> Start sequence
-    </button>
-  </section>
-
-  <!-- ================= PHASE 2 · DRAW ================= -->
-  <section class="phase" id="phDraw">
-    <div class="prompt-banner">
-      <span class="prompt-kicker" id="drawKicker">Your secret prompt</span>
-      <h2 class="prompt-value" id="drawPrompt">&mdash;</h2>
-    </div>
-
-    <div class="canvas-shell" id="canvasShell">
-      <canvas id="sketchCanvas" aria-label="Drawing surface"></canvas>
-    </div>
-
-    <div class="toolbar">
-      <div class="swatch-grid" id="swatchGrid"></div>
-      <div class="tool-row">
-        <span class="brush-preview" id="brushPreview" aria-hidden="true"></span>
-        <input type="range" id="brushRange" min="2" max="30" value="7" aria-label="Brush size" />
-        <button class="tool-btn" id="btnUndo" type="button" aria-label="Undo" disabled><span class="ico" data-icon="undo"></span></button>
-        <button class="tool-btn" id="btnRedo" type="button" aria-label="Redo" disabled><span class="ico" data-icon="redo"></span></button>
-        <button class="tool-btn" id="btnClear" type="button" aria-label="Clear canvas"><span class="ico" data-icon="trash"></span></button>
+    <div class="panel">
+      <div class="panel-label">Drawing time per turn</div>
+      <div class="opt-grid" id="timeOpts">
+        <button class="btn opt-btn" data-sec="45">45s</button>
+        <button class="btn opt-btn is-active" data-sec="70">70s</button>
+        <button class="btn opt-btn" data-sec="120">120s</button>
+        <button class="btn opt-btn" data-sec="0">None</button>
       </div>
     </div>
 
-    <button class="btn-primary" id="btnDoneDraw" type="button">
-      Lock sketch &amp; pass <span class="ico" data-icon="arrowRight"></span>
+    <button class="btn btn-accent" id="btnStart" style="min-height:58px;font-size:1rem">
+      <span class="ico" data-ic="play"></span> Start Game
     </button>
+    <p id="setupWarn" style="text-align:center;font-size:.78rem;color:var(--danger);font-family:var(--font-mono);display:none">Seat at least 3 players.</p>
   </section>
 
-  <!-- ================= PHASE 3 · GUESS ================= -->
-  <section class="phase" id="phGuess">
-    <div class="prompt-banner">
-      <span class="prompt-kicker">Decode the sketch</span>
-      <h2 class="prompt-value">What is this?</h2>
+  <!-- ============ SEED PICK ============ -->
+  <section class="screen" id="scrSeed">
+    <div class="panel">
+      <div class="panel-label">Secret word &middot; only you see this</div>
+      <h2 class="sec" style="margin-bottom:.35rem">Pick your word</h2>
+      <p class="lede">The next player will have to draw it. Pick something fun to butcher.</p>
     </div>
-
-    <div class="guess-frame">
-      <img id="guessImg" alt="Sketch drawn by the previous player" />
-    </div>
-
-    <input type="text" class="guess-field" id="guessField" placeholder="ENTER_GUESS..." maxlength="40" autocomplete="off" />
-
-    <button class="btn-primary btn-push" id="btnDoneGuess" type="button">
-      Submit &amp; pass <span class="ico" data-icon="arrowRight"></span>
-    </button>
+    <div style="display:flex;flex-direction:column;gap:.6rem" id="seedOptions"></div>
+    <button class="btn btn-ghost" id="btnSeedShuffle"><span class="ico" data-ic="shuffle"></span> Shuffle options</button>
   </section>
 
-  <!-- ================= PHASE 4 · FINALE ================= -->
-  <section class="phase" id="phFinale">
-    <h1 class="phase-title">Chain Declassified</h1>
-    <p class="phase-sub">Step through each chain to watch the original prompt mutate.</p>
-
-    <div class="chain-nav">
-      <button class="nav-btn" id="chainPrev" type="button" aria-label="Previous chain"><span class="ico" data-icon="arrowLeft"></span></button>
-      <span class="chain-count" id="chainCount">1 / 1</span>
-      <button class="nav-btn" id="chainNext" type="button" aria-label="Next chain"><span class="ico" data-icon="arrowRight"></span></button>
+  <!-- ============ DRAW ============ -->
+  <section class="screen" id="scrDraw">
+    <div>
+      <div class="task-bar">
+        <div style="min-width:0">
+          <span class="task-cap">Draw this</span>
+          <span class="task-word" id="drawWord">—</span>
+        </div>
+        <span class="timer-chip" id="drawTimer">70</span>
+      </div>
+      <div class="timer-track"><div class="timer-bar" id="drawBar"></div></div>
     </div>
 
-    <div class="strip" id="strip"></div>
+    <div class="pad-wrap"><canvas class="pad" id="padDraw"></canvas></div>
 
-    <div class="btn-row">
-      <button class="btn-ghost" id="btnExport" type="button"><span class="ico" data-icon="download"></span> Save strip</button>
-      <button class="btn-ghost" id="btnAgain" type="button"><span class="ico" data-icon="refresh"></span> Play again</button>
+    <div class="pad-tools">
+      <div class="swatches" id="swatchRow"></div>
+      <div class="tool-row">
+        <div class="size-group" id="sizeRow">
+          <button class="size-btn" data-size="3"><span class="size-dot" style="width:5px;height:5px"></span></button>
+          <button class="size-btn is-active" data-size="7"><span class="size-dot" style="width:9px;height:9px"></span></button>
+          <button class="size-btn" data-size="14"><span class="size-dot" style="width:15px;height:15px"></span></button>
+        </div>
+        <button class="btn btn-ghost btn-icon-only" id="btnUndo" aria-label="Undo"><span class="ico" data-ic="undo"></span></button>
+        <button class="btn btn-ghost btn-icon-only" id="btnRedo" aria-label="Redo"><span class="ico" data-ic="redo"></span></button>
+        <button class="btn btn-ghost btn-icon-only" id="btnClear" aria-label="Clear"><span class="ico" data-ic="trash"></span></button>
+        <div class="tool-spacer"></div>
+      </div>
+      <button class="btn btn-accent" id="btnDrawDone" style="min-height:56px"><span class="ico" data-ic="check"></span> Done Drawing</button>
     </div>
-
-    <canvas id="exportCanvas" class="is-hidden"></canvas>
   </section>
 
-</main>
+  <!-- ============ GUESS ============ -->
+  <section class="screen" id="scrGuess">
+    <div class="task-bar">
+      <div>
+        <span class="task-cap">Drawn by</span>
+        <span class="task-word" id="guessAuthor">—</span>
+      </div>
+      <span class="ico ico-lg" data-ic="eye" style="color:var(--accent)"></span>
+    </div>
+    <div class="pad-wrap"><canvas class="pad" id="padView" style="cursor:default"></canvas></div>
+    <form id="guessForm" style="display:flex;flex-direction:column;gap:.7rem">
+      <input class="guess-input" id="guessInput" placeholder="What is it?" maxlength="32" autocomplete="off" autocapitalize="words" />
+      <button type="submit" class="btn btn-accent" style="min-height:56px"><span class="ico" data-ic="check"></span> Lock In Guess</button>
+    </form>
+  </section>
 
-<!-- ================= PRIVACY CURTAIN ================= -->
-<div class="curtain" id="curtain" aria-hidden="true">
-  <div class="curtain-card">
-    <div class="curtain-ico"><span class="ico ico-lg" data-icon="lock"></span></div>
-    <span class="curtain-tag" id="curtainTag">SECURE HANDOVER</span>
-    <h2 class="curtain-name" id="curtainName">Pass the device</h2>
-    <p class="curtain-warn">Nobody else may look at the screen. Take the device, then unlock.</p>
-    <button class="btn-primary is-pulsing" id="btnUnlock" type="button">
-      <span class="ico" data-icon="unlock"></span> <span id="unlockTxt">I am ready</span>
-    </button>
+  <!-- ============ FINALE ============ -->
+  <section class="screen" id="scrFinale">
+    <div class="panel" style="text-align:center">
+      <div class="panel-label" style="margin-bottom:.4rem">The Big Reveal</div>
+      <h2 class="sec">Comic Strip Replay</h2>
+      <p class="lede" style="margin-top:.35rem">Tap through each chain and watch the word mutate.</p>
+    </div>
+    <div class="chain-chips" id="chainChips"></div>
+    <div class="panel" id="slideHost"></div>
+    <div class="nav-row">
+      <button class="btn btn-ghost" id="btnPrev"><span class="ico" data-ic="left"></span> Back</button>
+      <span class="step-count" id="stepCount">1 / 1</span>
+      <button class="btn btn-accent" id="btnNext">Next <span class="ico" data-ic="right"></span></button>
+    </div>
+    <hr class="hr-soft" />
+    <div style="display:flex;gap:.6rem">
+      <button class="btn btn-ghost" id="btnAgain" style="flex:1"><span class="ico" data-ic="refresh"></span> Play Again</button>
+      <a class="btn btn-ghost" href="../../index.html" style="flex:1"><span class="ico" data-ic="home"></span> Hub</a>
+    </div>
+  </section>
+</div>
+
+<!-- ============ CURTAIN ============ -->
+<div class="curtain" id="curtain">
+  <div class="curtain-eye"><span class="ico ico-xl" data-ic="lock"></span></div>
+  <span class="curtain-kicker" id="curtainKick">Pass the phone to</span>
+  <span class="curtain-name" id="curtainName">Player</span>
+  <span class="curtain-note" id="curtainNote">Everyone else: eyes up. No peeking at this screen.</span>
+  <button class="hold-btn" id="holdBtn">
+    <span class="hold-fill" id="holdFill"></span>
+    <span class="hold-label"><span class="ico" data-ic="finger"></span> Hold to unlock</span>
+  </button>
+</div>
+
+<!-- ============ RULES ============ -->
+<div class="pd-drawer" id="rulesDrawer">
+  <div class="pd-drawer-card">
+    <div class="pd-drawer-header">
+      <h2 style="font-size:1.2rem">30-Second Quick Start</h2>
+      <button class="btn btn-ghost btn-icon-only" id="btnRulesClose"><span class="ico" data-ic="close"></span></button>
+    </div>
+    <div class="pd-drawer-body">
+      <ul class="rules-list">
+        <li><span class="rules-n">1</span><p><strong>Pick a secret word.</strong> Everyone does this privately at the start.</p></li>
+        <li><span class="rules-n">2</span><p><strong>Draw what you're given.</strong> Pass the phone. The next player draws your word — no letters, no numbers.</p></li>
+        <li><span class="rules-n">3</span><p><strong>Guess what you see.</strong> Pass again. The next player only sees the drawing and types a guess. Repeat until the chain runs out.</p>
+        <div class="example-box">
+          <b>ASTRONAUT</b> &rarr; [drawing of a scuba diver] &rarr; <b>SCUBA GUY</b> &rarr; [drawing of a fish] &rarr; <b>SALMON</b>
+        </div></li>
+      </ul>
+      <hr class="hr-soft" />
+      <p style="font-size:.82rem;color:var(--text-muted)">Golden rule: pass the phone face-down. The whole payoff is the finale.</p>
+    </div>
   </div>
 </div>
 
-<!-- Optional shared libs: used if present, safely stubbed if not -->
-<script src="../../js/utils/icons.js"></script>
-<script src="../../js/partydeck-sdk.js"></script>
-<!-- Module code -->
-<script src="canvas-engine.js"></script>
-<script src="game-controller.js"></script>
+<div class="pd-toast" id="toast">Saved</div>
+
+<script>
+"use strict";
+/* ==========================================================================
+   TELE-SKETCH — PartyDeck Module
+   Self-contained. Consumes ../../css/themes.css + ../../css/base.css only.
+   ========================================================================== */
+(function(){
+
+/* ---------- SVG ICON REGISTRY (zero unicode emojis) ---------- */
+const ICONS={
+  help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+  fullscreen:'<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>',
+  home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  close:'<path d="M18 6 6 18M6 6l12 12"/>',
+  play:'<polygon points="6 3 20 12 6 21 6 3"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  undo:'<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>',
+  redo:'<path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/>',
+  trash:'<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/>',
+  eye:'<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  finger:'<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 11.5v-2a1.5 1.5 0 1 1 3 0V12"/><path d="M14 10.5a1.5 1.5 0 0 1 3 0V13"/><path d="M17 12a1.5 1.5 0 0 1 3 0v3a6 6 0 0 1-6 6h-2a7 7 0 0 1-7-7v-1a1.5 1.5 0 1 1 3 0"/>',
+  shuffle:'<path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="m15 15 6 6"/><path d="M4 4l5 5"/>',
+  left:'<path d="m15 18-6-6 6-6"/>',
+  right:'<path d="m9 18 6-6-6-6"/>',
+  refresh:'<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>',
+  brush:'<path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/>',
+  type:'<polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/>',
+  eraser:'<path d="m7 21-4-4a2 2 0 0 1 0-2.8l9.6-9.6a2 2 0 0 1 2.8 0l5.4 5.4a2 2 0 0 1 0 2.8L13 21z"/><path d="M22 21H7"/>',
+  star:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'
+};
+function paintIcons(root){
+  (root||document).querySelectorAll("[data-ic]").forEach(el=>{
+    const k=el.getAttribute("data-ic");
+    if(ICONS[k]&&!el.firstChild) el.innerHTML='<svg viewBox="0 0 24 24">'+ICONS[k]+'</svg>';
+  });
+}
+
+/* ---------- WEB AUDIO SYNTH ---------- */
+const SFX=(function(){
+  let ac=null;
+  function ctx(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume();}catch(e){}return ac;}
+  function tone(f,dur,type,gain,delay){
+    const c=ctx(); if(!c)return;
+    const o=c.createOscillator(),g=c.createGain();
+    o.type=type||"sine"; o.frequency.value=f; o.connect(g); g.connect(c.destination);
+    const t=c.currentTime+(delay||0);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(gain||0.12,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.start(t); o.stop(t+dur+0.03);
+  }
+  return {
+    unlock:ctx,
+    tap:()=>tone(560,0.06,"square",0.05),
+    ok:()=>{tone(680,0.12,"sine",0.11);tone(1020,0.18,"sine",0.09,0.08);},
+    open:()=>{tone(320,0.1,"triangle",0.1);tone(520,0.16,"triangle",0.09,0.07);},
+    err:()=>tone(150,0.22,"sawtooth",0.08),
+    tick:()=>tone(1400,0.035,"square",0.04),
+    warn:()=>tone(880,0.09,"square",0.07),
+    fanfare:()=>[523,659,784,1046].forEach((f,i)=>tone(f,0.32,"triangle",0.1,i*0.1))
+  };
+})();
+
+/* ---------- THEME SYNC ---------- */
+const THEME_META={"nordic-slate":"#0e1117","tokyo-sunset":"#120e24","terracotta-clay":"#1c1815","emerald-lounge":"#071712","alpine-mist":"#f3f6fa","synthwave-84":"#100b1a"};
+function applyTheme(t){
+  if(!t)return;
+  document.documentElement.setAttribute("data-theme",t);
+  const m=document.getElementById("metaThemeColor");
+  if(m&&THEME_META[t]) m.setAttribute("content",THEME_META[t]);
+}
+function initTheme(){
+  let t="nordic-slate";
+  try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
+  applyTheme(t);
+  window.addEventListener("storage",e=>{ if(e.key==="partydeck_theme") applyTheme(e.newValue); });
+  document.addEventListener("visibilitychange",()=>{
+    if(!document.hidden){ try{applyTheme(localStorage.getItem("partydeck_theme"));}catch(e){} }
+  });
+}
+
+/* ==========================================================================
+   UNIFIED SKETCH ENGINE
+   Normalized 0..1 stroke vectors, DPR scaling, quadratic Bézier smoothing.
+   Shared verbatim by Tele-Sketch, Fake Artist and all future drawing games.
+   ========================================================================== */
+const PAPER="#FAFAF7";
+const DPR=Math.min(window.devicePixelRatio||1,3);
+
+function paintStrokes(ctx,w,h,strokes){
+  ctx.save();
+  ctx.fillStyle=PAPER; ctx.fillRect(0,0,w,h);
+  ctx.lineCap="round"; ctx.lineJoin="round";
+  for(const s of strokes){
+    const p=s.points; if(!p.length)continue;
+    ctx.strokeStyle=s.color;
+    ctx.fillStyle=s.color;
+    ctx.lineWidth=s.size*(w/1000)*2.2;
+    if(p.length===1){
+      ctx.beginPath(); ctx.arc(p[0].x*w,p[0].y*h,ctx.lineWidth/2,0,Math.PI*2); ctx.fill(); continue;
+    }
+    ctx.beginPath();
+    ctx.moveTo(p[0].x*w,p[0].y*h);
+    if(p.length===2){ ctx.lineTo(p[1].x*w,p[1].y*h); }
+    else{
+      for(let i=1;i<p.length-1;i++){
+        const c=p[i],n=p[i+1];
+        ctx.quadraticCurveTo(c.x*w,c.y*h,(c.x+n.x)/2*w,(c.y+n.y)/2*h);
+      }
+      const last=p[p.length-1];
+      ctx.lineTo(last.x*w,last.y*h);
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function renderInto(canvas,strokes){
+  const r=canvas.getBoundingClientRect();
+  const w=Math.max(1,Math.round(r.width)),h=Math.max(1,Math.round(r.height));
+  canvas.width=w*DPR; canvas.height=h*DPR;
+  const ctx=canvas.getContext("2d");
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  paintStrokes(ctx,w,h,strokes||[]);
+}
+
+function createSketchPad(canvas,opts){
+  opts=opts||{};
+  const ctx=canvas.getContext("2d");
+  let strokes=[],redo=[],cur=null,locked=false;
+  let color="#1a1a1a",size=7,W=1,H=1;
+  let baseCount=0;              /* strokes locked in from previous turns */
+  let singleStroke=!!opts.singleStroke;
+
+  function sync(){
+    const r=canvas.getBoundingClientRect();
+    W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
+    canvas.width=W*DPR; canvas.height=H*DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    draw();
+  }
+  function draw(){
+    const all=cur?strokes.concat([cur]):strokes;
+    paintStrokes(ctx,W,H,all);
+    if(opts.onChange)opts.onChange(state());
+  }
+  function state(){
+    return {canUndo:strokes.length>baseCount,canRedo:redo.length>0,count:strokes.length-baseCount};
+  }
+  function pos(e){
+    const r=canvas.getBoundingClientRect();
+    return {
+      x:Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),
+      y:Math.min(1,Math.max(0,(e.clientY-r.top)/r.height))
+    };
+  }
+  function down(e){
+    if(locked)return;
+    if(singleStroke&&strokes.length>baseCount)return;
+    e.preventDefault();
+    canvas.setPointerCapture&&canvas.setPointerCapture(e.pointerId);
+    redo=[];
+    cur={color:color,size:size,points:[pos(e)]};
+    draw();
+  }
+  function move(e){
+    if(!cur)return;
+    e.preventDefault();
+    const p=pos(e),last=cur.points[cur.points.length-1];
+    if(Math.abs(p.x-last.x)*W<0.7&&Math.abs(p.y-last.y)*H<0.7)return;
+    cur.points.push(p);
+    draw();
+  }
+  function up(e){
+    if(!cur)return;
+    e.preventDefault();
+    strokes.push(cur);
+    const done=cur; cur=null;
+    draw();
+    if(opts.onStrokeEnd)opts.onStrokeEnd(done);
+  }
+  canvas.addEventListener("pointerdown",down,{passive:false});
+  canvas.addEventListener("pointermove",move,{passive:false});
+  canvas.addEventListener("pointerup",up,{passive:false});
+  canvas.addEventListener("pointercancel",up,{passive:false});
+  canvas.addEventListener("pointerleave",up,{passive:false});
+  canvas.addEventListener("touchstart",e=>e.preventDefault(),{passive:false});
+  canvas.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
+  window.addEventListener("resize",sync);
+  window.addEventListener("orientationchange",()=>setTimeout(sync,220));
+
+  return {
+    sync:sync,
+    setColor:c=>{color=c;},
+    setSize:s=>{size=s;},
+    setLocked:v=>{locked=!!v;},
+    setSingleStroke:v=>{singleStroke=!!v;},
+    undo(){ if(strokes.length<=baseCount)return; redo.push(strokes.pop()); draw(); },
+    redoStroke(){ if(!redo.length)return; strokes.push(redo.pop()); draw(); },
+    clear(){ while(strokes.length>baseCount) redo.push(strokes.pop()); draw(); },
+    reset(){ strokes=[]; redo=[]; cur=null; baseCount=0; draw(); },
+    load(s){ strokes=(s||[]).map(x=>({color:x.color,size:x.size,points:x.points.slice()})); redo=[]; cur=null; baseCount=strokes.length; draw(); },
+    commitBase(){ baseCount=strokes.length; redo=[]; },
+    getStrokes(){ return strokes.map(s=>({color:s.color,size:s.size,points:s.points.slice()})); },
+    getTurnStrokes(){ return strokes.slice(baseCount).map(s=>({color:s.color,size:s.size,points:s.points.slice()})); },
+    state:state
+  };
+}
+
+/* ---------- PROMPT POOL (48 entries) ---------- */
+const PROMPTS=["Astronaut losing a sandwich","Angry pineapple","Robot walking a dog","Vampire dentist","Shark on a skateboard","Grandma bench-pressing","Haunted vending machine","Pizza delivery to the moon","Cat CEO in a suit","Sneezing dragon","Broken umbrella in a storm","Penguin bodyguard","Spaghetti tornado","Wizard stuck in traffic","Worm wearing a hat","Ghost doing laundry","Bear on a unicycle","Melting snowman on vacation","Squirrel bank robbery","Toaster with legs","Detective duck","Octopus playing drums","Giraffe in an elevator","Time-traveling toddler","Nervous skydiver","Cactus in a bathtub","Chicken lawyer","Mermaid at a gym","Snail street race","Pirate at a wedding","Frog weather reporter","Yeti eating ice cream","Bee with a briefcase","Alien ordering coffee","Dinosaur doing yoga","Ninja making pancakes","Hamster pilot","Tooth fairy on strike","Clown at a funeral","Sloth firefighter","Crab conducting an orchestra","Knight fighting a lamp","Mummy at the beach","Moose in a phone booth","Zombie gardener","Flamingo on ice skates","Bulldog in a wig","Lobster playing chess"];
+
+/* ---------- INK PALETTE (tuned for white paper) ---------- */
+const INKS=["#1a1a1a","#e03131","#f76707","#e8a70b","#2f9e44","#1971c2","#7048e8","#e64980"];
+
+/* ==========================================================================
+   GAME STATE
+   ========================================================================== */
+const S={
+  players:[], chains:[], round:0, seat:0, totalRounds:0,
+  drawSecs:70, phase:"setup",
+  finaleChain:0, finaleStep:0,
+  seedOpts:[]
+};
+
+let padDraw=null, timerId=null, timeLeft=0;
+
+/* ---------- DOM ---------- */
+const $=id=>document.getElementById(id);
+const screens=["scrSetup","scrSeed","scrDraw","scrGuess","scrFinale"];
+function show(id){
+  screens.forEach(s=>$(s).classList.toggle("is-active",s===id));
+  document.querySelector(".stage").scrollTop=0;
+}
+function toast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),1900);
+}
+function sub(txt){ $("topSub").textContent=txt; }
+
+/* ---------- ROSTER ---------- */
+function getRoster(){
+  try{
+    const raw=localStorage.getItem("partydeck_players");
+    if(raw){ const a=JSON.parse(raw); if(Array.isArray(a)&&a.length) return a; }
+  }catch(e){}
+  return ["Alex","Jordan","Taylor","Sam"];
+}
+function saveRoster(a){ try{localStorage.setItem("partydeck_players",JSON.stringify(a));}catch(e){} }
+function renderRoster(){
+  const list=S.players;
+  $("rosterCount").textContent=list.length;
+  $("rosList").innerHTML=list.map((p,i)=>
+    '<li class="ros-item"><span><span class="seat-no">'+(i+1)+'</span>'+esc(p)+'</span>'+
+    '<button class="btn btn-ghost mini-x" data-del="'+i+'" aria-label="Remove"><span class="ico ico-sm" data-ic="close"></span></button></li>'
+  ).join("");
+  paintIcons($("rosList"));
+}
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ---------- CURTAIN (3-stage privacy barrier) ---------- */
+let curtainCb=null,holdRAF=null,holdStart=0;
+const HOLD_MS=700;
+function openCurtain(name,note,cb,kicker){
+  curtainCb=cb;
+  $("curtainName").textContent=name;
+  $("curtainNote").textContent=note;
+  $("curtainKick").textContent=kicker||"Pass the phone to";
+  $("holdFill").style.width="0%";
+  $("holdBtn").classList.remove("armed");
+  $("curtain").classList.add("is-open");
+  SFX.open();
+}
+function closeCurtain(){
+  $("curtain").classList.remove("is-open");
+  cancelHold();
+}
+function cancelHold(){
+  if(holdRAF)cancelAnimationFrame(holdRAF);
+  holdRAF=null;
+  $("holdFill").style.width="0%";
+  $("holdBtn").classList.remove("armed");
+}
+function beginHold(e){
+  e.preventDefault();
+  SFX.unlock();
+  holdStart=performance.now();
+  $("holdBtn").classList.add("armed");
+  const step=()=>{
+    const p=Math.min(1,(performance.now()-holdStart)/HOLD_MS);
+    $("holdFill").style.width=(p*100)+"%";
+    if(p>=1){ holdRAF=null; fireUnlock(); }
+    else holdRAF=requestAnimationFrame(step);
+  };
+  holdRAF=requestAnimationFrame(step);
+}
+function fireUnlock(){
+  SFX.ok();
+  closeCurtain();
+  const cb=curtainCb; curtainCb=null;
+  if(cb)cb();
+}
+
+/* ---------- CHAIN MATH ----------
+   chainFor(seat,round): at round r, seat s works on the chain that started
+   r seats to its left. Round advances only after a FULL lap of all seats.   */
+function chainFor(seat,round){
+  const n=S.players.length;
+  return ((seat-round)%n+n)%n;
+}
+
+/* ---------- GAME FLOW ---------- */
+function startGame(){
+  const n=S.players.length;
+  if(n<3){ $("setupWarn").style.display="block"; SFX.err(); return; }
+  $("setupWarn").style.display="none";
+  S.totalRounds=Math.min(n,8);
+  S.chains=S.players.map(()=>[]);
+  S.round=0; S.seat=0;
+  SFX.unlock();
+  nextTurn();
+}
+
+function nextTurn(){
+  if(S.round>=S.totalRounds){ enterFinale(); return; }
+  const name=S.players[S.seat];
+  const roundLabel=S.round===0?"Secret word":(S.round%2===1?"Draw":"Guess");
+  sub("Round "+(S.round+1)+"/"+S.totalRounds+" \u2022 "+roundLabel+" \u2022 Seat "+(S.seat+1)+"/"+S.players.length);
+  openCurtain(name,"Everyone else: eyes up. No peeking at this screen.",runTurn);
+}
+
+function advance(){
+  S.seat++;
+  if(S.seat>=S.players.length){ S.seat=0; S.round++; }
+  nextTurn();
+}
+
+function runTurn(){
+  if(S.round===0) return turnSeed();
+  const ci=chainFor(S.seat,S.round);
+  const prev=S.chains[ci][S.round-1];
+  if(S.round%2===1) turnDraw(prev);
+  else turnGuess(prev,ci);
+}
+
+/* --- Round 0: secret seed word --- */
+function rollSeeds(){
+  const pool=PROMPTS.slice();
+  const out=[];
+  while(out.length<3&&pool.length){ out.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]); }
+  S.seedOpts=out;
+  $("seedOptions").innerHTML=out.map((w,i)=>
+    '<button class="btn seed-btn" data-seed="'+i+'"><span>'+esc(w)+'</span><span class="ico" data-ic="right"></span></button>'
+  ).join("");
+  paintIcons($("seedOptions"));
+}
+function turnSeed(){
+  rollSeeds();
+  show("scrSeed");
+}
+function commitSeed(word){
+  S.chains[S.seat].push({type:"word",by:S.seat,text:word,seed:true});
+  SFX.ok();
+  advance();
+}
+
+/* --- Odd rounds: draw --- */
+function turnDraw(prev){
+  show("scrDraw");
+  $("drawWord").textContent=prev.text;
+  if(!padDraw){
+    padDraw=createSketchPad($("padDraw"),{onChange:updateToolState});
+    buildSwatches();
+  }
+  padDraw.reset();
+  padDraw.setColor(INKS[0]); padDraw.setSize(7);
+  document.querySelectorAll(".sw").forEach((b,i)=>b.classList.toggle("is-active",i===0));
+  document.querySelectorAll(".size-btn").forEach(b=>b.classList.toggle("is-active",b.dataset.size==="7"));
+  requestAnimationFrame(()=>padDraw.sync());
+  startTimer();
+}
+function commitDraw(){
+  stopTimer();
+  const ci=chainFor(S.seat,S.round);
+  S.chains[ci].push({type:"draw",by:S.seat,strokes:padDraw.getStrokes()});
+  SFX.ok();
+  advance();
+}
+
+/* --- Even rounds: guess --- */
+function turnGuess(prev,ci){
+  show("scrGuess");
+  $("guessAuthor").textContent=S.players[prev.by];
+  $("guessInput").value="";
+  requestAnimationFrame(()=>renderInto($("padView"),prev.strokes));
+}
+function commitGuess(){
+  const v=$("guessInput").value.trim();
+  if(!v){ SFX.err(); toast("Type a guess first"); return; }
+  const ci=chainFor(S.seat,S.round);
+  S.chains[ci].push({type:"word",by:S.seat,text:v});
+  SFX.ok();
+  advance();
+}
+
+/* ---------- TIMER ---------- */
+function startTimer(){
+  stopTimer();
+  if(!S.drawSecs){ $("drawTimer").textContent="\u221E"; $("drawBar").style.width="100%"; $("drawTimer").classList.remove("danger"); return; }
+  timeLeft=S.drawSecs;
+  paintTimer();
+  timerId=setInterval(()=>{
+    timeLeft--;
+    paintTimer();
+    if(timeLeft<=5&&timeLeft>0)SFX.tick();
+    if(timeLeft<=0){ stopTimer(); SFX.warn(); toast("Time! Pencils down."); commitDraw(); }
+  },1000);
+}
+function paintTimer(){
+  $("drawTimer").textContent=timeLeft;
+  $("drawBar").style.width=(timeLeft/S.drawSecs*100)+"%";
+  $("drawTimer").classList.toggle("danger",timeLeft<=10);
+}
+function stopTimer(){ if(timerId){clearInterval(timerId);timerId=null;} }
+
+/* ---------- TOOLS ---------- */
+function buildSwatches(){
+  const row=$("swatchRow");
+  row.innerHTML=INKS.map((c,i)=>'<button class="sw'+(i===0?" is-active":"")+'" data-ink="'+c+'" style="background:'+c+'" aria-label="Ink"></button>').join("")
+    +'<button class="sw eraser" data-ink="'+PAPER+'" aria-label="Eraser"><span class="ico ico-sm" data-ic="eraser"></span></button>';
+  paintIcons(row);
+  row.addEventListener("click",e=>{
+    const b=e.target.closest(".sw"); if(!b)return;
+    row.querySelectorAll(".sw").forEach(x=>x.classList.remove("is-active"));
+    b.classList.add("is-active");
+    padDraw.setColor(b.dataset.ink);
+    SFX.tap();
+  });
+}
+function updateToolState(st){
+  $("btnUndo").disabled=!st.canUndo;
+  $("btnRedo").disabled=!st.canRedo;
+  $("btnUndo").style.opacity=st.canUndo?1:.4;
+  $("btnRedo").style.opacity=st.canRedo?1:.4;
+}
+
+/* ---------- FINALE ---------- */
+function enterFinale(){
+  stopTimer();
+  sub("Finale \u2022 "+S.chains.length+" chains");
+  S.finaleChain=0; S.finaleStep=0;
+  $("chainChips").innerHTML=S.players.map((p,i)=>
+    '<button class="btn chain-chip'+(i===0?" is-active":"")+'" data-chain="'+i+'">'+esc(p)+"'s word</button>"
+  ).join("");
+  show("scrFinale");
+  renderSlide();
+  SFX.fanfare();
+}
+function renderSlide(){
+  const chain=S.chains[S.finaleChain]||[];
+  const step=Math.min(S.finaleStep,Math.max(0,chain.length-1));
+  S.finaleStep=step;
+  const e=chain[step];
+  const host=$("slideHost");
+  $("stepCount").textContent=(step+1)+" / "+chain.length;
+  if(!e){ host.innerHTML='<p class="lede">This chain is empty.</p>'; return; }
+
+  let inner='<div class="slide">';
+  inner+='<div class="slide-author"><span class="ico ico-sm" data-ic="'+(e.type==="draw"?"brush":(e.seed?"star":"type"))+'"></span>'
+       +(e.seed?"Secret word from ":(e.type==="draw"?"Drawn by ":"Guessed by "))+esc(S.players[e.by])+'</div>';
+  if(e.type==="draw"){
+    inner+='<div class="pad-wrap"><canvas class="pad" id="slideCanvas" style="cursor:default"></canvas></div>';
+  }else{
+    inner+='<div class="slide-text'+(e.seed?" seed":"")+'">'+esc(e.text)+'</div>';
+  }
+  inner+='</div>';
+  host.innerHTML=inner;
+  paintIcons(host);
+  if(e.type==="draw"){ requestAnimationFrame(()=>renderInto($("slideCanvas"),e.strokes)); }
+  $("btnPrev").disabled=step===0;
+  $("btnNext").textContent=(step>=chain.length-1)?"Next Chain":"Next";
+  paintIcons($("btnNext"));
+}
+
+/* ---------- FULLSCREEN ---------- */
+function toggleFullscreen(){
+  const el=document.documentElement;
+  if(!document.fullscreenElement&&!document.webkitFullscreenElement){
+    const req=el.requestFullscreen||el.webkitRequestFullscreen;
+    if(req){ req.call(el).catch(()=>toast("Add to Home Screen for fullscreen on iOS")); }
+    else toast("Add to Home Screen for fullscreen on iOS");
+  }else{
+    (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+  }
+}
+
+/* ==========================================================================
+   BOOT
+   ========================================================================== */
+document.addEventListener("DOMContentLoaded",function(){
+  initTheme();
+  paintIcons(document);
+  S.players=getRoster();
+  renderRoster();
+
+  /* Roster */
+  $("rosForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const v=$("rosInput").value.trim();
+    if(!v)return;
+    if(S.players.length>=12){ toast("12 seats max"); SFX.err(); return; }
+    if(S.players.some(p=>p.toLowerCase()===v.toLowerCase())){ toast("Name already seated"); SFX.err(); return; }
+    S.players.push(v); saveRoster(S.players); renderRoster();
+    $("rosInput").value=""; SFX.tap();
+  });
+  $("rosList").addEventListener("click",e=>{
+    const b=e.target.closest("[data-del]"); if(!b)return;
+    S.players.splice(parseInt(b.dataset.del,10),1);
+    saveRoster(S.players); renderRoster(); SFX.tap();
+  });
+
+  /* Timer option */
+  $("timeOpts").addEventListener("click",e=>{
+    const b=e.target.closest("[data-sec]"); if(!b)return;
+    $("timeOpts").querySelectorAll(".opt-btn").forEach(x=>x.classList.remove("is-active"));
+    b.classList.add("is-active");
+    S.drawSecs=parseInt(b.dataset.sec,10);
+    SFX.tap();
+  });
+
+  $("btnStart").addEventListener("click",startGame);
+
+  /* Curtain hold */
+  const hb=$("holdBtn");
+  hb.addEventListener("pointerdown",beginHold,{passive:false});
+  hb.addEventListener("pointerup",cancelHold);
+  hb.addEventListener("pointerleave",cancelHold);
+  hb.addEventListener("pointercancel",cancelHold);
+  hb.addEventListener("contextmenu",e=>e.preventDefault());
+
+  /* Seed */
+  $("seedOptions").addEventListener("click",e=>{
+    const b=e.target.closest("[data-seed]"); if(!b)return;
+    commitSeed(S.seedOpts[parseInt(b.dataset.seed,10)]);
+  });
+  $("btnSeedShuffle").addEventListener("click",()=>{ rollSeeds(); SFX.tap(); });
+
+  /* Draw tools */
+  $("sizeRow").addEventListener("click",e=>{
+    const b=e.target.closest("[data-size]"); if(!b)return;
+    $("sizeRow").querySelectorAll(".size-btn").forEach(x=>x.classList.remove("is-active"));
+    b.classList.add("is-active");
+    padDraw.setSize(parseInt(b.dataset.size,10)); SFX.tap();
+  });
+  $("btnUndo").addEventListener("click",()=>{padDraw.undo();SFX.tap();});
+  $("btnRedo").addEventListener("click",()=>{padDraw.redoStroke();SFX.tap();});
+  $("btnClear").addEventListener("click",()=>{padDraw.clear();SFX.tap();});
+  $("btnDrawDone").addEventListener("click",commitDraw);
+
+  /* Guess */
+  $("guessForm").addEventListener("submit",e=>{e.preventDefault();commitGuess();});
+
+  /* Finale nav */
+  $("chainChips").addEventListener("click",e=>{
+    const b=e.target.closest("[data-chain]"); if(!b)return;
+    $("chainChips").querySelectorAll(".chain-chip").forEach(x=>x.classList.remove("is-active"));
+    b.classList.add("is-active");
+    S.finaleChain=parseInt(b.dataset.chain,10); S.finaleStep=0;
+    renderSlide(); SFX.tap();
+  });
+  $("btnPrev").addEventListener("click",()=>{ if(S.finaleStep>0){S.finaleStep--;renderSlide();SFX.tap();} });
+  $("btnNext").addEventListener("click",()=>{
+    const chain=S.chains[S.finaleChain]||[];
+    if(S.finaleStep<chain.length-1){ S.finaleStep++; SFX.tap(); }
+    else{
+      S.finaleChain=(S.finaleChain+1)%S.chains.length;
+      S.finaleStep=0; SFX.ok();
+      $("chainChips").querySelectorAll(".chain-chip").forEach((x,i)=>x.classList.toggle("is-active",i===S.finaleChain));
+    }
+    renderSlide();
+  });
+  $("btnAgain").addEventListener("click",()=>{
+    S.chains=[];S.round=0;S.seat=0;
+    sub("Setup"); show("scrSetup"); renderRoster(); SFX.tap();
+  });
+
+  /* Chrome */
+  $("btnFs").addEventListener("click",toggleFullscreen);
+  $("btnRules").addEventListener("click",()=>{$("rulesDrawer").classList.add("is-open");SFX.open();});
+  $("btnRulesClose").addEventListener("click",()=>$("rulesDrawer").classList.remove("is-open"));
+  $("rulesDrawer").addEventListener("click",e=>{ if(e.target===$("rulesDrawer"))$("rulesDrawer").classList.remove("is-open"); });
+
+  /* Safety: never let a curtain-protected screen render behind a closed curtain */
+  window.addEventListener("pagehide",stopTimer);
+});
+})();
+</script>
 </body>
 </html>

@@ -282,5 +282,47 @@ const PARTY_GAMES = [
     iconKey: "target",
     entryPath: "games/medusa-eye/index.html",
     description: "Put the phone in the middle of the table. Look up on 3! If you make eye contact with someone looking back, tap fast!"
+  },
+  {
+    id: "flappy-penalty",
+    title: "Flappy Gauntlet",
+    tagline: "One Tap. One Life. One Public Failure.",
+    category: "arcade",
+    tags: ["Arcade", "Reaction", "Group Challenge"],
+    minPlayers: 2,
+    maxPlayers: 12,
+    drinkingMode: true,
+    estimatedTime: "5-10m",
+    iconKey: "zap",
+    entryPath: "games/flappy-penalty/index.html",
+    description: "Take turns trying to survive a one-tap gauntlet while the group watches."
+  },
+  {
+    id: "quick-draw-duel",
+    title: "Quick-Draw Duel",
+    tagline: "Hold, Wait, Lift First",
+    category: "arcade",
+    tags: ["Arcade", "Reaction", "Duel"],
+    minPlayers: 2,
+    maxPlayers: 2,
+    drinkingMode: true,
+    estimatedTime: "3-5m",
+    iconKey: "zap",
+    entryPath: "games/quick-draw-duel/index.html",
+    description: "Face off in a reaction-time duel and be the first to lift at the right moment."
+  },
+  {
+    id: "finger-roulette",
+    title: "Finger Roulette",
+    tagline: "Multi-Touch Electric Chooser",
+    category: "arcade",
+    tags: ["Arcade", "Multiplayer", "Chooser"],
+    minPlayers: 2,
+    maxPlayers: 6,
+    drinkingMode: true,
+    estimatedTime: "1-2m",
+    iconKey: "flame",
+    entryPath: "games/finger-roulette/index.html",
+    description: "Place multiple fingers on screen and let the game randomly choose one."
   }
 ];

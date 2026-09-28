@@ -1,505 +1,810 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cyber-neon">
+<html lang="en" data-theme="nordic-slate">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#08090c" id="metaThemeColor" />
-<title>A Fake Artist Goes to New York | PartyDeck</title>
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Fake Artist | PartyDeck</title>
+
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+
 <style>
-:root {
-  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-mono: 'Space Mono', monospace;
-  --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
-  --ease: cubic-bezier(.2,.8,.3,1);
-}
-[data-theme="cyber-neon"] {
-  --bg-primary: #08090c; --bg-surface: #10141b; --bg-elevated: #181e29;
-  --text-primary: #ffffff; --text-secondary: #9ba3b4; --text-muted: #5c6577;
-  --accent: #00ffcc; --accent-glow: rgba(0,255,204,0.35); --accent-secondary: #ff007f;
-  --danger: #ff0055; --success: #00ff66; --border-color: rgba(0,255,204,0.22);
-  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(0,255,204,0.12);
-}
-[data-theme="sunset-rave"] {
-  --bg-primary: #0f071d; --bg-surface: #1e0f38; --bg-elevated: #321659;
-  --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
-  --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-secondary: #ff8800;
-  --danger: #ff0044; --success: #00ffaa; --border-color: rgba(255,0,127,0.3);
-  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,0,127,0.2);
-}
-[data-theme="retro-arcade"] {
-  --bg-primary: #12131c; --bg-surface: #1a1b28; --bg-elevated: #26273b;
-  --text-primary: #f5f5f5; --text-secondary: #a2a8d3; --text-muted: #6873a8;
-  --accent: #ffd400; --accent-glow: rgba(255,212,0,0.35); --accent-secondary: #ff3860;
-  --danger: #ff3860; --success: #42e2b8; --border-color: rgba(255,212,0,0.25);
-  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,212,0,0.15);
-}
-[data-theme="minimal-light"] {
-  --bg-primary: #f4f6f9; --bg-surface: #ffffff; --bg-elevated: #e8ecf2;
-  --text-primary: #101828; --text-secondary: #475467; --text-muted: #98a2b3;
-  --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2); --accent-secondary: #7c3aed;
-  --danger: #d92d20; --success: #0f9d58; --border-color: rgba(16,24,40,0.15);
-  --card-shadow: 0 8px 24px rgba(16,24,40,0.08);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
-.pd-hud{position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
-.hud-exit{display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;padding:.42rem .65rem;cursor:pointer;text-decoration:none;}
-.hud-exit:active{transform:scale(.96);}
-.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
-.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);white-space:nowrap;text-transform:uppercase;}
-.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:62px;text-align:center;}
-main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
-.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
-.phase.on{display:flex;animation:pFade .2s var(--ease);}
-@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
-.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
-h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
-p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
-.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
-.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
-.chips{display:flex;flex-wrap:wrap;gap:.45rem;}
-.chip{background:var(--bg-elevated);color:var(--text-secondary);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:.5rem .75rem;min-height:38px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
-.chip.is-on{background:var(--accent);color:var(--bg-primary);border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow);}
-.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
-.btn:active{transform:scale(.98);}
-.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
-.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
-.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--danger);box-shadow:none;}
-.btn.push{margin-top:auto;}
-.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
-.tile{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.8rem .5rem;color:var(--text-primary);font-family:var(--font-mono);font-size:.82rem;font-weight:700;text-align:center;cursor:pointer;}
-.tile.is-on{background:var(--accent);color:var(--bg-primary);box-shadow:0 0 10px var(--accent-glow);}
-.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:28vh;overflow-y:auto;}
-.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
-.ritem .seat{color:var(--accent);font-weight:700;}
-.ritem .nm{flex:1;font-weight:700;}
-.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;display:grid;place-items:center;}
+  input{user-select:text;-webkit-user-select:text}
+  body{overflow:hidden;height:100dvh}
 
-.hold-card{position:relative;width:100%;aspect-ratio:16/10;border-radius:var(--r-lg);border:2px dashed var(--border-color);background:var(--bg-surface);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;touch-action:none;}
-.hold-card.revealed{border-style:solid;border-color:var(--accent);box-shadow:0 0 24px var(--accent-glow);}
-.hold-curtain{position:absolute;inset:0;background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;}
-.hold-face{position:absolute;inset:0;background:var(--bg-elevated);padding:1.4rem;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.45rem;}
-.hold-card.revealed .hold-curtain{display:none;}
-.hold-card.revealed .hold-face{display:flex;}
-.h-tag{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase;}
-.h-val{font-family:var(--font-display);font-size:1.5rem;font-weight:900;color:var(--accent);}
-.h-val.is-fake{color:var(--danger);}
+  .gm-top{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:.75rem;padding:.55rem .9rem;background:var(--bg-surface);border-bottom:1px solid var(--border-ui);flex-shrink:0}
+  .gm-idblock{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+  .gm-title{font-family:var(--font-display);font-size:.98rem;font-weight:900}
+  .gm-sub{font-family:var(--font-mono);font-size:.64rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .gm-actions{display:flex;gap:.4rem;flex-shrink:0}
+  .gm-actions .btn-icon-only{width:48px;height:48px;min-height:48px}
 
-.canvas-wrap{position:relative;width:100%;aspect-ratio:4/3;background:#fff;border-radius:var(--r-md);border:2px solid var(--border-color);overflow:hidden;touch-action:none;}
-#drawCanvas{width:100%;height:100%;display:block;}
-.turn-strip{display:flex;align-items:center;justify-content:space-between;background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.6rem .8rem;}
-.turn-name{font-family:var(--font-display);font-size:1.1rem;font-weight:800;color:var(--accent);}
-.stroke-count{font-family:var(--font-mono);font-size:.78rem;color:var(--text-muted);}
+  .stage{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .screen{display:none;flex-direction:column;gap:1rem;padding:1.1rem;max-width:680px;margin:0 auto;width:100%}
+  .screen.is-active{display:flex}
 
-.curtain{position:fixed;inset:0;z-index:90;background:rgba(8,9,12,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.4rem;}
-.curtain.on{display:flex;}
-.cur-card{background:var(--bg-surface);border:2px solid var(--border-color);border-radius:var(--r-lg);padding:1.6rem 1.2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 0 30px var(--accent-glow);}
-.cur-tag{font-family:var(--font-mono);font-size:.6rem;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
-.cur-name{font-family:var(--font-display);font-size:1.5rem;font-weight:900;margin:.4rem 0 .65rem;}
-.pulse{animation:ring 2s infinite}
-@keyframes ring{0%{box-shadow:0 0 0 0 var(--accent-glow)}70%{box-shadow:0 0 0 16px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
+  .panel{background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-lg);padding:1.1rem;box-shadow:var(--card-shadow)}
+  .panel-label{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.6rem}
+  .hr-soft{height:1px;background:var(--border-ui);margin:1rem 0;border:0}
+  h2.sec{font-size:1.45rem;line-height:1.2}
+  p.lede{font-size:.88rem;color:var(--text-secondary);line-height:1.5}
 
-.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
-.ico svg{width:100%;height:100%;display:block;}
+  .ros-row{display:flex;gap:.5rem;margin-bottom:.75rem}
+  .ros-row input{flex:1;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-md);color:var(--text-primary);font-family:var(--font-mono);font-size:16px;padding:.7rem .9rem;outline:none;min-height:48px}
+  .ros-row input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+  .ros-list{list-style:none;display:flex;flex-direction:column;gap:.45rem;max-height:34vh;overflow-y:auto}
+  .ros-item{display:flex;align-items:center;justify-content:space-between;gap:.5rem;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-sm);padding:.45rem .5rem .45rem .8rem;font-family:var(--font-mono);font-size:.84rem}
+  .ink-dot{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:.6rem;vertical-align:-2px;border:2px solid rgba(255,255,255,.35)}
+  .mini-x{width:48px;height:48px;min-height:48px;padding:0;border-radius:var(--r-sm)}
+
+  .opt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+  .opt-btn{padding:.6rem .3rem;font-size:.78rem;border-radius:var(--r-sm)}
+  .opt-btn.is-active{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent);box-shadow:0 2px 10px var(--accent-glow)}
+
+  /* Curtain */
+  .curtain{position:fixed;inset:0;z-index:900;background:var(--bg-primary);display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.1rem;padding:2rem 1.5rem;text-align:center;padding-bottom:max(2rem,env(safe-area-inset-bottom))}
+  .curtain.is-open{display:flex;animation:cIn .28s var(--ease-smooth)}
+  @keyframes cIn{from{opacity:0}to{opacity:1}}
+  .curtain-eye{width:76px;height:76px;border-radius:var(--r-lg);background:var(--bg-elevated);border:1px solid var(--border-ui);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+  .curtain-kicker{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted)}
+  .curtain-name{font-family:var(--font-display);font-size:2.25rem;font-weight:900;line-height:1.1;word-break:break-word}
+  .curtain-note{font-size:.85rem;color:var(--text-secondary);max-width:30ch}
+  .hold-btn{position:relative;overflow:hidden;width:100%;max-width:340px;min-height:62px;font-size:.95rem;border-radius:var(--r-lg);background:var(--bg-elevated);border:1px solid var(--border-ui-active)}
+  .hold-fill{position:absolute;left:0;top:0;bottom:0;width:0%;background:var(--accent);opacity:.9;transition:width .06s linear}
+  .hold-label{position:relative;z-index:2;display:inline-flex;align-items:center;gap:.5rem}
+  .hold-btn.armed .hold-label{color:var(--accent-contrast)}
+
+  /* Secret reveal */
+  .reveal-card{display:flex;flex-direction:column;align-items:center;gap:.85rem;padding:2rem 1.2rem;border-radius:var(--r-lg);border:1px solid var(--border-ui);background:var(--bg-surface);box-shadow:var(--card-shadow);text-align:center;animation:pop .32s var(--ease-spring)}
+  @keyframes pop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+  .reveal-cat{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted)}
+  .reveal-word{font-family:var(--font-display);font-size:2.5rem;font-weight:900;letter-spacing:-.02em;color:var(--accent);word-break:break-word;line-height:1.05}
+  .reveal-word.fake{color:var(--danger);font-size:4.5rem}
+  .reveal-role{font-size:.9rem;color:var(--text-secondary);max-width:32ch;line-height:1.5}
+  .ink-badge{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--font-mono);font-size:.76rem;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-full);padding:.45rem .85rem}
+
+  /* Pad */
+  .pad-wrap{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--border-ui);box-shadow:var(--card-shadow);background:#FAFAF7}
+  canvas.pad{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+  .pad-wrap.locked canvas.pad{cursor:not-allowed}
+  .turn-bar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:.65rem .9rem}
+  .turn-cap{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:.15rem}
+  .turn-name{font-family:var(--font-display);font-size:1.3rem;font-weight:900}
+  .lap-chip{font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted);border:1px solid var(--border-ui);border-radius:var(--r-full);padding:.3rem .65rem;flex-shrink:0}
+  .hint-strip{font-family:var(--font-mono);font-size:.72rem;color:var(--text-muted);text-align:center;padding:.5rem;border:1px dashed var(--border-ui);border-radius:var(--r-sm)}
+  .order-strip{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:center}
+  .order-pip{width:26px;height:26px;border-radius:50%;border:2px solid var(--border-ui);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.6rem;font-weight:700;color:var(--bg-primary)}
+  .order-pip.done{opacity:.35}
+  .order-pip.now{transform:scale(1.2);border-color:var(--text-primary);box-shadow:0 0 0 3px var(--accent-glow)}
+
+  /* Voting */
+  .vote-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+  .vote-btn{flex-direction:column;align-items:flex-start;gap:.4rem;padding:1rem;text-align:left;border-radius:var(--r-md);background:var(--bg-elevated)}
+  .vote-btn.is-active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+  .vote-name{font-family:var(--font-display);font-size:1.05rem;font-weight:800}
+
+  /* Escape grid */
+  .escape-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+  .escape-btn{padding:.9rem .6rem;font-size:.88rem;border-radius:var(--r-sm);background:var(--bg-elevated);text-align:center;justify-content:center}
+  .escape-btn.is-active{background:var(--accent);color:var(--accent-contrast);border-color:var(--accent)}
+
+  /* Result */
+  .verdict{text-align:center;padding:1.6rem 1rem;border-radius:var(--r-lg);border:1px solid var(--border-ui);box-shadow:var(--card-shadow);animation:pop .35s var(--ease-spring)}
+  .verdict.artists{background:linear-gradient(160deg,var(--bg-surface),color-mix(in srgb,var(--success) 14%,var(--bg-surface)))}
+  .verdict.fake{background:linear-gradient(160deg,var(--bg-surface),color-mix(in srgb,var(--danger) 16%,var(--bg-surface)))}
+  .verdict h2{font-size:1.9rem;margin-bottom:.4rem}
+  .verdict .who{font-family:var(--font-mono);font-size:.82rem;color:var(--text-secondary)}
+  .tally-list{list-style:none;display:flex;flex-direction:column;gap:.4rem;margin-top:.6rem}
+  .tally-item{display:flex;justify-content:space-between;align-items:center;background:var(--bg-elevated);border:1px solid var(--border-ui);border-radius:var(--r-sm);padding:.5rem .8rem;font-family:var(--font-mono);font-size:.8rem}
+  .tally-item.culprit{border-color:var(--danger);color:var(--danger)}
+
+  .rules-list{list-style:none;display:flex;flex-direction:column;gap:.85rem}
+  .rules-list li{display:flex;gap:.75rem;align-items:flex-start}
+  .rules-n{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--accent);color:var(--accent-contrast);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:.72rem;font-weight:700}
+  .rules-list p{font-size:.88rem;color:var(--text-secondary);line-height:1.45}
+  .rules-list strong{color:var(--text-primary)}
+  .example-box{background:var(--bg-elevated);border:1px dashed var(--border-ui);border-radius:var(--r-sm);padding:.75rem .85rem;font-family:var(--font-mono);font-size:.74rem;color:var(--text-secondary);line-height:1.6;margin-top:.35rem}
+  .example-box b{color:var(--accent)}
 </style>
+<script src="../../js/roster-normalize.js"></script>
+<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
-<header class="pd-hud">
-  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
-  <div class="hud-mid">
-    <span class="hud-badge" id="hudBadge">SETUP // PHASE</span>
-    <span class="hud-label" id="hudLabel">Fake Artist</span>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">A Fake Artist Goes to New York</span>
+    <span class="gm-sub" id="topSub">Setup</span>
   </div>
-  <div class="hud-count" id="hudCount">0/0</div>
+  <div class="gm-actions">
+    <button class="btn btn-ghost btn-icon-only" id="btnRules" aria-label="How to play"><span class="ico" data-ic="help"></span></button>
+    <button class="btn btn-ghost btn-icon-only" id="btnFs" aria-label="Fullscreen"><span class="ico" data-ic="fullscreen"></span></button>
+    <a class="btn btn-ghost btn-icon-only" href="../../index.html" aria-label="Hub"><span class="ico" data-ic="home"></span></a>
+  </div>
 </header>
 
-<main>
+<div class="stage">
+
   <!-- SETUP -->
-  <section class="phase on" id="phSetup">
-    <div class="hero"><span class="ico" data-ic="brush"></span></div>
-    <h1 class="title">A Fake Artist Goes to New York</h1>
-    <p class="sub">Everyone knows the secret word except the Fake Artist, who only sees the category. Draw one stroke per turn and find the impostor.</p>
+  <section class="screen is-active" id="scrSetup">
+    <div>
+      <h2 class="sec">Everyone draws. One of you has no idea what.</h2>
+      <p class="lede">All artists see the secret word and draw one line each. The Fake Artist sees only a question mark and has to fake it convincingly.</p>
+    </div>
+
     <div class="panel">
-      <p class="ptitle">Artists (drawing order)</p>
-      <ul class="rlist" id="rList"></ul>
-      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
-        <input type="text" id="rInput" placeholder="Add player..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
-        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
+      <div class="panel-label">Party Roster &middot; <span id="rosterCount">0</span> seated <span style="color:var(--text-muted)">(4&ndash;10)</span></div>
+      <form class="ros-row" id="rosForm">
+        <input type="text" id="rosInput" placeholder="Add player name..." maxlength="14" autocomplete="off" />
+        <button type="submit" class="btn btn-accent">Add</button>
+      </form>
+      <ul class="ros-list" id="rosList"></ul>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Category</div>
+      <div class="opt-grid" id="catOpts"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">Lines per artist</div>
+      <div class="opt-grid" id="lapOpts">
+        <button class="btn opt-btn" data-laps="1">1 line</button>
+        <button class="btn opt-btn is-active" data-laps="2">2 lines</button>
+        <button class="btn opt-btn" data-laps="3">3 lines</button>
       </div>
     </div>
-    <div class="panel">
-      <p class="ptitle">Drawing Rounds</p>
-      <div class="chips" id="roundChips">
-        <button class="chip" type="button" data-r="1">QUICK (1 EACH)</button>
-        <button class="chip is-on" type="button" data-r="2">STANDARD (2 EACH)</button>
-        <button class="chip" type="button" data-r="3">EXTENDED (3 EACH)</button>
-      </div>
-    </div>
-    <button class="btn push" id="btnStart" type="button">Assign Secret Roles</button>
+
+    <button class="btn btn-accent" id="btnStart" style="min-height:58px;font-size:1rem"><span class="ico" data-ic="play"></span> Deal Secret Roles</button>
+    <p id="setupWarn" style="text-align:center;font-size:.78rem;color:var(--danger);font-family:var(--font-mono);display:none">Seat between 4 and 10 players.</p>
   </section>
 
-  <!-- DEAL -->
-  <section class="phase" id="phDeal">
-    <div class="panel" style="text-align:center;padding:1.4rem 1rem;">
-      <p class="ptitle" id="dealStep">PLAYER 1 OF 4</p>
-      <h1 class="title" id="dealWho" style="color:var(--accent);margin:.2rem 0 .9rem;">Player</h1>
-      <div class="hold-card" id="holdBox">
-        <div class="hold-curtain">
-          <span class="ico" data-ic="lock" style="width:32px;height:32px;color:var(--accent);"></span>
-          <span>Hold to Reveal Role</span>
-        </div>
-        <div class="hold-face" id="holdFace"></div>
-      </div>
-      <p class="sub" style="margin-top:.8rem;font-size:.78rem;">Release to hide, then pass the device.</p>
-    </div>
-    <button class="btn push" id="btnDealNext" type="button" disabled>View Role First</button>
+  <!-- SECRET REVEAL -->
+  <section class="screen" id="scrSecret">
+    <div class="reveal-card" id="revealCard"></div>
+    <button class="btn btn-accent" id="btnSecretDone" style="min-height:56px"><span class="ico" data-ic="check"></span> Got It &mdash; Hide</button>
+    <p class="lede" style="text-align:center;font-size:.78rem;color:var(--text-muted)">Memorise it. You won't see it again until the reveal.</p>
   </section>
 
   <!-- DRAW -->
-  <section class="phase" id="phDraw">
-    <div class="turn-strip">
-      <span class="turn-name" id="turnName">Player</span>
-      <span class="stroke-count" id="strokeCount">Stroke 1 of 8</span>
+  <section class="screen" id="scrDraw">
+    <div class="turn-bar">
+      <div>
+        <span class="turn-cap">Now drawing</span>
+        <span class="turn-name" id="turnName">—</span>
+      </div>
+      <span class="lap-chip" id="lapChip">Line 1 of 2</span>
     </div>
-    <div class="canvas-wrap">
-      <canvas id="drawCanvas"></canvas>
+    <div class="order-strip" id="orderStrip"></div>
+    <div class="pad-wrap" id="padWrap"><canvas class="pad" id="padMain"></canvas></div>
+    <div class="hint-strip" id="hintStrip">One continuous line. Lift your finger and the line is finished.</div>
+    <div style="display:flex;gap:.6rem">
+      <button class="btn btn-ghost" id="btnRedraw" style="flex:1" disabled><span class="ico" data-ic="undo"></span> Redo Line</button>
+      <button class="btn btn-accent" id="btnConfirmLine" style="flex:2" disabled><span class="ico" data-ic="check"></span> Confirm &amp; Pass</button>
     </div>
-    <div class="btn-row">
-      <button class="btn ghost" id="btnUndo" type="button">Undo My Stroke</button>
-      <button class="btn" id="btnConfirmStroke" type="button" disabled>Confirm & Pass</button>
-    </div>
-    <button class="btn danger push" id="btnEndEarly" type="button">End Drawing & Vote Now</button>
   </section>
 
   <!-- VOTE -->
-  <section class="phase" id="phVote">
-    <h1 class="title">Accuse the Fake Artist</h1>
-    <p class="sub">Discuss the drawing, then unanimously tap who you believe is the Fake Artist.</p>
-    <div class="canvas-wrap" style="max-height:200px;">
-      <canvas id="voteCanvasPreview"></canvas>
-    </div>
+  <section class="screen" id="scrVote">
     <div class="panel">
-      <div class="grid-2" id="voteGrid"></div>
+      <div class="panel-label">Secret ballot</div>
+      <h2 class="sec" id="voteTitle">Who is the Fake Artist?</h2>
+      <p class="lede">Tap the name you suspect, then lock it in. Nobody sees your vote.</p>
     </div>
-    <button class="btn push" id="btnLockVote" type="button" disabled>Confirm Accusation</button>
+    <div class="vote-grid" id="voteGrid"></div>
+    <button class="btn btn-accent" id="btnVoteLock" style="min-height:56px" disabled><span class="ico" data-ic="check"></span> Lock In Vote</button>
   </section>
 
-  <!-- ESCAPE GUESS -->
-  <section class="phase" id="phEscape">
-    <div class="hero"><span class="ico" data-ic="target"></span></div>
-    <h1 class="title" style="color:var(--danger);">Fake Artist Caught!</h1>
-    <p class="sub" id="escPrompt">Guess the secret word to steal the win:</p>
-    <div class="panel">
-      <input type="text" id="escInput" placeholder="Type your guess..." style="width:100%;background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.8rem;outline:none;font-size:1rem;">
+  <!-- ESCAPE -->
+  <section class="screen" id="scrEscape">
+    <div class="panel" style="border-color:var(--danger)">
+      <div class="panel-label" style="color:var(--danger)">You were caught</div>
+      <h2 class="sec">Last chance, <span id="escapeName">Faker</span>.</h2>
+      <p class="lede">Name the secret word from the category <strong id="escapeCat">—</strong>. Get it right and you steal the win anyway.</p>
     </div>
-    <button class="btn push" id="btnLockEscape" type="button">Submit Guess</button>
+    <div class="escape-grid" id="escapeGrid"></div>
+    <button class="btn btn-accent" id="btnEscapeLock" style="min-height:56px" disabled><span class="ico" data-ic="check"></span> Final Answer</button>
   </section>
 
   <!-- RESULT -->
-  <section class="phase" id="phResult">
-    <div class="hero"><span class="ico" data-ic="target"></span></div>
-    <h1 class="title" id="resTitle">Round Complete</h1>
-    <p class="sub" id="resSub">—</p>
+  <section class="screen" id="scrResult">
+    <div class="verdict" id="verdict"></div>
+    <div class="pad-wrap"><canvas class="pad" id="padFinal" style="cursor:default"></canvas></div>
     <div class="panel">
-      <p class="ptitle">Secret Word</p>
-      <p class="title" id="resWord" style="color:var(--accent);font-size:1.4rem;text-align:left;">—</p>
+      <div class="panel-label">Vote tally</div>
+      <ul class="tally-list" id="tallyList"></ul>
     </div>
-    <div class="btn-row push">
-      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
-      <button class="btn" id="btnAgain" type="button">New Canvas</button>
+    <div style="display:flex;gap:.6rem">
+      <button class="btn btn-accent" id="btnAgain" style="flex:1"><span class="ico" data-ic="refresh"></span> New Round</button>
+      <a class="btn btn-ghost" href="../../index.html" style="flex:1"><span class="ico" data-ic="home"></span> Hub</a>
     </div>
   </section>
-</main>
+</div>
 
-<div class="curtain" id="curtain" aria-hidden="true">
-  <div class="cur-card">
-    <div class="hero" style="margin-bottom:.5rem;"><span class="ico" data-ic="lock" style="width:36px;height:36px;"></span></div>
-    <span class="cur-tag">YOUR TURN</span>
-    <h2 class="cur-name" id="curWho">Pass Phone</h2>
-    <p class="sub" style="margin-bottom:1.2rem;">Draw exactly one continuous stroke related to the secret word.</p>
-    <button class="btn pulse" id="btnCurtainUnlock" type="button">I am ready</button>
+<!-- CURTAIN -->
+<div class="curtain" id="curtain">
+  <div class="curtain-eye"><span class="ico ico-xl" data-ic="lock"></span></div>
+  <span class="curtain-kicker" id="curtainKick">Pass the phone to</span>
+  <span class="curtain-name" id="curtainName">Player</span>
+  <span class="curtain-note" id="curtainNote">Everyone else: eyes up.</span>
+  <button class="hold-btn" id="holdBtn">
+    <span class="hold-fill" id="holdFill"></span>
+    <span class="hold-label"><span class="ico" data-ic="finger"></span> Hold to unlock</span>
+  </button>
+</div>
+
+<!-- RULES -->
+<div class="pd-drawer" id="rulesDrawer">
+  <div class="pd-drawer-card">
+    <div class="pd-drawer-header">
+      <h2 style="font-size:1.2rem">30-Second Quick Start</h2>
+      <button class="btn btn-ghost btn-icon-only" id="btnRulesClose"><span class="ico" data-ic="close"></span></button>
+    </div>
+    <div class="pd-drawer-body">
+      <ul class="rules-list">
+        <li><span class="rules-n">1</span><p><strong>Everyone sees the secret word &mdash; except one Fake Artist,</strong> who sees a question mark.</p></li>
+        <li><span class="rules-n">2</span><p><strong>Draw ONE continuous line each,</strong> in your own colour, on the same shared picture. Lift your finger and your turn is over.</p>
+        <div class="example-box">Word is <b>OCTOPUS</b>. Don't draw the whole thing &mdash; draw one tentacle. Prove you know it without handing it to the faker.</div></li>
+        <li><span class="rules-n">3</span><p><strong>Then everyone votes.</strong> Catch the faker and the artists win &mdash; unless the faker can name the word.</p></li>
+      </ul>
+      <hr class="hr-soft" />
+      <p style="font-size:.82rem;color:var(--text-muted)">Draw too well and you expose the word. Draw too vaguely and you look like the faker.</p>
+    </div>
   </div>
 </div>
 
-<script>
-(function(){
-"use strict";
-const LOCAL={
- home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
- brush:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>',
- lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
- target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
- close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'
-};
-function ICO(k){ return LOCAL[k]||''; }
-document.querySelectorAll('[data-ic]').forEach(el=> el.innerHTML=ICO(el.getAttribute('data-ic')));
+<div class="pd-toast" id="toast">Saved</div>
 
-const PD={
- getPlayers:()=>{ try{ return JSON.parse(localStorage.getItem("partydeck_players")||"[]"); }catch(e){return[];} },
- setPlayers:(a)=>{ try{ localStorage.setItem("partydeck_players",JSON.stringify(a)); }catch(e){} },
- exitToHub:()=>{ window.location.href="../../index.html"; },
- vibrate:(p)=>{ if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){} }
-};
+<script>
+"use strict";
+/* ==========================================================================
+   A FAKE ARTIST GOES TO NEW YORK — PartyDeck Module
+   Uses the identical sketch engine as Tele-Sketch (single-stroke mode).
+   ========================================================================== */
 (function(){
- let t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
- document.documentElement.setAttribute("data-theme",t);
+
+/* ---------- ICONS ---------- */
+const ICONS={
+  help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+  fullscreen:'<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>',
+  home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+  close:'<path d="M18 6 6 18M6 6l12 12"/>',
+  play:'<polygon points="6 3 20 12 6 21 6 3"/>',
+  check:'<polyline points="20 6 9 17 4 12"/>',
+  undo:'<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>',
+  lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  finger:'<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 11.5v-2a1.5 1.5 0 1 1 3 0V12"/><path d="M14 10.5a1.5 1.5 0 0 1 3 0V13"/><path d="M17 12a1.5 1.5 0 0 1 3 0v3a6 6 0 0 1-6 6h-2a7 7 0 0 1-7-7v-1a1.5 1.5 0 1 1 3 0"/>',
+  refresh:'<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>',
+  brush:'<path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/>',
+  mask:'<path d="M2 9s2-3 10-3 10 3 10 3-1 9-10 9S2 9 2 9Z"/><circle cx="8.5" cy="10.5" r="1.2"/><circle cx="15.5" cy="10.5" r="1.2"/>',
+  vote:'<path d="M9 12l2 2 4-4"/><rect width="18" height="18" x="3" y="3" rx="2"/>'
+};
+function paintIcons(root){
+  (root||document).querySelectorAll("[data-ic]").forEach(el=>{
+    const k=el.getAttribute("data-ic");
+    if(ICONS[k]&&!el.firstChild) el.innerHTML='<svg viewBox="0 0 24 24">'+ICONS[k]+'</svg>';
+  });
+}
+
+/* ---------- SFX ---------- */
+const SFX=(function(){
+  let ac=null;
+  function ctx(){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume();}catch(e){}return ac;}
+  function tone(f,dur,type,gain,delay){
+    const c=ctx(); if(!c)return;
+    const o=c.createOscillator(),g=c.createGain();
+    o.type=type||"sine"; o.frequency.value=f; o.connect(g); g.connect(c.destination);
+    const t=c.currentTime+(delay||0);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(gain||0.12,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.start(t); o.stop(t+dur+0.03);
+  }
+  return {
+    unlock:ctx,
+    tap:()=>tone(560,0.06,"square",0.05),
+    ok:()=>{tone(680,0.12,"sine",0.11);tone(1020,0.18,"sine",0.09,0.08);},
+    open:()=>{tone(320,0.1,"triangle",0.1);tone(520,0.16,"triangle",0.09,0.07);},
+    err:()=>tone(150,0.22,"sawtooth",0.08),
+    sting:()=>{tone(220,0.5,"sawtooth",0.1);tone(165,0.7,"sawtooth",0.08,0.1);},
+    win:()=>[523,659,784,1046].forEach((f,i)=>tone(f,0.3,"triangle",0.1,i*0.1)),
+    drum:()=>{for(let i=0;i<8;i++)tone(120+i*6,0.06,"square",0.05,i*0.07);}
+  };
 })();
 
-const Sfx={
- ctx:null,
- ok(){ if(!this.ctx)try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume(); return !!this.ctx; },
- t(f,d,type,vol,slide,delay){
-  if(!this.ok())return; const c=this.ctx, t0=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
-  o.type=type||"square"; o.frequency.setValueAtTime(f,t0);
-  if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+d);
-  g.gain.setValueAtTime(vol||.14,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
-  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+d);
- },
- play(n){
-  switch(n){
-   case"click": this.t(880,.045,"square",.1); break;
-   case"reveal": this.t(360,.18,"sine",.14,680); break;
-   case"pen": this.t(600,.03,"sine",.05); break;
-   case"success": this.t(523,.08,"triangle",.15); this.t(659,.08,"triangle",.15,null,.07); this.t(784,.14,"triangle",.15,null,.14); break;
-   case"alert": this.t(180,.28,"sawtooth",.18); break;
+/* ---------- THEME ---------- */
+const THEME_META={"nordic-slate":"#0e1117","tokyo-sunset":"#120e24","terracotta-clay":"#1c1815","emerald-lounge":"#071712","alpine-mist":"#f3f6fa","synthwave-84":"#100b1a"};
+function applyTheme(t){
+  if(!t)return;
+  document.documentElement.setAttribute("data-theme",t);
+  const m=document.getElementById("metaThemeColor");
+  if(m&&THEME_META[t])m.setAttribute("content",THEME_META[t]);
+}
+function initTheme(){
+  let t="nordic-slate";
+  try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
+  applyTheme(t);
+  window.addEventListener("storage",e=>{if(e.key==="partydeck_theme")applyTheme(e.newValue);});
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden){try{applyTheme(localStorage.getItem("partydeck_theme"));}catch(e){}}});
+}
+
+/* ==========================================================================
+   SKETCH ENGINE (identical to Tele-Sketch)
+   ========================================================================== */
+const PAPER="#FAFAF7";
+const DPR=Math.min(window.devicePixelRatio||1,3);
+
+function paintStrokes(ctx,w,h,strokes){
+  ctx.save();
+  ctx.fillStyle=PAPER; ctx.fillRect(0,0,w,h);
+  ctx.lineCap="round"; ctx.lineJoin="round";
+  for(const s of strokes){
+    const p=s.points; if(!p.length)continue;
+    ctx.strokeStyle=s.color; ctx.fillStyle=s.color;
+    ctx.lineWidth=s.size*(w/1000)*2.2;
+    if(p.length===1){ ctx.beginPath(); ctx.arc(p[0].x*w,p[0].y*h,ctx.lineWidth/2,0,Math.PI*2); ctx.fill(); continue; }
+    ctx.beginPath();
+    ctx.moveTo(p[0].x*w,p[0].y*h);
+    if(p.length===2){ ctx.lineTo(p[1].x*w,p[1].y*h); }
+    else{
+      for(let i=1;i<p.length-1;i++){
+        const c=p[i],n=p[i+1];
+        ctx.quadraticCurveTo(c.x*w,c.y*h,(c.x+n.x)/2*w,(c.y+n.y)/2*h);
+      }
+      const last=p[p.length-1];
+      ctx.lineTo(last.x*w,last.y*h);
+    }
+    ctx.stroke();
   }
- }
-};
+  ctx.restore();
+}
+function renderInto(canvas,strokes){
+  const r=canvas.getBoundingClientRect();
+  const w=Math.max(1,Math.round(r.width)),h=Math.max(1,Math.round(r.height));
+  canvas.width=w*DPR; canvas.height=h*DPR;
+  const ctx=canvas.getContext("2d");
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  paintStrokes(ctx,w,h,strokes||[]);
+}
+function createSketchPad(canvas,opts){
+  opts=opts||{};
+  const ctx=canvas.getContext("2d");
+  let strokes=[],redo=[],cur=null,locked=false;
+  let color="#1a1a1a",size=8,W=1,H=1,baseCount=0;
+  let singleStroke=!!opts.singleStroke;
 
+  function sync(){
+    const r=canvas.getBoundingClientRect();
+    W=Math.max(1,Math.round(r.width)); H=Math.max(1,Math.round(r.height));
+    canvas.width=W*DPR; canvas.height=H*DPR;
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    draw();
+  }
+  function draw(){
+    paintStrokes(ctx,W,H,cur?strokes.concat([cur]):strokes);
+    if(opts.onChange)opts.onChange({canUndo:strokes.length>baseCount,count:strokes.length-baseCount});
+  }
+  function pos(e){
+    const r=canvas.getBoundingClientRect();
+    return {x:Math.min(1,Math.max(0,(e.clientX-r.left)/r.width)),y:Math.min(1,Math.max(0,(e.clientY-r.top)/r.height))};
+  }
+  function down(e){
+    if(locked)return;
+    if(singleStroke&&strokes.length>baseCount)return;
+    e.preventDefault();
+    canvas.setPointerCapture&&canvas.setPointerCapture(e.pointerId);
+    redo=[]; cur={color:color,size:size,points:[pos(e)]}; draw();
+  }
+  function move(e){
+    if(!cur)return; e.preventDefault();
+    const p=pos(e),last=cur.points[cur.points.length-1];
+    if(Math.abs(p.x-last.x)*W<0.7&&Math.abs(p.y-last.y)*H<0.7)return;
+    cur.points.push(p); draw();
+  }
+  function up(e){
+    if(!cur)return; e.preventDefault();
+    strokes.push(cur); const done=cur; cur=null; draw();
+    if(opts.onStrokeEnd)opts.onStrokeEnd(done);
+  }
+  canvas.addEventListener("pointerdown",down,{passive:false});
+  canvas.addEventListener("pointermove",move,{passive:false});
+  canvas.addEventListener("pointerup",up,{passive:false});
+  canvas.addEventListener("pointercancel",up,{passive:false});
+  canvas.addEventListener("pointerleave",up,{passive:false});
+  canvas.addEventListener("touchstart",e=>e.preventDefault(),{passive:false});
+  canvas.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
+  window.addEventListener("resize",sync);
+  window.addEventListener("orientationchange",()=>setTimeout(sync,220));
+
+  return {
+    sync,
+    setColor:c=>{color=c;},
+    setSize:s=>{size=s;},
+    setLocked:v=>{locked=!!v;},
+    undo(){ if(strokes.length<=baseCount)return; redo.push(strokes.pop()); draw(); },
+    clear(){ while(strokes.length>baseCount)strokes.pop(); draw(); },
+    reset(){ strokes=[];redo=[];cur=null;baseCount=0;draw(); },
+    commitBase(){ baseCount=strokes.length; redo=[]; },
+    getStrokes(){ return strokes.map(s=>({color:s.color,size:s.size,points:s.points.slice()})); },
+    turnCount(){ return strokes.length-baseCount; }
+  };
+}
+
+/* ---------- ARTIST INK COLOURS (10 distinct, white-paper safe) ---------- */
+const ARTIST_INKS=["#1971c2","#e03131","#2f9e44","#f76707","#7048e8","#0ca678","#e64980","#8b5e34","#495057","#c2255c"];
+
+/* ---------- CATEGORY WORD BANKS (14 each, for escape grid) ---------- */
 const CATEGORIES={
- "Animals":["Lion","Elephant","Giraffe","Penguin","Dolphin","Kangaroo","Octopus","Owl","Peacock","Flamingo"],
- "Movies":["Titanic","Jaws","Frozen","Inception","Avatar","Jurassic Park","Rocky","Shrek"],
- "Food":["Pizza","Sushi","Taco","Pancake","Cheeseburger","Ice Cream Sundae","Spaghetti","Donut"],
- "Sports":["Basketball","Surfing","Boxing","Gymnastics","Hockey","Archery","Bowling","Golf"],
- "Occupations":["Firefighter","Astronaut","Chef","Pilot","Dentist","Magician","Lifeguard","Beekeeper"],
- "Objects":["Umbrella","Bicycle","Guitar","Lighthouse","Telescope","Kite","Chandelier","Anchor"]
+  "Animals":["Octopus","Giraffe","Penguin","Hedgehog","Kangaroo","Flamingo","Rhinoceros","Jellyfish","Chameleon","Walrus","Peacock","Sloth","Scorpion","Narwhal"],
+  "Food":["Pineapple","Spaghetti","Cupcake","Sushi Roll","Hot Dog","Watermelon","Pretzel","Taco","Ice Cream Cone","Popcorn","Pancakes","Doughnut","Lollipop","Corn Dog"],
+  "Places":["Lighthouse","Pyramid","Castle","Igloo","Windmill","Skyscraper","Treehouse","Subway Station","Volcano","Ferris Wheel","Bridge","Barn","Cathedral","Waterfall"],
+  "Objects":["Umbrella","Typewriter","Telescope","Skateboard","Chandelier","Guitar","Mousetrap","Lawnmower","Hourglass","Anchor","Parachute","Fire Hydrant","Sewing Machine","Traffic Cone"],
+  "Movies & TV":["Jurassic Park","Titanic","Star Wars","The Godfather","Jaws","Frozen","Ghostbusters","Stranger Things","Breaking Bad","The Matrix","Shrek","Toy Story","Spider-Man","Harry Potter"],
+  "Sports":["Pole Vault","Bowling","Surfing","Fencing","Ice Hockey","Archery","Sumo Wrestling","Skateboarding","Rowing","Basketball","Golf","Curling","Boxing","Gymnastics"]
 };
+const CAT_NAMES=Object.keys(CATEGORIES);
 
-let roster=PD.getPlayers().slice(0,10);
-if(roster.length<4) roster=["Alex","Jordan","Taylor","Morgan"];
-
-const S={category:'',word:'',fakeIdx:0,dealIdx:0,rounds:2,strokes:[],turnIdx:0,curPath:null,accused:null,ctx:null,canvas:null};
+/* ==========================================================================
+   STATE
+   ========================================================================== */
+const S={
+  players:[], inks:[], category:"Animals", word:"", fake:-1,
+  laps:2, lap:0, seat:0, phase:"setup",
+  votes:[], voteSel:-1, escapeSel:-1, escapeWords:[],
+  secretIndex:0
+};
+let pad=null, lineDone=false;
 
 const $=id=>document.getElementById(id);
-function hud(b,l,c){ $('hudBadge').textContent=b; $('hudLabel').textContent=l; if(c)$('hudCount').textContent=c; }
-function go(id){ document.querySelectorAll('.phase').forEach(p=>p.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); }
+const SCREENS=["scrSetup","scrSecret","scrDraw","scrVote","scrEscape","scrResult"];
+function show(id){ SCREENS.forEach(s=>$(s).classList.toggle("is-active",s===id)); document.querySelector(".stage").scrollTop=0; }
+function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),1900); }
+function sub(t){ $("topSub").textContent=t; }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 
+/* ---------- ROSTER ---------- */
+function getRoster(){
+  try{ const raw=localStorage.getItem("partydeck_players");
+    if(raw){const a=JSON.parse(raw); if(Array.isArray(a)&&a.length)return a.slice(0,10);} }catch(e){}
+  return ["Alex","Jordan","Taylor","Sam"];
+}
+function saveRoster(a){ try{localStorage.setItem("partydeck_players",JSON.stringify(a));}catch(e){} }
 function renderRoster(){
- $('rList').innerHTML=roster.map((p,i)=>`<li class="ritem"><span class="seat">#${i+1}</span><span class="nm">${p}</span><button type="button" data-del="${i}">${ICO('close')}</button></li>`).join('');
- $('btnStart').disabled=roster.length<4;
- PD.setPlayers(roster);
-}
-$('rAdd').onclick=()=>{ const v=$('rInput').value.trim(); if(v&&roster.indexOf(v)===-1){ roster.push(v); $('rInput').value=''; Sfx.play('click'); renderRoster(); } };
-$('rList').onclick=e=>{ const b=e.target.closest('[data-del]'); if(b){ roster.splice(+b.dataset.del,1); Sfx.play('click'); renderRoster(); } };
-
-$('roundChips').onclick=e=>{
- const b=e.target.closest('[data-r]');
- if(b){ $('roundChips').querySelectorAll('.chip').forEach(c=>c.classList.remove('is-on')); b.classList.add('is-on'); S.rounds=+b.dataset.r; Sfx.play('click'); }
-};
-
-$('btnStart').onclick=()=>{
- const catNames=Object.keys(CATEGORIES);
- S.category=catNames[Math.floor(Math.random()*catNames.length)];
- const words=CATEGORIES[S.category];
- S.word=words[Math.floor(Math.random()*words.length)];
- S.fakeIdx=Math.floor(Math.random()*roster.length);
- S.dealIdx=0;
- hud("DEAL // PHASE","Secret Roles");
- renderDeal();
- go('phDeal');
- Sfx.play('success');
-};
-
-function renderDeal(){
- $('dealStep').textContent=`PLAYER ${S.dealIdx+1} OF ${roster.length}`;
- $('dealWho').textContent=roster[S.dealIdx];
- const isFake=S.dealIdx===S.fakeIdx;
- $('holdFace').innerHTML=isFake
-  ? `<div class="h-tag">CATEGORY ONLY</div><div class="h-val">${S.category}</div><div class="h-tag" style="margin-top:.4rem;color:var(--danger)">YOU ARE THE FAKE ARTIST</div><p class="sub" style="font-size:.76rem;color:var(--danger)">You don't know the word. Draw vaguely and blend in.</p>`
-  : `<div class="h-tag">CATEGORY</div><div class="h-val">${S.category}</div><div class="h-tag" style="margin-top:.4rem">SECRET WORD</div><div class="h-val" style="color:var(--text-primary);font-size:1.3rem;">${S.word}</div>`;
- $('holdBox').classList.remove('revealed');
- $('btnDealNext').disabled=true;
- $('btnDealNext').textContent='View Role First';
+  $("rosterCount").textContent=S.players.length;
+  $("rosList").innerHTML=S.players.map((p,i)=>
+    '<li class="ros-item"><span><span class="ink-dot" style="background:'+ARTIST_INKS[i%ARTIST_INKS.length]+'"></span>'+esc(p)+'</span>'+
+    '<button class="btn btn-ghost mini-x" data-del="'+i+'"><span class="ico ico-sm" data-ic="close"></span></button></li>'
+  ).join("");
+  paintIcons($("rosList"));
 }
 
-const hBox=$('holdBox');
-hBox.addEventListener('pointerdown',e=>{
- e.preventDefault();
- hBox.classList.add('revealed');
- Sfx.play('reveal');
- PD.vibrate(25);
- $('btnDealNext').disabled=false;
- $('btnDealNext').textContent=S.dealIdx<roster.length-1?'Conceal & Pass':'Begin Drawing';
+/* ---------- CURTAIN ---------- */
+let curtainCb=null,holdRAF=null,holdStart=0;
+const HOLD_MS=700;
+function openCurtain(name,note,cb,kick){
+  curtainCb=cb;
+  $("curtainName").textContent=name;
+  $("curtainNote").textContent=note;
+  $("curtainKick").textContent=kick||"Pass the phone to";
+  $("holdFill").style.width="0%"; $("holdBtn").classList.remove("armed");
+  $("curtain").classList.add("is-open"); SFX.open();
+}
+function cancelHold(){ if(holdRAF)cancelAnimationFrame(holdRAF); holdRAF=null; $("holdFill").style.width="0%"; $("holdBtn").classList.remove("armed"); }
+function beginHold(e){
+  e.preventDefault(); SFX.unlock(); holdStart=performance.now(); $("holdBtn").classList.add("armed");
+  const step=()=>{
+    const p=Math.min(1,(performance.now()-holdStart)/HOLD_MS);
+    $("holdFill").style.width=(p*100)+"%";
+    if(p>=1){ holdRAF=null; SFX.ok(); $("curtain").classList.remove("is-open"); cancelHold();
+      const cb=curtainCb; curtainCb=null; if(cb)cb(); }
+    else holdRAF=requestAnimationFrame(step);
+  };
+  holdRAF=requestAnimationFrame(step);
+}
+
+/* ==========================================================================
+   FLOW
+   ========================================================================== */
+function startGame(){
+  const n=S.players.length;
+  if(n<4||n>10){ $("setupWarn").style.display="block"; SFX.err(); return; }
+  $("setupWarn").style.display="none";
+  SFX.unlock();
+
+  S.inks=S.players.map((_,i)=>ARTIST_INKS[i%ARTIST_INKS.length]);
+  const bank=CATEGORIES[S.category];
+  S.word=bank[Math.floor(Math.random()*bank.length)];
+  S.fake=Math.floor(Math.random()*n);
+  S.lap=0; S.seat=0; S.votes=[]; S.secretIndex=0;
+
+  /* Escape grid: real word + 11 decoys from the same category */
+  const decoys=bank.filter(w=>w!==S.word);
+  shuffle(decoys);
+  S.escapeWords=shuffle([S.word].concat(decoys.slice(0,11)));
+
+  if(pad){ pad.reset(); }
+  nextSecret();
+}
+
+/* --- Stage 1: secret distribution --- */
+function nextSecret(){
+  if(S.secretIndex>=S.players.length){ beginDrawing(); return; }
+  const name=S.players[S.secretIndex];
+  sub("Dealing roles \u2022 "+(S.secretIndex+1)+"/"+S.players.length);
+  openCurtain(name,"Everyone else: eyes up. This screen is secret.",showSecret);
+}
+function showSecret(){
+  const i=S.secretIndex, isFake=(i===S.fake);
+  const ink=S.inks[i];
+  $("revealCard").innerHTML=
+    '<span class="reveal-cat">Category &middot; '+esc(S.category)+'</span>'+
+    '<span class="reveal-word'+(isFake?" fake":"")+'">'+(isFake?"?":esc(S.word))+'</span>'+
+    '<span class="reveal-role">'+(isFake
+      ? "<strong>You are the Fake Artist.</strong> You do not know the word. Draw a line that looks confident and blend in."
+      : "You are a real artist. Draw <strong>one line</strong> that hints at this &mdash; without making it obvious to the faker.")+'</span>'+
+    '<span class="ink-badge"><span class="ink-dot" style="background:'+ink+';margin:0"></span> Your ink colour</span>';
+  isFake?SFX.sting():SFX.ok();
+  show("scrSecret");
+}
+
+/* --- Stage 2: round-robin drawing --- */
+function beginDrawing(){
+  if(!pad){
+    pad=createSketchPad($("padMain"),{
+      singleStroke:true,
+      onStrokeEnd:()=>{
+        lineDone=true;
+        $("btnConfirmLine").disabled=false;
+        $("btnRedraw").disabled=false;
+        $("hintStrip").textContent="Line placed. Confirm to pass, or redo it.";
+        SFX.tap();
+      }
+    });
+  }
+  S.lap=0; S.seat=0;
+  requestAnimationFrame(()=>pad.sync());
+  nextDrawTurn();
+}
+function nextDrawTurn(){
+  if(S.lap>=S.laps){ beginVoting(); return; }
+  const name=S.players[S.seat];
+  sub("Drawing \u2022 Line "+(S.lap+1)+"/"+S.laps+" \u2022 "+name);
+  openCurtain(name,"Your turn to add one line to the shared picture.",runDrawTurn,"Hand the phone to");
+}
+function runDrawTurn(){
+  lineDone=false;
+  pad.commitBase();
+  pad.setColor(S.inks[S.seat]);
+  pad.setSize(8);
+  pad.setLocked(false);
+  $("turnName").textContent=S.players[S.seat];
+  $("turnName").style.color=S.inks[S.seat];
+  $("lapChip").textContent="Line "+(S.lap+1)+" of "+S.laps;
+  $("btnConfirmLine").disabled=true;
+  $("btnRedraw").disabled=true;
+  $("hintStrip").textContent="One continuous line. Lift your finger and the line is finished.";
+  renderOrderStrip();
+  show("scrDraw");
+  requestAnimationFrame(()=>pad.sync());
+}
+function renderOrderStrip(){
+  $("orderStrip").innerHTML=S.players.map((p,i)=>{
+    const cls=i<S.seat?"done":(i===S.seat?"now":"");
+    return '<span class="order-pip '+cls+'" style="background:'+S.inks[i]+'" title="'+esc(p)+'">'+esc(p.charAt(0).toUpperCase())+'</span>';
+  }).join("");
+}
+function confirmLine(){
+  if(!lineDone){ SFX.err(); toast("Draw a line first"); return; }
+  pad.setLocked(true);
+  pad.commitBase();
+  SFX.ok();
+  S.seat++;
+  if(S.seat>=S.players.length){ S.seat=0; S.lap++; }
+  nextDrawTurn();
+}
+function redoLine(){
+  pad.undo(); lineDone=false;
+  $("btnConfirmLine").disabled=true; $("btnRedraw").disabled=true;
+  $("hintStrip").textContent="One continuous line. Lift your finger and the line is finished.";
+  SFX.tap();
+}
+
+/* --- Stage 3: secret ballot --- */
+function beginVoting(){
+  pad.setLocked(true);
+  S.votes=[]; S.secretIndex=0;
+  nextVoter();
+}
+function nextVoter(){
+  if(S.secretIndex>=S.players.length){ resolveVotes(); return; }
+  const name=S.players[S.secretIndex];
+  sub("Voting \u2022 "+(S.secretIndex+1)+"/"+S.players.length);
+  openCurtain(name,"Cast your secret vote. Nobody else sees this.",runVote,"Secret ballot for");
+}
+function runVote(){
+  S.voteSel=-1;
+  $("voteTitle").textContent=S.players[S.secretIndex]+", who is the Fake Artist?";
+  $("voteGrid").innerHTML=S.players.map((p,i)=>
+    i===S.secretIndex?"":'<button class="btn vote-btn" data-v="'+i+'">'+
+      '<span class="ink-dot" style="background:'+S.inks[i]+'"></span>'+
+      '<span class="vote-name">'+esc(p)+'</span></button>'
+  ).join("");
+  $("btnVoteLock").disabled=true;
+  show("scrVote");
+}
+function lockVote(){
+  if(S.voteSel<0){ SFX.err(); return; }
+  S.votes.push(S.voteSel);
+  S.secretIndex++;
+  SFX.ok();
+  nextVoter();
+}
+function resolveVotes(){
+  const tally=S.players.map(()=>0);
+  S.votes.forEach(v=>tally[v]++);
+  const max=Math.max.apply(null,tally);
+  const top=[];
+  tally.forEach((c,i)=>{ if(c===max)top.push(i); });
+  const accused=(top.length===1)?top[0]:-1;   /* tie = nobody accused */
+  S.tally=tally; S.accused=accused;
+
+  if(accused===S.fake){
+    sub("Faker caught \u2022 Escape guess");
+    openCurtain(S.players[S.fake],"You've been accused. Time to guess the word.",showEscape,"Hand the phone to");
+  }else{
+    finish(false,null);
+  }
+}
+
+/* --- Stage 4: escape guess --- */
+function showEscape(){
+  S.escapeSel=-1;
+  $("escapeName").textContent=S.players[S.fake];
+  $("escapeCat").textContent=S.category;
+  $("escapeGrid").innerHTML=S.escapeWords.map((w,i)=>
+    '<button class="btn escape-btn" data-e="'+i+'">'+esc(w)+'</button>'
+  ).join("");
+  $("btnEscapeLock").disabled=true;
+  show("scrEscape");
+  SFX.drum();
+}
+function lockEscape(){
+  if(S.escapeSel<0){ SFX.err(); return; }
+  const guess=S.escapeWords[S.escapeSel];
+  finish(true,guess);
+}
+
+/* --- Stage 5: verdict --- */
+function finish(wasCaught,guess){
+  const correct=wasCaught&&guess===S.word;
+  const artistsWin=wasCaught&&!correct;
+  let head,body;
+  if(artistsWin){
+    head="Artists Win";
+    body="<strong>"+esc(S.players[S.fake])+"</strong> was the Fake Artist and guessed <strong>"+esc(guess)+"</strong>. Wrong.";
+  }else if(correct){
+    head="Faker Escapes";
+    body="<strong>"+esc(S.players[S.fake])+"</strong> was caught &mdash; then named the word correctly. Full marks for nerve.";
+  }else if(S.accused===-1){
+    head="Faker Wins";
+    body="The vote was a dead tie. <strong>"+esc(S.players[S.fake])+"</strong> walks away clean.";
+  }else{
+    head="Faker Wins";
+    body="You accused <strong>"+esc(S.players[S.accused])+"</strong>. The Fake Artist was <strong>"+esc(S.players[S.fake])+"</strong>.";
+  }
+  $("verdict").className="verdict "+(artistsWin?"artists":"fake");
+  $("verdict").innerHTML=
+    '<span class="ico ico-xl" data-ic="'+(artistsWin?"vote":"mask")+'" style="color:'+(artistsWin?"var(--success)":"var(--danger)")+';margin:0 auto .5rem"></span>'+
+    '<h2>'+head+'</h2>'+
+    '<p class="who" style="margin-bottom:.7rem">The word was <strong style="color:var(--accent)">'+esc(S.word)+'</strong> &middot; '+esc(S.category)+'</p>'+
+    '<p class="who">'+body+'</p>';
+  paintIcons($("verdict"));
+
+  $("tallyList").innerHTML=S.players.map((p,i)=>
+    '<li class="tally-item'+(i===S.fake?" culprit":"")+'">'+
+    '<span><span class="ink-dot" style="background:'+S.inks[i]+'"></span>'+esc(p)+(i===S.fake?" \u2014 FAKE":"")+'</span>'+
+    '<span>'+S.tally[i]+' vote'+(S.tally[i]===1?"":"s")+'</span></li>'
+  ).join("");
+
+  sub("Round complete");
+  show("scrResult");
+  requestAnimationFrame(()=>renderInto($("padFinal"),pad.getStrokes()));
+  artistsWin?SFX.win():SFX.sting();
+}
+
+/* ---------- FULLSCREEN ---------- */
+function toggleFullscreen(){
+  const el=document.documentElement;
+  if(!document.fullscreenElement&&!document.webkitFullscreenElement){
+    const req=el.requestFullscreen||el.webkitRequestFullscreen;
+    if(req){ req.call(el).catch(()=>toast("Add to Home Screen for fullscreen on iOS")); }
+    else toast("Add to Home Screen for fullscreen on iOS");
+  }else{ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }
+}
+
+/* ==========================================================================
+   BOOT
+   ========================================================================== */
+document.addEventListener("DOMContentLoaded",function(){
+  initTheme();
+  paintIcons(document);
+  S.players=getRoster();
+  renderRoster();
+
+  $("catOpts").innerHTML=CAT_NAMES.map((c,i)=>
+    '<button class="btn opt-btn'+(i===0?" is-active":"")+'" data-cat="'+esc(c)+'">'+esc(c)+'</button>'
+  ).join("");
+  S.category=CAT_NAMES[0];
+
+  $("rosForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const v=$("rosInput").value.trim(); if(!v)return;
+    if(S.players.length>=10){ toast("10 artists max"); SFX.err(); return; }
+    if(S.players.some(p=>p.toLowerCase()===v.toLowerCase())){ toast("Name already seated"); SFX.err(); return; }
+    S.players.push(v); saveRoster(S.players); renderRoster(); $("rosInput").value=""; SFX.tap();
+  });
+  $("rosList").addEventListener("click",e=>{
+    const b=e.target.closest("[data-del]"); if(!b)return;
+    S.players.splice(parseInt(b.dataset.del,10),1);
+    saveRoster(S.players); renderRoster(); SFX.tap();
+  });
+  $("catOpts").addEventListener("click",e=>{
+    const b=e.target.closest("[data-cat]"); if(!b)return;
+    $("catOpts").querySelectorAll(".opt-btn").forEach(x=>x.classList.remove("is-active"));
+    b.classList.add("is-active"); S.category=b.dataset.cat; SFX.tap();
+  });
+  $("lapOpts").addEventListener("click",e=>{
+    const b=e.target.closest("[data-laps]"); if(!b)return;
+    $("lapOpts").querySelectorAll(".opt-btn").forEach(x=>x.classList.remove("is-active"));
+    b.classList.add("is-active"); S.laps=parseInt(b.dataset.laps,10); SFX.tap();
+  });
+  $("btnStart").addEventListener("click",startGame);
+
+  const hb=$("holdBtn");
+  hb.addEventListener("pointerdown",beginHold,{passive:false});
+  hb.addEventListener("pointerup",cancelHold);
+  hb.addEventListener("pointerleave",cancelHold);
+  hb.addEventListener("pointercancel",cancelHold);
+  hb.addEventListener("contextmenu",e=>e.preventDefault());
+
+  $("btnSecretDone").addEventListener("click",()=>{ S.secretIndex++; SFX.tap(); nextSecret(); });
+  $("btnConfirmLine").addEventListener("click",confirmLine);
+  $("btnRedraw").addEventListener("click",redoLine);
+
+  $("voteGrid").addEventListener("click",e=>{
+    const b=e.target.closest("[data-v]"); if(!b)return;
+    $("voteGrid").querySelectorAll(".vote-btn").forEach(x=>x.classList.remove("is-active"));
+    b.classList.add("is-active"); S.voteSel=parseInt(b.dataset.v,10);
+    $("btnVoteLock").disabled=false; SFX.tap();
+  });
+  $("btnVoteLock").addEventListener("click",lockVote);
+
+  $("escapeGrid").addEventListener("click",e=>{
+    const b=e.target.closest("[data-e]"); if(!b)return;
+    $("escapeGrid").querySelectorAll(".escape-btn").forEach(x=>x.classList.remove("is-active"));
+    b.classList.add("is-active"); S.escapeSel=parseInt(b.dataset.e,10);
+    $("btnEscapeLock").disabled=false; SFX.tap();
+  });
+  $("btnEscapeLock").addEventListener("click",lockEscape);
+
+  $("btnAgain").addEventListener("click",()=>{ sub("Setup"); show("scrSetup"); renderRoster(); SFX.tap(); });
+
+  $("btnFs").addEventListener("click",toggleFullscreen);
+  $("btnRules").addEventListener("click",()=>{$("rulesDrawer").classList.add("is-open");SFX.open();});
+  $("btnRulesClose").addEventListener("click",()=>$("rulesDrawer").classList.remove("is-open"));
+  $("rulesDrawer").addEventListener("click",e=>{ if(e.target===$("rulesDrawer"))$("rulesDrawer").classList.remove("is-open"); });
 });
-['pointerup','pointerleave','pointercancel'].forEach(ev=> hBox.addEventListener(ev,()=> hBox.classList.remove('revealed')));
-
-$('btnDealNext').onclick=()=>{
- if(S.dealIdx<roster.length-1){ S.dealIdx++; renderDeal(); Sfx.play('click'); }
- else { startDrawing(); }
-};
-
-function setupCanvas(){
- S.canvas=$('drawCanvas');
- const wrap=S.canvas.parentElement;
- const ratio=window.devicePixelRatio||1;
- const w=wrap.clientWidth, h=wrap.clientHeight;
- S.canvas.width=w*ratio; S.canvas.height=h*ratio;
- S.ctx=S.canvas.getContext('2d');
- S.ctx.scale(ratio,ratio);
- S.ctx.lineCap='round'; S.ctx.lineJoin='round'; S.ctx.lineWidth=3.5; S.ctx.strokeStyle='#111';
-}
-function redrawAll(ctxTarget,canvasTarget){
- const c=ctxTarget||S.ctx, cv=canvasTarget||S.canvas;
- const ratio=window.devicePixelRatio||1;
- c.clearRect(0,0,cv.width/ratio,cv.height/ratio);
- S.strokes.forEach(st=>{
-  if(st.points.length<2)return;
-  c.beginPath();
-  c.moveTo(st.points[0].x,st.points[0].y);
-  for(let i=1;i<st.points.length;i++) c.lineTo(st.points[i].x,st.points[i].y);
-  c.stroke();
- });
-}
-
-function startDrawing(){
- S.strokes=[]; S.turnIdx=0;
- setupCanvas();
- hud("DRAWING","Turn 1",`0/${roster.length*S.rounds}`);
- promptDrawTurn();
- go('phDraw');
-}
-function promptDrawTurn(){
- const who=roster[S.turnIdx % roster.length];
- $('curWho').textContent=who;
- $('curtain').classList.add('on');
- $('btnCurtainUnlock').onclick=()=>{
-  $('curtain').classList.remove('on');
-  Sfx.play('click');
-  $('turnName').textContent=who;
-  $('strokeCount').textContent=`Stroke ${S.strokes.length+1} of ${roster.length*S.rounds}`;
-  $('btnConfirmStroke').disabled=true;
-  S.curPath=null;
-  redrawAll();
-  hud("DRAWING",who,`${S.strokes.length}/${roster.length*S.rounds}`);
- };
-}
-
-function getPos(e){
- const rect=S.canvas.getBoundingClientRect();
- const cx = e.touches ? e.touches[0].clientX : e.clientX;
- const cy = e.touches ? e.touches[0].clientY : e.clientY;
- return {x:cx-rect.left, y:cy-rect.top};
-}
-let drawing=false;
-function ptrDown(e){
- if($('curtain').classList.contains('on'))return;
- if($('btnConfirmStroke').disabled===false)return;
- e.preventDefault();
- drawing=true;
- S.curPath={points:[getPos(e)]};
- Sfx.play('pen');
-}
-function ptrMove(e){
- if(!drawing)return;
- e.preventDefault();
- const p=getPos(e);
- S.curPath.points.push(p);
- S.ctx.beginPath();
- const pts=S.curPath.points;
- S.ctx.moveTo(pts[pts.length-2].x,pts[pts.length-2].y);
- S.ctx.lineTo(p.x,p.y);
- S.ctx.stroke();
-}
-function ptrUp(e){
- if(!drawing)return;
- drawing=false;
- if(S.curPath && S.curPath.points.length>1){
-  S.strokes.push({player:roster[S.turnIdx%roster.length],points:S.curPath.points});
-  $('btnConfirmStroke').disabled=false;
- }
-}
-$('drawCanvas').addEventListener('pointerdown',ptrDown);
-$('drawCanvas').addEventListener('pointermove',ptrMove);
-window.addEventListener('pointerup',ptrUp);
-
-$('btnUndo').onclick=()=>{
- if(S.strokes.length && S.strokes[S.strokes.length-1].player===roster[S.turnIdx%roster.length]){
-  S.strokes.pop();
-  redrawAll();
-  $('btnConfirmStroke').disabled=true;
-  Sfx.play('click');
- }
-};
-$('btnConfirmStroke').onclick=()=>{
- S.turnIdx++;
- if(S.turnIdx>=roster.length*S.rounds){ goToVote(); }
- else { promptDrawTurn(); }
-};
-$('btnEndEarly').onclick=()=>{ goToVote(); };
-
-function goToVote(){
- const vc=$('voteCanvasPreview');
- const ratio=window.devicePixelRatio||1;
- vc.width=vc.parentElement.clientWidth*ratio; vc.height=vc.parentElement.clientHeight*ratio;
- const vctx=vc.getContext('2d');
- vctx.scale(ratio,ratio);
- vctx.lineCap='round'; vctx.lineJoin='round'; vctx.lineWidth=3; vctx.strokeStyle='#111';
- redrawAll(vctx,vc);
-
- $('voteGrid').innerHTML=roster.map(p=>`<button class="tile" type="button" data-acc="${p}">${p}</button>`).join('');
- S.accused=null; $('btnLockVote').disabled=true;
- hud("VOTE","Accuse Fake Artist");
- go('phVote');
- Sfx.play('alert');
-}
-$('voteGrid').onclick=e=>{
- const b=e.target.closest('[data-acc]');
- if(b){
-  $('voteGrid').querySelectorAll('.tile').forEach(t=>t.classList.remove('is-on'));
-  b.classList.add('is-on'); S.accused=b.dataset.acc; $('btnLockVote').disabled=false; Sfx.play('click');
- }
-};
-$('btnLockVote').onclick=()=>{
- const fakeName=roster[S.fakeIdx];
- if(S.accused===fakeName){
-  $('escPrompt').textContent=`${fakeName} was caught! They get one guess at the secret word to steal the win:`;
-  hud("ESCAPE GUESS","Fake Artist");
-  $('escInput').value='';
-  go('phEscape');
-  Sfx.play('alert');
- } else {
-  finishGame(false,`${S.accused} was innocent! The Fake Artist (${fakeName}) escaped undetected.`);
- }
-};
-$('btnLockEscape').onclick=()=>{
- const guess=$('escInput').value.trim().toLowerCase();
- if(guess===S.word.toLowerCase()){
-  finishGame(false,`The Fake Artist correctly guessed "${S.word}" and stole the victory!`);
- } else {
-  finishGame(true,`The Fake Artist guessed "${$('escInput').value.trim()||'(nothing)'}" — incorrect! The Artists win.`);
- }
-};
-
-function finishGame(artistsWin, msg){
- $('resTitle').textContent = artistsWin ? "ARTISTS WIN!" : "FAKE ARTIST WINS!";
- $('resTitle').style.color = artistsWin ? "var(--success)" : "var(--danger)";
- $('resSub').textContent = msg;
- $('resWord').textContent = `${S.word} (${S.category})`;
- hud("ROUND OVER","Resolved");
- go('phResult');
- Sfx.play(artistsWin?'success':'alert');
-}
-
-$('btnAgain').onclick=()=>{ renderRoster(); hud("SETUP // PHASE","Fake Artist"); go('phSetup'); Sfx.play('click'); };
-$('btnHub').onclick=()=>PD.exitToHub();
-$('btnExit').onclick=()=>PD.exitToHub();
-
-renderRoster();
 })();
 </script>
 </body>

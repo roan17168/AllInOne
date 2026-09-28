@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nordic-slate">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<title>Starship Crisis Relay | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #08090d; --bg-surface: #10141d; --bg-elevated: #18202d;
+    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #57657a;
+    --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.35); --accent-contrast: #031525;
+    --danger: #ff0055; --success: #00ff66; --warning: #ffd000;
+    --border-ui: rgba(56,189,248,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow-x: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+  }
+  .screen.is-active { display: flex; }
+
+  /* HUD Core Meter */
+  .warp-meter-strip {
+    display: flex; flex-direction: column; gap: 4px; padding: .6rem 1rem;
+    background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+  }
+  .meter-track {
+    width: 100%; height: 14px; background: var(--bg-elevated); border-radius: 7px;
+    border: 1px solid var(--border-ui); overflow: hidden; position: relative;
+  }
+  .meter-fill {
+    height: 100%; width: 0%; background: linear-gradient(90deg, #00ff66, #ffd000, #ff0055);
+    box-shadow: 0 0 12px var(--danger); transition: width 0.3s ease;
+  }
+
+  /* Shouted Command Banner */
+  .command-terminal {
+    background: #020712; border: 2px solid var(--accent); border-radius: var(--r-md);
+    padding: 1.2rem; text-align: center; box-shadow: 0 0 24px var(--accent-glow);
+    animation: terminalPulse 2s infinite ease-in-out;
+  }
+  @keyframes terminalPulse {
+    0%, 100% { border-color: var(--accent); }
+    50% { border-color: rgba(56, 189, 248, 0.4); }
+  }
+  .terminal-kicker {
+    font-family: 'Space Mono', monospace; font-size: .65rem; font-weight: 800;
+    color: var(--warning); letter-spacing: .15em; text-transform: uppercase;
+  }
+  .terminal-shout {
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 900;
+    color: #fff; line-height: 1.25; margin-top: .4rem;
+  }
+
+  /* Interactive Hardware Controls Grid */
+  .controls-matrix {
+    display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; margin: .5rem 0;
+  }
+  .hw-card {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: .9rem .7rem; display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between; min-height: 100px; gap: 8px; text-align: center;
+  }
+  .hw-lbl {
+    font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--text-secondary);
+    text-transform: uppercase; font-weight: 700;
+  }
+  .toggle-switch {
+    width: 60px; height: 32px; background: var(--bg-elevated); border: 2px solid var(--border-ui);
+    border-radius: 16px; position: relative; cursor: pointer; transition: all .2s;
+  }
+  .toggle-switch.is-on {
+    background: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .switch-knob {
+    position: absolute; left: 3px; top: 3px; width: 22px; height: 22px;
+    background: #fff; border-radius: 50%; transition: transform .2s;
+  }
+  .toggle-switch.is-on .switch-knob { transform: translateX(28px); }
+
+  .slider-ctrl { width: 100%; accent-color: var(--accent); cursor: pointer; }
+
+  /* Panels */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-ui); box-shadow: none; }
+  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,85,.4); }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Starship Crisis Relay</span>
+    <span class="gm-sub" id="topSub">2-Phone Synchronizer</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP / ROLE ASSIGNMENT -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Multi-Phone Pairing Directives</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • <strong>Use 2 (or more) active mobile phones</strong>.<br>
+        • Set Phone 1 to <strong>Console Alpha</strong> and Phone 2 to <strong>Console Bravo</strong>.<br>
+        • When the game begins, <strong>SHOUT the commands</strong> on your terminal out loud!<br>
+        • Your crew mate has the matching control switches on their screen.<br>
+        • Fail to execute before the warp core overheats = Whole crew drinks!
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Select Device Console Station</div>
+      <div class="btn-grid">
+        <button class="btn" id="btnSetAlpha">Console Alpha</button>
+        <button class="btn ghost" id="btnSetBravo" style="border-color:var(--accent);color:var(--accent);">Console Bravo</button>
+      </div>
+    </div>
+
+    <button class="btn" id="btnLaunchRelay" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Synchronize Flight Deck
+    </button>
+  </section>
+
+  <!-- 2. GAMEPLAY FLIGHT DECK -->
+  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
+    <div class="warp-meter-strip">
+      <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:.65rem;">
+        <span style="color:var(--danger);font-weight:800;">WARP CORE TEMPERATURE</span>
+        <span id="tempPercent" style="color:var(--accent);">10%</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" id="warpFill"></div>
+      </div>
+    </div>
+
+    <div style="padding:1.1rem;display:flex;flex-direction:column;gap:.9rem;flex:1;max-width:600px;margin:0 auto;width:100%;">
+      <!-- Terminal Shouting Box -->
+      <div class="command-terminal">
+        <span class="terminal-kicker" id="commandKicker">SHOUT TO YOUR CREWMATE:</span>
+        <h2 class="terminal-shout" id="commandText">ENGAGE PLASMA VENTILATOR!</h2>
+      </div>
+
+      <!-- Local Device Control Board -->
+      <div class="panel">
+        <div class="panel-title" id="boardTitle">Your Station Controls</div>
+        <div class="controls-matrix" id="controlsGrid"></div>
+      </div>
+
+      <div style="font-family:'Space Mono',monospace;font-size:.7rem;text-align:center;color:var(--text-muted);margin-top:auto;">
+        Score: <strong id="scoreTally" style="color:var(--accent);">0 Completed</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. CATASTROPHE VERDICT -->
+  <section class="screen" id="scrVerdict">
+    <div class="panel" style="text-align:center;padding:1.8rem 1rem;border-color:var(--danger);">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--danger);">WARP CORE BREACH</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;color:#fff;">VESSEL DESTROYED</h2>
+      <div style="font-family:'Space Mono',monospace;font-size:1.8rem;font-weight:900;color:var(--danger);margin-bottom:.4rem;" id="verdictScore">0 COMMANDS</div>
+      <div style="background:rgba(255,0,85,0.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;">
+        <p style="font-size:1.05rem;font-weight:800;color:#fff;">ALL CREW MEMBERS: CHUG 3 SIPS!</p>
+      </div>
+    </div>
+    <button class="btn" id="btnRestartFlight" style="margin-top:auto;">Re-arm Flight Relays</button>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const Synth = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  click(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "square"; o.frequency.setValueAtTime(800, this.ctx.currentTime);
+      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.04);
+    }catch(e){}
+  },
+  commandPass(){
+    try {
+      this.init();
+      [587, 880].forEach((f, i) => {
+        setTimeout(() => {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
+          g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(); o.stop(this.ctx.currentTime + 0.1);
+        }, i * 65);
+      });
+    }catch(e){}
+  },
+  alarm(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(440, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(110, this.ctx.currentTime + 0.35);
+      g.gain.setValueAtTime(0.25, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.35);
+    }catch(e){}
+  }
+};
+
+/* ================= FLIGHT CONTROL DATASETS ================= */
+// Commands given to Phone A target Phone B's controls, and vice-versa
+const CONTROLS_ALPHA = [
+  { id: "a_switch1", label: "Hyperdrive", type: "toggle", state: false },
+  { id: "a_switch2", label: "Shield Matrix", type: "toggle", state: false },
+  { id: "a_btn1", label: "Purge Inertia", type: "btn" },
+  { id: "a_slider", label: "Reactor Thruster", type: "slider", val: 0 }
+];
+
+const CONTROLS_BRAVO = [
+  { id: "b_switch1", label: "Plasma Vent", type: "toggle", state: false },
+  { id: "b_switch2", label: "Quantum Radar", type: "toggle", state: false },
+  { id: "b_btn1", label: "Fire Torpedo", type: "btn" },
+  { id: "b_slider", label: "Auxiliary Sublight", type: "slider", val: 0 }
+];
+
+const COMMANDS_FOR_ALPHA = [
+  { text: "ENGAGE PLASMA VENT!", targetId: "b_switch1" },
+  { text: "ACTIVATE QUANTUM RADAR!", targetId: "b_switch2" },
+  { text: "FIRE TORPEDO IMMEDIATELY!", targetId: "b_btn1" },
+  { text: "SET SUBLIGHT TO MAXIMUM!", targetId: "b_slider" }
+];
+
+const COMMANDS_FOR_BRAVO = [
+  { text: "ENGAGE HYPERDRIVE!", targetId: "a_switch1" },
+  { text: "ACTIVATE SHIELD MATRIX!", targetId: "a_switch2" },
+  { text: "PURGE INERTIA COILS!", targetId: "a_btn1" },
+  { text: "MAXIMIZE REACTOR THRUST!", targetId: "a_slider" }
+];
+
+const S = {
+  mode: "alpha", // 'alpha' or 'bravo'
+  coreTemp: 10,
+  score: 0,
+  gameTimer: null,
+  running: false,
+  currentCmd: null
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+/* ================= SETUP & ROLE ================= */
+$("btnSetAlpha").onclick = () => {
+  S.mode = "alpha";
+  $("btnSetAlpha").className = "btn";
+  $("btnSetBravo").className = "btn ghost";
+};
+$("btnSetBravo").onclick = () => {
+  S.mode = "bravo";
+  $("btnSetBravo").className = "btn";
+  $("btnSetAlpha").className = "btn ghost";
+};
+
+$("btnLaunchRelay").onclick = () => {
+  startFlightDeck();
+};
+
+/* ================= GAMEPLAY ENGINE ================= */
+function startFlightDeck(){
+  S.coreTemp = 10;
+  S.score = 0;
+  S.running = true;
+  $("boardTitle").textContent = `Console ${S.mode.toUpperCase()} Hardware`;
+  showScreen("scrPlay");
+  renderLocalControls();
+  nextCommandPrompt();
+
+  clearInterval(S.gameTimer);
+  S.gameTimer = setInterval(() => {
+    // Core temperature rises continuously over time
+    S.coreTemp += 2.2;
+    updateTempMeter();
+
+    if(S.coreTemp >= 100){
+      clearInterval(S.gameTimer);
+      triggerBreach();
+    }
+  }, 1000);
+}
+
+function updateTempMeter(){
+  $("warpFill").style.width = `${Math.min(100, S.coreTemp)}%`;
+  $("tempPercent").textContent = `${Math.round(S.coreTemp)}%`;
+  if(S.coreTemp > 75) Synth.alarm();
+}
+
+function nextCommandPrompt(){
+  const pool = (S.mode === "alpha") ? COMMANDS_FOR_ALPHA : COMMANDS_FOR_BRAVO;
+  S.currentCmd = pool[Math.floor(Math.random() * pool.length)];
+  $("commandText").textContent = S.currentCmd.text;
+}
+
+function renderLocalControls(){
+  const grid = $("controlsGrid");
+  grid.innerHTML = "";
+  const list = (S.mode === "alpha") ? CONTROLS_ALPHA : CONTROLS_BRAVO;
+
+  list.forEach(ctrl => {
+    const card = document.createElement("div");
+    card.className = "hw-card";
+
+    if(ctrl.type === "toggle"){
+      card.innerHTML = `
+        <span class="hw-lbl">${ctrl.label}</span>
+        <div class="toggle-switch ${ctrl.state ? 'is-on' : ''}" data-id="${ctrl.id}">
+          <div class="switch-knob"></div>
+        </div>
+      `;
+      card.querySelector(".toggle-switch").onclick = function(){
+        ctrl.state = !ctrl.state;
+        this.classList.toggle("is-on", ctrl.state);
+        Synth.click();
+        checkAction(ctrl.id);
+      };
+    } else if(ctrl.type === "btn"){
+      card.innerHTML = `
+        <span class="hw-lbl">${ctrl.label}</span>
+        <button class="btn" style="min-height:42px;font-size:.75rem;" data-id="${ctrl.id}">EXECUTE</button>
+      `;
+      card.querySelector("button").onclick = function(){
+        Synth.click();
+        checkAction(ctrl.id);
+      };
+    } else if(ctrl.type === "slider"){
+      card.innerHTML = `
+        <span class="hw-lbl">${ctrl.label}</span>
+        <input type="range" class="slider-ctrl" min="0" max="100" value="${ctrl.val}" data-id="${ctrl.id}">
+      `;
+      const slider = card.querySelector(".slider-ctrl");
+      slider.onchange = function(){
+        ctrl.val = parseInt(this.value, 10);
+        Synth.click();
+        if(ctrl.val >= 80) checkAction(ctrl.id);
+      };
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+function checkAction(actionId){
+  // Cooling bonus when correct hardware is engaged
+  S.coreTemp = Math.max(0, S.coreTemp - 8);
+  S.score++;
+  $("scoreTally").textContent = `${S.score} Completed`;
+  Synth.commandPass();
+  updateTempMeter();
+
+  // Pick fresh command
+  setTimeout(nextCommandPrompt, 400);
+}
+
+function triggerBreach(){
+  S.running = false;
+  Synth.alarm();
+  $("verdictScore").textContent = `${S.score} COMMANDS`;
+  showScreen("scrVerdict");
+}
+
+$("btnRestartFlight").onclick = () => {
+  showScreen("scrSetup");
+};
+
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

@@ -1,440 +1,376 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cyber-neon">
+<html lang="en" data-theme="nordic-slate">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#08090c" id="metaThemeColor" />
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>Chameleon Word | PartyDeck</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-/* ================= ARCADE DESIGN SYSTEM ================= */
-:root {
-  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-mono: 'Space Mono', monospace;
-  --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
-  --ease: cubic-bezier(.2,.8,.3,1);
-}
-[data-theme="cyber-neon"] {
-  --bg-primary: #08090c; --bg-surface: #10141b; --bg-elevated: #181e29;
-  --text-primary: #ffffff; --text-secondary: #9ba3b4; --text-muted: #5c6577;
-  --accent: #00ffcc; --accent-glow: rgba(0,255,204,0.35); --accent-secondary: #ff007f;
-  --danger: #ff0055; --success: #00ff66; --border-color: rgba(0,255,204,0.22);
-  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(0,255,204,0.12);
-}
-[data-theme="sunset-rave"] {
-  --bg-primary: #0f071d; --bg-surface: #1e0f38; --bg-elevated: #321659;
-  --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
-  --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-secondary: #ff8800;
-  --danger: #ff0044; --success: #00ffaa; --border-color: rgba(255,0,127,0.3);
-  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,0,127,0.2);
-}
-[data-theme="retro-arcade"] {
-  --bg-primary: #12131c; --bg-surface: #1a1b28; --bg-elevated: #26273b;
-  --text-primary: #f5f5f5; --text-secondary: #a2a8d3; --text-muted: #6873a8;
-  --accent: #ffd400; --accent-glow: rgba(255,212,0,0.35); --accent-secondary: #ff3860;
-  --danger: #ff3860; --success: #42e2b8; --border-color: rgba(255,212,0,0.25);
-  --card-shadow: 0 12px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,212,0,0.15);
-}
-[data-theme="minimal-light"] {
-  --bg-primary: #f4f6f9; --bg-surface: #ffffff; --bg-elevated: #e8ecf2;
-  --text-primary: #101828; --text-secondary: #475467; --text-muted: #98a2b3;
-  --accent: #2563eb; --accent-glow: rgba(37,99,235,0.2); --accent-secondary: #7c3aed;
-  --danger: #d92d20; --success: #0f9d58; --border-color: rgba(16,24,40,0.15);
-  --card-shadow: 0 8px 24px rgba(16,24,40,0.08);
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
-
-.pd-hud {
-  position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);
-  padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;
-}
-.hud-exit {
-  display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);
-  border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;
-  padding:.42rem .65rem;cursor:pointer;text-decoration:none;
-}
-.hud-exit:active{transform:scale(.96);}
-.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
-.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);white-space:nowrap;text-transform:uppercase;}
-.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:62px;text-align:center;}
-
-main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
-.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
-.phase.on{display:flex;animation:pFade .2s var(--ease);}
-@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-
-.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
-.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
-h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
-p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
-.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
-.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
-
-.chips{display:flex;flex-wrap:wrap;gap:.45rem;}
-.chip{background:var(--bg-elevated);color:var(--text-secondary);border:1px solid rgba(255,255,255,.1);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:.5rem .75rem;min-height:38px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
-.chip.is-on{background:var(--accent);color:var(--bg-primary);border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow);}
-
-.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
-.btn:active{transform:scale(.98);}
-.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
-.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
-.btn.danger{background:transparent;color:var(--danger);border:1px solid var(--danger);box-shadow:none;}
-.btn.push{margin-top:auto;}
-.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
-
-/* 4x4 Coordinate Matrix */
-.matrix-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;}
-.cell{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.55rem .25rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:var(--font-mono);font-size:.74rem;font-weight:700;color:var(--text-primary);cursor:pointer;min-height:52px;justify-content:center;}
-.cell .coord{font-size:.56rem;color:var(--accent);font-weight:800;}
-.cell.secret{background:var(--accent);color:var(--bg-primary);box-shadow:0 0 14px var(--accent-glow);border-color:var(--accent);}
-.cell.secret .coord{color:var(--bg-primary);}
-.cell.target{border-color:var(--accent-secondary);background:rgba(255,0,127,0.18);}
-
-/* Hold to Reveal Card */
-.hold-card{position:relative;width:100%;aspect-ratio:16/10;border-radius:var(--r-lg);border:2px dashed var(--border-color);background:var(--bg-surface);display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;touch-action:none;}
-.hold-card.revealed{border-style:solid;border-color:var(--accent);box-shadow:0 0 24px var(--accent-glow);}
-.hold-curtain{position:absolute;inset:0;background:var(--bg-surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;}
-.hold-face{position:absolute;inset:0;background:var(--bg-elevated);padding:1.4rem;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.45rem;}
-.hold-card.revealed .hold-curtain{display:none;}
-.hold-card.revealed .hold-face{display:flex;}
-.h-tag{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.16em;color:var(--text-muted);text-transform:uppercase;}
-.h-val{font-family:var(--font-display);font-size:1.6rem;font-weight:900;color:var(--accent);}
-.h-val.is-cham{color:var(--danger);}
-
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
-.tile{background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.8rem .5rem;color:var(--text-primary);font-family:var(--font-mono);font-size:.82rem;font-weight:700;text-align:center;cursor:pointer;}
-.tile.is-on{background:var(--accent);color:var(--bg-primary);box-shadow:0 0 10px var(--accent-glow);}
-
-.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:140px;overflow-y:auto;}
-.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
-.ritem .seat{color:var(--accent);font-weight:700;}
-.ritem .nm{flex:1;font-weight:700;}
-.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;display:grid;place-items:center;}
-
-.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
-.ico svg{width:100%;height:100%;display:block;}
-</style>
-</head>
-<body>
-<header class="pd-hud">
-  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
-  <div class="hud-mid">
-    <span class="hud-badge" id="hudBadge">SETUP // PHASE</span>
-    <span class="hud-label" id="hudLabel">Topic Matrix</span>
-  </div>
-  <div class="hud-count" id="hudCount">4x4 GRID</div>
-</header>
-
-<main>
-  <!-- PHASE 1: SETUP -->
-  <section class="phase on" id="phSetup">
-    <div class="hero"><span class="ico" data-ic="eye"></span></div>
-    <h1 class="title">Chameleon Word</h1>
-    <p class="sub">Everyone knows the secret word coordinate except the Chameleon. Give 1-word clues and hunt the impostor.</p>
-    <div class="panel">
-      <p class="ptitle">Roster</p>
-      <ul class="rlist" id="rList"></ul>
-      <div style="display:flex;gap:.5rem;margin-top:.7rem;">
-        <input type="text" id="rInput" placeholder="Add player..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
-        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
-      </div>
-    </div>
-    <div class="panel">
-      <p class="ptitle">Topic Deck</p>
-      <div class="chips" id="topicChips"></div>
-    </div>
-    <button class="btn push" id="btnStart" type="button">Deal Secret Coordinates</button>
-  </section>
-
-  <!-- PHASE 2: DEAL ASSIGNMENTS -->
-  <section class="phase" id="phDeal">
-    <div class="panel" style="text-align:center;padding:1.4rem 1rem;">
-      <p class="ptitle" id="dealStep">PLAYER 1 OF 4</p>
-      <h1 class="title" id="dealWho" style="color:var(--accent);margin:.2rem 0 .9rem;">Player</h1>
-      <div class="hold-card" id="holdBox">
-        <div class="hold-curtain">
-          <span class="ico" data-ic="lock" style="width:32px;height:32px;color:var(--accent);"></span>
-          <span>Hold to Reveal Code</span>
-        </div>
-        <div class="hold-face" id="holdFace"></div>
-      </div>
-      <p class="sub" style="margin-top:.8rem;font-size:.78rem;">Release to hide, then pass the device.</p>
-    </div>
-    <button class="btn push" id="btnDealNext" type="button" disabled>View Assignment First</button>
-  </section>
-
-  <!-- PHASE 3: CLUE ROUND & MATRIX -->
-  <section class="phase" id="phPlay">
-    <div class="panel">
-      <p class="ptitle" id="playTopic">TOPIC: ANIMALS (4x4 MATRIX)</p>
-      <div class="matrix-grid" id="playMatrix"></div>
-    </div>
-    <div class="panel" style="text-align:center;">
-      <p class="ptitle">Clue Round In Progress</p>
-      <p class="sub" style="font-size:.9rem;color:var(--text-primary);line-height:1.4;">
-        Go in circle order. Say <strong>EXACTLY ONE WORD</strong> related to the secret cell.
-      </p>
-    </div>
-    <button class="btn push danger" id="btnCallVote" type="button">Everyone Gave Clues &mdash; Vote</button>
-  </section>
-
-  <!-- PHASE 4: ACCUSE VOTE -->
-  <section class="phase" id="phVote">
-    <h1 class="title">Accuse the Chameleon</h1>
-    <p class="sub">Unanimously tap who you believe does not know the secret word coordinate.</p>
-    <div class="panel">
-      <div class="grid-2" id="voteGrid"></div>
-    </div>
-    <div class="btn-row push">
-      <button class="btn ghost" id="btnCancelVote" type="button">Back to Board</button>
-      <button class="btn" id="btnLockVote" type="button" disabled>Lock In Accusation</button>
-    </div>
-  </section>
-
-  <!-- PHASE 5: CHAMELEON ESCAPE GUESS -->
-  <section class="phase" id="phEscape">
-    <div class="hero"><span class="ico" data-ic="target"></span></div>
-    <h1 class="title" style="color:var(--danger);">Chameleon Caught!</h1>
-    <p class="sub" id="escPrompt">You were accused. Guess the exact word to escape and steal the win:</p>
-    <div class="panel">
-      <div class="matrix-grid" id="escapeMatrix"></div>
-    </div>
-    <button class="btn push" id="btnLockEscape" type="button" disabled>Lock In Word Guess</button>
-  </section>
-
-  <!-- PHASE 6: RESULTS -->
-  <section class="phase" id="phResult">
-    <div class="hero"><span class="ico" data-ic="target"></span></div>
-    <h1 class="title" id="resTitle">Round Complete</h1>
-    <p class="sub" id="resSub">—</p>
-    <div class="panel">
-      <p class="ptitle">Secret Word Cell</p>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:.4rem 0;">
-        <span class="title" id="resWord" style="color:var(--accent);font-size:1.4rem;">—</span>
-        <span class="hud-count" id="resCoord">A1</span>
-      </div>
-    </div>
-    <div class="btn-row push">
-      <button class="btn ghost" id="btnExit" type="button">Exit to Hub</button>
-      <button class="btn" id="btnAgain" type="button">Next Matrix</button>
-    </div>
-  </section>
-</main>
 
 <script>
-(function(){
-"use strict";
-const LOCAL={
- home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
- eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
- lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
- target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
- close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'
-};
-function ICO(k){ return LOCAL[k]||''; }
-document.querySelectorAll('[data-ic]').forEach(el=> el.innerHTML=ICO(el.getAttribute('data-ic')));
+(function(){try{var t=localStorage.getItem("partydeck_theme")||"nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
 
-const PD={
- getPlayers:()=> { try{ return JSON.parse(localStorage.getItem("partydeck_players")||"[]"); }catch(e){return[];} },
- setPlayers:(a)=> { try{ localStorage.setItem("partydeck_players",JSON.stringify(a)); }catch(e){} },
- exitToHub:()=> { window.location.href="../../index.html"; },
- vibrate:(p)=> { if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){} }
-};
-(function(){
- let t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
- document.documentElement.setAttribute("data-theme",t);
-})();
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
 
-const Sfx={
- ctx:null,
- ok(){ if(!this.ctx)try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){} if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume(); return !!this.ctx; },
- t(f,d,type,vol,slide,delay){
-  if(!this.ok())return; const c=this.ctx, t0=c.currentTime+(delay||0), o=c.createOscillator(), g=c.createGain();
-  o.type=type||"square"; o.frequency.setValueAtTime(f,t0);
-  if(slide)o.frequency.exponentialRampToValueAtTime(slide,t0+d);
-  g.gain.setValueAtTime(vol||.14,t0); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
-  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0+d);
- },
- play(n){
-  switch(n){
-   case"click": this.t(880,.045,"square",.1); break;
-   case"reveal": this.t(360,.18,"sine",.14,680); break;
-   case"success": this.t(523,.08,"triangle",.15); this.t(659,.08,"triangle",.15,null,.07); this.t(784,.14,"triangle",.15,null,.14); break;
-   case"alert": this.t(180,.28,"sawtooth",.18); break;
-  }
- }
-};
+<style>
+  body { overflow: hidden; height: 100dvh; }
+  .gm-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui); flex-shrink: 0; }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: var(--font-display); font-size: .98rem; font-weight: 900; }
+  .gm-sub { font-family: var(--font-mono); font-size: .64rem; color: var(--text-muted); }
+  .gm-actions { display: flex; gap: .4rem; }
+  .gm-actions .btn-icon-only { width: 48px; height: 48px; min-height: 48px; }
 
-const TOPICS={
- "Animals":["Lion","Otter","Eagle","Shark","Camel","Panda","Wolf","Moth","Crab","Snake","Bison","Gecko","Heron","Llama","Toad","Falcon"],
- "Food":["Sushi","Bagel","Taco","Curry","Pizza","Ramen","Steak","Donut","Salad","Waffle","Burger","Kebab","Pasta","Nacho","Crepe","Paella"],
- "Movies":["Titanic","Jaws","Alien","Rocky","Shrek","Avatar","Gladiator","Matrix","Psycho","Dune","Joker","Casino","Frozen","Up","Speed","Amelie"],
- "Travel":["Tokyo","Paris","Cairo","London","Sydney","Venice","Rome","Dubai","Hawaii","Iceland","Rio","Banff","Berlin","Seoul","Athens","Prague"],
- "Tech":["Robot","Drone","Laser","Server","Rocket","Sensor","Battery","Screen","Chip","Optics","Radar","Modem","Memory","Router","Camera","Antenna"]
-};
-const COORDS=["A1","A2","A3","A4","B1","B2","B3","B4","C1","C2","C3","C4","D1","D2","D3","D4"];
+  .stage { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .screen { display: none; flex-direction: column; gap: 1rem; padding: 1.1rem; max-width: 680px; margin: 0 auto; width: 100%; }
+  .screen.is-active { display: flex; }
 
-let roster=PD.getPlayers().slice(0,10);
-if(roster.length<3) roster=["Player 1","Player 2","Player 3","Player 4"];
+  .panel { background: var(--bg-surface); border: 1px solid var(--border-ui); border-radius: var(--r-lg); padding: 1.1rem; box-shadow: var(--card-shadow); }
+  .panel-label { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem; }
+  h2.sec { font-size: 1.45rem; line-height: 1.2; }
+  p.lede { font-size: .88rem; color: var(--text-secondary); line-height: 1.5; }
 
-const S={
- chosenTopic:'Animals', words:[], secretIdx:0, chamIdx:0,
- dealIdx:0, accused:null, escapeChoice:null
-};
+  .grid-matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: .45rem; margin: .5rem 0; }
+  .matrix-cell { background: var(--bg-elevated); border: 1px solid var(--border-ui); border-radius: var(--r-sm); padding: .75rem .4rem; text-align: center; font-family: var(--font-display); font-size: .85rem; font-weight: 800; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 54px; }
+  .matrix-cell.selected { border-color: var(--accent); background: var(--accent); color: var(--accent-contrast); }
+  .matrix-cell .coord-tag { font-family: var(--font-mono); font-size: .55rem; color: var(--text-muted); margin-bottom: 2px; }
+  .matrix-cell.selected .coord-tag { color: var(--accent-contrast); opacity: .8; }
 
-const $=id=>document.getElementById(id);
-function hud(b,l,c){ $('hudBadge').textContent=b; $('hudLabel').textContent=l; if(c)$('hudCount').textContent=c; }
-function go(id){ document.querySelectorAll('.phase').forEach(p=>p.classList.remove('on')); $(id).classList.add('on'); window.scrollTo(0,0); }
+  .curtain { position: fixed; inset: 0; z-index: 900; background: var(--bg-primary); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem; padding: 2rem 1.5rem; text-align: center; }
+  .curtain.is-open { display: flex; }
+  .curtain-name { font-family: var(--font-display); font-size: 2.2rem; font-weight: 900; }
+  .hold-btn { position: relative; overflow: hidden; width: 100%; max-width: 340px; min-height: 62px; font-size: .95rem; border-radius: var(--r-lg); background: var(--bg-elevated); border: 1px solid var(--border-ui-active); }
+  .hold-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--accent); opacity: .9; transition: width .06s linear; }
+  .hold-label { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: .5rem; }
+  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
 
-function renderRoster(){
- $('rList').innerHTML=roster.map((p,i)=>`<li class="ritem"><span class="seat">#${String(i+1).padStart(2,'0')}</span><span class="nm">${p}</span><button type="button" data-del="${i}">${ICO('close')}</button></li>`).join('');
- $('btnStart').disabled=roster.length<3;
- PD.setPlayers(roster);
-}
-$('rAdd').onclick=()=>{ const v=$('rInput').value.trim(); if(v&&roster.indexOf(v)===-1){ roster.push(v); $('rInput').value=''; Sfx.play('click'); renderRoster(); } };
-$('rList').onclick=e=>{ const b=e.target.closest('[data-del]'); if(b){ roster.splice(+b.dataset.del,1); Sfx.play('click'); renderRoster(); } };
+  .vote-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .vote-btn { padding: .85rem; font-family: var(--font-display); font-weight: 800; font-size: .95rem; background: var(--bg-elevated); border: 1px solid var(--border-ui); border-radius: var(--r-md); }
+  .vote-btn.is-active { border-color: var(--danger); background: rgba(244, 63, 94, .15); color: var(--danger); }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
 
-function renderTopicChips(){
- $('topicChips').innerHTML=Object.keys(TOPICS).map(t=>`<button class="chip${t===S.chosenTopic?' is-on':''}" type="button" data-t="${t}">${t}</button>`).join('');
-}
-$('topicChips').onclick=e=>{
- const b=e.target.closest('[data-t]');
- if(b){
-  S.chosenTopic=b.dataset.t;
-  renderTopicChips();
-  Sfx.play('click');
- }
-};
-
-$('btnStart').onclick=()=>{
- S.words=TOPICS[S.chosenTopic].slice().sort(()=>Math.random()-.5);
- S.secretIdx=Math.floor(Math.random()*16);
- S.chamIdx=Math.floor(Math.random()*roster.length);
- S.dealIdx=0;
- hud("DEAL // PHASE","Secret Code");
- renderDeal();
- go('phDeal');
- Sfx.play('success');
-};
-
-function renderDeal(){
- $('dealStep').textContent=`PLAYER ${S.dealIdx+1} OF ${roster.length}`;
- $('dealWho').textContent=roster[S.dealIdx];
- const isCham=S.dealIdx===S.chamIdx;
- $('holdFace').innerHTML=isCham
-  ? `<div class="h-tag">SECRET ASSIGNMENT</div><div class="h-val is-cham">CHAMELEON</div><p class="sub" style="font-size:.78rem;color:var(--danger)">You have no code. Listen to clues, blend in, and discover the word.</p>`
-  : `<div class="h-tag">SECRET COORDINATE</div><div class="h-val">${COORDS[S.secretIdx]}</div><div class="h-tag" style="margin-top:.4rem">WORD: ${S.words[S.secretIdx]}</div>`;
- $('holdBox').classList.remove('revealed');
- $('btnDealNext').disabled=true;
- $('btnDealNext').textContent='View Code First';
-}
-
-const hBox=$('holdBox');
-hBox.addEventListener('pointerdown',e=>{
- e.preventDefault();
- hBox.classList.add('revealed');
- Sfx.play('reveal');
- PD.vibrate(25);
- $('btnDealNext').disabled=false;
- $('btnDealNext').textContent=S.dealIdx<roster.length-1?'Conceal & Pass':'Start Clue Round';
-});
-['pointerup','pointerleave','pointercancel'].forEach(ev=> hBox.addEventListener(ev,()=> hBox.classList.remove('revealed')));
-
-$('btnDealNext').onclick=()=>{
- if(S.dealIdx<roster.length-1){ S.dealIdx++; renderDeal(); Sfx.play('click'); }
- else { startClueRound(); }
-};
-
-function startClueRound(){
- $('playTopic').textContent=`TOPIC: ${S.chosenTopic.toUpperCase()} (4x4 MATRIX)`;
- $('playMatrix').innerHTML=S.words.map((w,i)=>`
-  <div class="cell">
-   <span class="coord">${COORDS[i]}</span>
-   <span>${w}</span>
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Chameleon Word</span>
+    <span class="gm-sub" id="topSub">Topic Grid Deduction</span>
   </div>
- `).join('');
- hud("CLUE ROUND",S.chosenTopic,"4x4 MATRIX");
- go('phPlay');
- Sfx.play('success');
-}
+  <div class="gm-actions">
+    <button class="btn btn-ghost btn-icon-only" id="btnRules"><span class="ico" data-ic="help"></span></button>
+    <a class="btn btn-ghost btn-icon-only" href="../../index.html"><span class="ico" data-ic="home"></span></a>
+  </div>
+</header>
 
-$('btnCallVote').onclick=()=>{
- $('voteGrid').innerHTML=roster.map(p=>`<button class="tile" type="button" data-acc="${p}">${p}</button>`).join('');
- S.accused=null;
- $('btnLockVote').disabled=true;
- hud("ACCUSATION","Vote Chameleon");
- go('phVote');
- Sfx.play('alert');
-};
-$('voteGrid').onclick=e=>{
- const b=e.target.closest('[data-acc]');
- if(b){
-  $('voteGrid').querySelectorAll('.tile').forEach(t=>t.classList.remove('is-on'));
-  b.classList.add('is-on'); S.accused=b.dataset.acc; $('btnLockVote').disabled=false; Sfx.play('click');
- }
-};
-$('btnCancelVote').onclick=()=>{ go('phPlay'); };
+<div class="stage">
+  <!-- SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div>
+      <h2 class="sec">Blend In or Get Caught</h2>
+      <p class="lede">Everyone knows the secret grid coordinate except the Chameleon. Give 1-word clues, catch the impostor, or guess the word to escape.</p>
+    </div>
 
-$('btnLockVote').onclick=()=>{
- const chamName=roster[S.chamIdx];
- if(S.accused===chamName){
-  // Caught -> Escape Guess
-  $('escPrompt').textContent=`${chamName} was correctly caught as the Chameleon! Guess the secret word:`;
-  $('escapeMatrix').innerHTML=S.words.map((w,i)=>`
-   <button class="cell" type="button" data-esc="${i}">
-    <span class="coord">${COORDS[i]}</span>
-    <span>${w}</span>
-   </button>
-  `).join('');
-  S.escapeChoice=null;
-  $('btnLockEscape').disabled=true;
-  hud("ESCAPE GUESS","Chameleon");
-  go('phEscape');
-  Sfx.play('alert');
- } else {
-  finishGame(false,`${S.accused} was innocent! The Chameleon (${chamName}) escaped undetected.`);
- }
-};
+    <div class="panel">
+      <div class="panel-label">Choose Topic Pack</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem" id="topicGrid"></div>
+    </div>
 
-$('escapeMatrix').onclick=e=>{
- const b=e.target.closest('[data-esc]');
- if(b){
-  $('escapeMatrix').querySelectorAll('.cell').forEach(c=>c.classList.remove('target'));
-  b.classList.add('target');
-  S.escapeChoice=+b.dataset.esc;
-  $('btnLockEscape').disabled=false;
-  Sfx.play('click');
- }
-};
-$('btnLockEscape').onclick=()=>{
- if(S.escapeChoice===S.secretIdx){
-  finishGame(false,`The Chameleon guessed ${S.words[S.secretIdx]} (${COORDS[S.secretIdx]}) correctly and stole the victory!`);
- } else {
-  finishGame(true,`The Chameleon incorrectly guessed ${S.words[S.escapeChoice]}. The group wins!`);
- }
-};
+    <button class="btn btn-accent" id="btnDealRoles" style="min-height:56px;font-size:1rem"><span class="ico" data-ic="play"></span> Deal Secret Coordinates</button>
+  </section>
 
-function finishGame(groupWins, msg){
- $('resTitle').textContent=groupWins?"GROUP WINS!":"CHAMELEON WINS!";
- $('resTitle').style.color=groupWins?"var(--success)":"var(--danger)";
- $('resSub').textContent=msg;
- $('resWord').textContent=S.words[S.secretIdx];
- $('resCoord').textContent=COORDS[S.secretIdx];
- hud("ROUND OVER","Resolved");
- go('phResult');
- Sfx.play(groupWins?'success':'alert');
-}
+  <!-- SECRET RECEIPT VIEW -->
+  <section class="screen" id="scrSecret">
+    <div class="panel" style="text-align:center" id="secretBox"></div>
+    <button class="btn btn-accent" id="btnNextPlayer" style="min-height:54px"><span class="ico" data-ic="check"></span> Got It &mdash; Pass Phone</button>
+  </section>
 
-$('btnAgain').onclick=()=>{ renderRoster(); renderTopicChips(); hud("SETUP // PHASE","Topic Matrix"); go('phSetup'); Sfx.play('click'); };
-$('btnHub').onclick=()=>PD.exitToHub();
-$('btnExit').onclick=()=>PD.exitToHub();
+  <!-- CLUE ROUND & MATRIX DISPLAY -->
+  <section class="screen" id="scrMatrix">
+    <div class="panel">
+      <div class="panel-label">Topic: <strong id="matrixTopic" style="color:var(--accent)">Animals</strong></div>
+      <div class="grid-matrix" id="liveMatrix"></div>
+    </div>
+    <div class="panel" style="text-align:center">
+      <p style="font-size:.85rem;color:var(--text-secondary)">
+        Go around the circle: Each player says <strong>EXACTLY ONE WORD</strong> related to the secret topic.
+      </p>
+    </div>
+    <button class="btn btn-accent" id="btnToVote" style="min-height:56px"><span class="ico" data-ic="users"></span> All Clues Given &mdash; Vote Impostor</button>
+  </section>
 
-renderRoster();
-renderTopicChips();
+  <!-- VOTING PHASE -->
+  <section class="screen" id="scrVote">
+    <div class="panel">
+      <div class="panel-label">Accuse the Chameleon</div>
+      <h2 class="sec">Who is the Impostor?</h2>
+      <p class="lede" style="margin-top:.2rem">Vote for the player who gave the shadiest or most generic clue.</p>
+      <div class="vote-grid" id="playerVoteGrid" style="margin-top:.75rem"></div>
+    </div>
+    <button class="btn btn-accent" id="btnAccuse" style="min-height:56px" disabled><span class="ico" data-ic="check"></span> Confirm Accusation</button>
+  </section>
+
+  <!-- CHAMELEON ESCAPE GUESS -->
+  <section class="screen" id="scrEscape">
+    <div class="panel" style="border-color:var(--danger)">
+      <span class="panel-label" style="color:var(--danger)">CHAMELEON TRAPPED</span>
+      <h2 class="sec">Escape Matrix Guess</h2>
+      <p class="lede" style="margin-top:.3rem">
+        <strong id="chameleonName">Player</strong> was caught! Tap the secret word on the grid to steal the win.
+      </p>
+      <div class="grid-matrix" id="escapeMatrix"></div>
+    </div>
+    <button class="btn btn-accent" id="btnLockEscape" style="min-height:56px" disabled><span class="ico" data-ic="lock"></span> Lock In Escape Guess</button>
+  </section>
+
+  <!-- FINALE VERDICT -->
+  <section class="screen" id="scrVerdict">
+    <div class="panel" style="text-align:center" id="verdictBox"></div>
+    <button class="btn btn-accent" id="btnPlayAgain" style="min-height:56px"><span class="ico" data-ic="refresh"></span> New Round</button>
+  </section>
+</div>
+
+<!-- CURTAIN -->
+<div class="curtain" id="curtain">
+  <div style="width:72px;height:72px;border-radius:var(--r-lg);background:var(--bg-elevated);border:1px solid var(--border-ui);display:flex;align-items:center;justify-content:center;color:var(--accent)">
+    <span class="ico ico-xl" data-ic="eye"></span>
+  </div>
+  <span style="font-family:var(--font-mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted)">SECRET COORDINATE</span>
+  <span class="curtain-name" id="curtainPlayer">Player</span>
+  <p style="font-size:.85rem;color:var(--text-secondary);max-width:32ch">No peeking! Only the active player may hold the screen.</p>
+  <button class="hold-btn" id="holdBtn">
+    <span class="hold-fill" id="holdFill"></span>
+    <span class="hold-label"><span class="ico" data-ic="finger"></span> Hold to reveal coordinate</span>
+  </button>
+</div>
+
+<script>
+"use strict";
+(function(){
+  const ICONS = {
+    help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    play:'<polygon points="6 3 20 12 6 21 6 3"/>',
+    check:'<polyline points="20 6 9 17 4 12"/>',
+    eye:'<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    finger:'<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 11.5v-2a1.5 1.5 0 1 1 3 0V12"/><path d="M14 10.5a1.5 1.5 0 0 1 3 0V13"/><path d="M17 12a1.5 1.5 0 0 1 3 0v3a6 6 0 0 1-6 6h-2a7 7 0 0 1-7-7v-1a1.5 1.5 0 1 1 3 0"/>',
+    refresh:'<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>'
+  };
+  function paintIcons(){ document.querySelectorAll("[data-ic]").forEach(el=>{ const k=el.getAttribute("data-ic"); if(ICONS[k]) el.innerHTML=`<svg viewBox="0 0 24 24">${ICONS[k]}</svg>`; }); }
+
+  const SFX = {
+    ctx: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext||window.webkitAudioContext)(); },
+    tone(f,d,type="sine"){ this.init(); const o=this.ctx.createOscillator(), g=this.ctx.createGain(); o.type=type; o.frequency.value=f; o.connect(g); g.connect(this.ctx.destination); g.gain.setValueAtTime(0.1, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime+d); o.start(); o.stop(this.ctx.currentTime+d); },
+    pop(){ this.tone(550, 0.05, "triangle"); },
+    win(){ this.tone(523, 0.1); setTimeout(()=>this.tone(659, 0.1), 90); setTimeout(()=>this.tone(784, 0.25), 180); },
+    alarm(){ this.tone(200, 0.35, "sawtooth"); }
+  };
+
+  const TOPICS = {
+    "Animals": ["Lion", "Penguin", "Elephant", "Kangaroo", "Dolphin", "Cheetah", "Giraffe", "Gorilla", "Chameleon", "Koala", "Octopus", "Flamingo", "Wolf", "Panda", "Zebra", "Eagle"],
+    "Food & Drink": ["Pizza", "Sushi", "Tacos", "Burger", "Pancakes", "Ramen", "Pasta", "Croissant", "Ice Cream", "Coffee", "Donut", "Bacon", "Curry", "Steak", "Waffle", "Chocolate"],
+    "Everyday Objects": ["Umbrella", "Keys", "Backpack", "Toaster", "Headphones", "Flashlight", "Clock", "Mirror", "Wallet", "Toothbrush", "Pencil", "Bicycle", "Sunglasses", "Bottle", "Sofa", "Hammer"],
+    "Movie Genres": ["Sci-Fi", "Horror", "Comedy", "Western", "Romance", "Thriller", "Action", "Fantasy", "Animation", "Documentary", "Mystery", "Musical", "Drama", "Noir", "Superhero", "Zombies"]
+  };
+
+  const COORDS = ["A1","A2","A3","A4","B1","B2","B3","B4","C1","C2","C3","C4","D1","D2","D3","D4"];
+
+  let roster = ["Alex", "Jordan", "Taylor", "Sam"];
+  try {
+    const raw = localStorage.getItem("partydeck_players");
+    if(raw) { const arr = JSON.parse(raw); if(Array.isArray(arr) && arr.length >= 3) roster = arr; }
+  } catch(e){}
+
+  let state = { topic: "Animals", chameleonIdx: 0, secretCellIdx: 5, dealIdx: 0, accusedIdx: -1, escapeChoiceIdx: -1 };
+
+  const $ = id => document.getElementById(id);
+  function showScreen(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("is-active", s.id===id)); }
+
+  function renderTopicOptions(){
+    $("topicGrid").innerHTML = Object.keys(TOPICS).map((t, idx)=>`
+      <button class="btn opt-btn ${idx===0?'is-active':''}" data-topic="${t}">${t}</button>
+    `).join("");
+  }
+
+  function startDeal(){
+    state.chameleonIdx = Math.floor(Math.random() * roster.length);
+    state.secretCellIdx = Math.floor(Math.random() * 16);
+    state.dealIdx = 0;
+    openCurtainForPlayer();
+  }
+
+  function openCurtainForPlayer(){
+    $("curtainPlayer").textContent = roster[state.dealIdx];
+    $("curtain").classList.add("is-open");
+
+    let holdStart = 0, raf = null;
+    const btn = $("holdBtn");
+    const cancel = () => { if (raf) cancelAnimationFrame(raf); raf = null; $("holdFill").style.width = "0%"; btn.classList.remove("armed"); };
+
+    btn.onpointerdown = e => {
+      e.preventDefault();
+      holdStart = performance.now();
+      btn.classList.add("armed");
+      const tick = () => {
+        const p = Math.min(1, (performance.now() - holdStart) / 700);
+        $("holdFill").style.width = (p * 100) + "%";
+        if (p >= 1) {
+          cancel();
+          $("curtain").classList.remove("is-open");
+          showPlayerSecret();
+        } else raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
+    btn.onpointerup = cancel;
+    btn.onpointercancel = cancel;
+    btn.onpointerleave = cancel;
+  }
+
+  function showPlayerSecret(){
+    const isChameleon = state.dealIdx === state.chameleonIdx;
+    const words = TOPICS[state.topic];
+    const secretWord = words[state.secretCellIdx];
+    const coord = COORDS[state.secretCellIdx];
+
+    $("secretBox").innerHTML = isChameleon ? `
+      <span class="panel-label" style="color:var(--danger)">SECRET ROLE</span>
+      <h2 style="font-size:2.4rem;font-family:var(--font-display);color:var(--danger);margin:.3rem 0">YOU ARE THE CHAMELEON</h2>
+      <p style="font-size:.95rem;color:var(--text-secondary)">
+        You do not know the secret coordinate! Listen carefully to other players' clues and blend in.
+      </p>
+    ` : `
+      <span class="panel-label">SECRET TOPIC COORDINATE</span>
+      <h2 style="font-size:3.2rem;font-family:var(--font-display);color:var(--accent);margin:.2rem 0">${coord}</h2>
+      <p style="font-size:1.15rem;font-weight:800;color:var(--text-primary)">Word: ${secretWord}</p>
+      <p style="font-size:.85rem;color:var(--text-muted);margin-top:.4rem">Give 1 subtle clue related to this word.</p>
+    `;
+
+    showScreen("scrSecret");
+    if(isChameleon) SFX.alarm(); else SFX.pop();
+  }
+
+  function renderMatrix(containerId, isEscape = false){
+    const words = TOPICS[state.topic];
+    $(containerId).innerHTML = words.map((w, idx)=>`
+      <div class="matrix-cell" data-idx="${idx}">
+        <span class="coord-tag">${COORDS[idx]}</span>
+        <span>${w}</span>
+      </div>
+    `).join("");
+
+    if(isEscape){
+      $(containerId).onclick = e => {
+        const cell = e.target.closest(".matrix-cell"); if(!cell) return;
+        document.querySelectorAll(`#${containerId} .matrix-cell`).forEach(c=>c.classList.remove("selected"));
+        cell.classList.add("selected");
+        state.escapeChoiceIdx = parseInt(cell.dataset.idx, 10);
+        $("btnLockEscape").disabled = false;
+        SFX.pop();
+      };
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    paintIcons();
+    renderTopicOptions();
+
+    $("topicGrid").onclick = e => {
+      const b = e.target.closest(".opt-btn"); if(!b) return;
+      document.querySelectorAll("#topicGrid .opt-btn").forEach(x=>x.classList.remove("is-active"));
+      b.classList.add("is-active");
+      state.topic = b.dataset.topic;
+    };
+
+    $("btnDealRoles").onclick = startDeal;
+
+    $("btnNextPlayer").onclick = () => {
+      state.dealIdx++;
+      if(state.dealIdx >= roster.length){
+        $("matrixTopic").textContent = state.topic;
+        renderMatrix("liveMatrix");
+        showScreen("scrMatrix");
+      } else {
+        openCurtainForPlayer();
+      }
+    };
+
+    $("btnToVote").onclick = () => {
+      $("playerVoteGrid").innerHTML = roster.map((p, idx)=>`
+        <button class="vote-btn" data-v="${idx}">${p}</button>
+      `).join("");
+      $("btnAccuse").disabled = true;
+      showScreen("scrVote");
+    };
+
+    $("playerVoteGrid").onclick = e => {
+      const b = e.target.closest(".vote-btn"); if(!b) return;
+      document.querySelectorAll(".vote-btn").forEach(x=>x.classList.remove("is-active"));
+      b.classList.add("is-active");
+      state.accusedIdx = parseInt(b.dataset.v, 10);
+      $("btnAccuse").disabled = false;
+      SFX.pop();
+    };
+
+    $("btnAccuse").onclick = () => {
+      const caught = state.accusedIdx === state.chameleonIdx;
+      if(caught){
+        $("chameleonName").textContent = roster[state.chameleonIdx];
+        renderMatrix("escapeMatrix", true);
+        showScreen("scrEscape");
+        SFX.alarm();
+      } else {
+        $("verdictBox").innerHTML = `
+          <span class="panel-label" style="color:var(--danger)">CHAMELEON WINS</span>
+          <h2 style="font-size:2.2rem;font-family:var(--font-display);color:var(--danger);margin:.3rem 0">${roster[state.chameleonIdx]} Escaped!</h2>
+          <p style="font-size:.95rem;color:var(--text-secondary)">
+            The group wrongly accused <strong>${roster[state.accusedIdx]}</strong>. The secret word was <strong>${TOPICS[state.topic][state.secretCellIdx]}</strong>.
+          </p>
+        `;
+        showScreen("scrVerdict");
+        SFX.win();
+      }
+    };
+
+    $("btnLockEscape").onclick = () => {
+      const correct = state.escapeChoiceIdx === state.secretCellIdx;
+      const secretWord = TOPICS[state.topic][state.secretCellIdx];
+      const guessWord = TOPICS[state.topic][state.escapeChoiceIdx];
+
+      if(correct){
+        $("verdictBox").innerHTML = `
+          <span class="panel-label" style="color:var(--danger)">CHAMELEON STOLE THE WIN</span>
+          <h2 style="font-size:2.2rem;font-family:var(--font-display);color:var(--danger);margin:.3rem 0">${roster[state.chameleonIdx]} Guessed Correctly!</h2>
+          <p style="font-size:.95rem;color:var(--text-secondary)">
+            Caught in the vote, but correctly identified the secret word: <strong>${secretWord}</strong> (${COORDS[state.secretCellIdx]}).
+          </p>
+        `;
+      } else {
+        $("verdictBox").innerHTML = `
+          <span class="panel-label" style="color:var(--success)">GROUP WINS</span>
+          <h2 style="font-size:2.2rem;font-family:var(--font-display);color:var(--success);margin:.3rem 0">Chameleon Defeated!</h2>
+          <p style="font-size:.95rem;color:var(--text-secondary)">
+            ${roster[state.chameleonIdx]} guessed <em>${guessWord}</em>. The real secret was <strong>${secretWord}</strong>.
+          </p>
+        `;
+      }
+      showScreen("scrVerdict");
+      SFX.win();
+    };
+
+    $("btnPlayAgain").onclick = () => showScreen("scrSetup");
+  });
 })();
 </script>
+<script src="../../js/theme-sync.js"></script>
 </body>
 </html>

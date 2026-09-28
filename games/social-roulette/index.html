@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#08090c" id="metaThemeColor" />
 <title>Social Roulette | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(!/^(nordic-slate|tokyo-sunset|terracotta-clay|emerald-lounge|alpine-mist|synthwave-84)$/.test(t||""))t="nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","nordic-slate");}})();
+</script>
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* ================= ARCADE DESIGN SYSTEM ================= */
@@ -103,6 +108,7 @@ p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:4
 .ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
 .ico svg{width:100%;height:100%;display:block;}
 </style>
+<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
 <header class="pd-hud">
@@ -321,5 +327,6 @@ renderRoster();
 renderPacks();
 })();
 </script>
+<script src="../../js/theme-sync.js"></script>
 </body>
 </html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald-lounge">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#071712" id="metaThemeColor" />
+<title>Neon Snake Gauntlet | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #071712; --bg-surface: #0e241d; --bg-elevated: #16362c;
+    --text-primary: #ffffff; --text-secondary: #a3cfbe; --text-muted: #5e9481;
+    --accent: #10b981; --accent-glow: rgba(16,185,129,0.38); --accent-contrast: #031c14;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(16,185,129,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.is-active { display: flex; }
+
+  /* HUD */
+  .hud-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+  }
+  .hud-stat {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); padding: .3rem .4rem;
+  }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .55rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 800; color: var(--accent); }
+
+  /* Snake Grid Viewport */
+  .snake-stage { flex: 1; position: relative; width: 100%; height: 100%; background: #030b08; touch-action: none; }
+  #snakeCanvas { width: 100%; height: 100%; display: block; }
+
+  /* Virtual D-Pad Touch Controls */
+  .dpad-overlay {
+    position: absolute; bottom: 12px; right: 12px; width: 130px; height: 130px;
+    display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+    gap: 4px; z-index: 10; pointer-events: none;
+  }
+  .dbtn {
+    pointer-events: auto; background: rgba(22, 54, 44, 0.75); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); color: var(--accent); display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .dbtn:active { background: var(--accent); color: var(--accent-contrast); }
+
+  /* Panels */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .opt-btn {
+    min-height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
+    font-size: .78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .opt-btn.is-active {
+    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow);
+  }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+
+  /* 3-Stage Privacy Curtain */
+  .curtain {
+    position: fixed; inset: 0; z-index: 100; background: rgba(7, 23, 18, 0.96);
+    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
+  }
+  .curtain.is-open { display: flex; }
+  .cur-card {
+    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
+    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
+  }
+  .hold-btn {
+    position: relative; overflow: hidden; width: 100%; min-height: 60px;
+    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
+    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
+    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
+  }
+  .hold-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: var(--accent); opacity: .85; transition: width .04s linear;
+  }
+  .hold-label { position: relative; z-index: 2; pointer-events: none; }
+  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Neon Snake Gauntlet</span>
+    <span class="gm-sub" id="topSub">Setup</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Snake Length Quota</div>
+      <div class="opt-grid" id="quotaGrid">
+        <button class="opt-btn" data-q="10">10 Segments</button>
+        <button class="opt-btn is-active" data-q="20">20 Segments</button>
+        <button class="opt-btn" data-q="30">30 Segments</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Gauntlet Directives</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • Swipe anywhere or use the D-Pad to steer the neon snake.<br>
+        • Collect glowing energy pellets to grow and increase speed.<br>
+        • Watch out for shrinking matrix borders!<br>
+        • Crashing before reaching the target length = Drink penalty!
+      </p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Active Pilots</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+    <button class="btn" id="btnStartTourney" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Start Snake Run
+    </button>
+  </section>
+
+  <!-- 2. GAMEPLAY CANVAS -->
+  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
+    <div class="hud-bar">
+      <div class="hud-stat">
+        <span class="hud-lbl">Pilot</span>
+        <span class="hud-val" id="hudPlayer" style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-lbl">Length / Goal</span>
+        <span class="hud-val" id="hudLength">3 / 20</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-lbl">Speed</span>
+        <span class="hud-val" id="hudSpeed" style="color:var(--warning);">1.0x</span>
+      </div>
+    </div>
+
+    <div class="snake-stage" id="stageWrap">
+      <canvas id="snakeCanvas"></canvas>
+      <div class="dpad-overlay">
+        <div></div>
+        <button class="dbtn" data-dir="UP">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg></span>
+        </button>
+        <div></div>
+        <button class="dbtn" data-dir="LEFT">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></span>
+        </button>
+        <div></div>
+        <button class="dbtn" data-dir="RIGHT">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
+        </button>
+        <div></div>
+        <button class="dbtn" data-dir="DOWN">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. VERDICT -->
+  <section class="screen" id="scrVerdict">
+    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">SNAKE CRASH LOG</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="verdictPlayer">Player</h2>
+      <div style="font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:900;color:var(--accent);margin-bottom:.4rem;" id="verdictScore">0 LENGTH</div>
+
+      <div id="forfeitBox" style="background:rgba(255,0,85,.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
+        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--danger);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">CRASHED BELOW QUOTA</span>
+        <p style="font-size:1.05rem;font-weight:800;color:#fff;margin-top:.4rem;" id="forfeitText">Take 3 sips!</p>
+      </div>
+
+      <div id="passBox" style="background:rgba(0,255,170,.1);border:2px solid var(--success);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
+        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--success);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">SNAKE MASTER</span>
+        <p style="font-size:1rem;font-weight:800;color:#fff;margin-top:.4rem;">Quota cleared! Nominate 2 players to drink.</p>
+      </div>
+    </div>
+    <button class="btn" id="btnNextPilot" style="margin-top:auto;">Next Snake Pilot</button>
+  </section>
+</div>
+
+<!-- 4. PRIVACY CURTAIN -->
+<div class="curtain" id="curtain">
+  <div class="cur-card">
+    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT RUNNER</div>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
+    <p style="font-size:.82rem;color:var(--text-secondary);">Goal: Grow to <strong id="curQuota" style="color:var(--accent);">20</strong> Segments</p>
+    <button class="hold-btn" id="btnCurtainHold">
+      <span class="hold-fill" id="holdFill"></span>
+      <span class="hold-label">HOLD 700MS TO ENTER MATRIX</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const AudioSnake = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  pelletEat(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(580, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(1100, this.ctx.currentTime + 0.08);
+      g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.08);
+    }catch(e){}
+  },
+  turnBeep(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "triangle"; o.frequency.setValueAtTime(440, this.ctx.currentTime);
+      g.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.02);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.02);
+    }catch(e){}
+  },
+  crash(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(150, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.45);
+      g.gain.setValueAtTime(0.3, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.45);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.45);
+    }catch(e){}
+  }
+};
+
+/* ================= STATE & DATA ================= */
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 2) roster = ["Pilot 1", "Pilot 2"];
+
+const GRID_SIZE = 18; // 18x18 grid matrix
+const S = {
+  quota: 20,
+  playerIdx: 0,
+  snake: [],
+  dir: { x: 1, y: 0 },
+  nextDir: { x: 1, y: 0 },
+  pellet: { x: 10, y: 10 },
+  stepTime: 0.14,
+  stepTimer: 0,
+  running: false
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+/* ================= PRIVACY CURTAIN ================= */
+let holdTimer = null, holdStart = 0;
+const HOLD_MS = 700;
+
+function openCurtain(pName, onUnlock){
+  $("curName").textContent = pName;
+  $("curQuota").textContent = S.quota;
+  $("holdFill").style.width = "0%";
+  $("btnCurtainHold").classList.remove("armed");
+  $("curtain").classList.add("is-open");
+
+  const btn = $("btnCurtainHold");
+  const cancel = () => {
+    if(holdTimer) cancelAnimationFrame(holdTimer);
+    holdTimer = null;
+    $("holdFill").style.width = "0%";
+    btn.classList.remove("armed");
+  };
+  const start = e => {
+    e.preventDefault();
+    btn.classList.add("armed");
+    holdStart = performance.now();
+    const tick = now => {
+      const el = now - holdStart;
+      const pct = Math.min(100, (el / HOLD_MS) * 100);
+      $("holdFill").style.width = pct + "%";
+      if(el >= HOLD_MS){
+        cancel();
+        $("curtain").classList.remove("is-open");
+        onUnlock();
+      } else {
+        holdTimer = requestAnimationFrame(tick);
+      }
+    };
+    holdTimer = requestAnimationFrame(tick);
+  };
+
+  btn.onpointerdown = start;
+  btn.onpointerup = cancel;
+  btn.onpointercancel = cancel;
+  btn.onpointerleave = cancel;
+}
+
+/* ================= CANVAS ENGINE ================= */
+const cvs = $("snakeCanvas");
+const ctx = cvs.getContext("2d");
+let W = 360, H = 540, DPR = 1;
+
+function resizeCanvas(){
+  const wrap = cvs.parentElement;
+  DPR = Math.min(window.devicePixelRatio || 1, 3);
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  cvs.width = W * DPR;
+  cvs.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+window.addEventListener("resize", resizeCanvas);
+
+function resetGameForPlayer(){
+  S.snake = [
+    { x: 6, y: 9 },
+    { x: 5, y: 9 },
+    { x: 4, y: 9 }
+  ];
+  S.dir = { x: 1, y: 0 };
+  S.nextDir = { x: 1, y: 0 };
+  S.stepTime = 0.14;
+  S.stepTimer = 0;
+  spawnPellet();
+  updateHUD();
+  S.running = true;
+}
+
+function spawnPellet(){
+  let valid = false;
+  while(!valid){
+    S.pellet.x = Math.floor(Math.random() * (GRID_SIZE - 2)) + 1;
+    S.pellet.y = Math.floor(Math.random() * (GRID_SIZE - 2)) + 1;
+    valid = !S.snake.some(seg => seg.x === S.pellet.x && seg.y === S.pellet.y);
+  }
+}
+
+function updateHUD(){
+  $("hudLength").textContent = `${S.snake.length} / ${S.quota}`;
+  const spd = (0.14 / S.stepTime).toFixed(1);
+  $("hudSpeed").textContent = `${spd}x`;
+}
+
+let lastT = performance.now();
+function loop(t){
+  if(!S.running) return;
+  const dt = Math.min((t - lastT) / 1000, 0.033);
+  lastT = t;
+
+  S.stepTimer += dt;
+  if(S.stepTimer >= S.stepTime){
+    S.stepTimer = 0;
+    stepSnake();
+  }
+
+  // Clear Matrix Surface
+  ctx.fillStyle = "#030b08";
+  ctx.fillRect(0, 0, W, H);
+
+  // Compute Grid Scale
+  const pad = 16;
+  const boardSize = Math.min(W - pad*2, H - pad*2);
+  const startX = (W - boardSize) / 2;
+  const startY = (H - boardSize) / 2;
+  const cell = boardSize / GRID_SIZE;
+
+  // Draw Arena Matrix Grid & Border
+  ctx.strokeStyle = "rgba(16, 185, 129, 0.12)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(let i = 0; i <= GRID_SIZE; i++){
+    ctx.moveTo(startX + i * cell, startY); ctx.lineTo(startX + i * cell, startY + boardSize);
+    ctx.moveTo(startX, startY + i * cell); ctx.lineTo(startX + boardSize, startY + i * cell);
+  }
+  ctx.stroke();
+
+  ctx.strokeStyle = "#10b981";
+  ctx.lineWidth = 3;
+  ctx.shadowColor = "#10b981"; ctx.shadowBlur = 10;
+  ctx.strokeRect(startX, startY, boardSize, boardSize);
+  ctx.shadowBlur = 0;
+
+  // Draw Glowing Energy Pellet
+  ctx.fillStyle = "#ffd000";
+  ctx.shadowColor = "#ffd000"; ctx.shadowBlur = 12;
+  ctx.fillRect(startX + S.pellet.x * cell + 2, startY + S.pellet.y * cell + 2, cell - 4, cell - 4);
+  ctx.shadowBlur = 0;
+
+  // Draw Snake Segments
+  S.snake.forEach((seg, i) => {
+    ctx.fillStyle = (i === 0) ? "#00ffaa" : "#10b981";
+    ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = (i === 0) ? 10 : 4;
+    ctx.fillRect(startX + seg.x * cell + 1.5, startY + seg.y * cell + 1.5, cell - 3, cell - 3);
+    ctx.shadowBlur = 0;
+  });
+
+  requestAnimationFrame(loop);
+}
+
+function stepSnake(){
+  S.dir = S.nextDir;
+  const head = { x: S.snake[0].x + S.dir.x, y: S.snake[0].y + S.dir.y };
+
+  // Wall Collisions
+  if(head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE){
+    triggerCrash();
+    return;
+  }
+
+  // Self Collision
+  if(S.snake.some(seg => seg.x === head.x && seg.y === head.y)){
+    triggerCrash();
+    return;
+  }
+
+  S.snake.unshift(head);
+
+  // Pellet Check
+  if(head.x === S.pellet.x && head.y === S.pellet.y){
+    AudioSnake.pelletEat();
+    S.stepTime = Math.max(0.065, S.stepTime * 0.96); // Accelerate
+    spawnPellet();
+    updateHUD();
+
+    if(S.snake.length >= S.quota){
+      endGauntlet(true);
+      return;
+    }
+  } else {
+    S.snake.pop();
+  }
+}
+
+function triggerCrash(){
+  S.running = false;
+  AudioSnake.crash();
+  endGauntlet(false);
+}
+
+function endGauntlet(cleared){
+  S.running = false;
+  const pName = roster[S.playerIdx];
+  const passed = cleared || S.snake.length >= S.quota;
+
+  $("verdictPlayer").textContent = pName;
+  $("verdictScore").textContent = `${S.snake.length} SEGMENTS`;
+
+  if(passed){
+    $("passBox").style.display = "block";
+    $("forfeitBox").style.display = "none";
+  } else {
+    $("passBox").style.display = "none";
+    $("forfeitBox").style.display = "block";
+    const sips = Math.max(2, S.quota - S.snake.length);
+    $("forfeitText").textContent = `Crashed before quota! Take ${sips} penalty sips!`;
+  }
+  showScreen("scrVerdict");
+}
+
+/* ================= CONTROLS & SWIPES ================= */
+function setDirection(dx, dy){
+  if(dx !== 0 && S.dir.x !== 0) return; // Prevent reversing
+  if(dy !== 0 && S.dir.y !== 0) return;
+  S.nextDir = { x: dx, y: dy };
+  AudioSnake.turnBeep();
+}
+
+// D-Pad
+document.querySelectorAll(".dbtn").forEach(btn => {
+  btn.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    const d = btn.dataset.dir;
+    if(d === "UP") setDirection(0, -1);
+    if(d === "DOWN") setDirection(0, 1);
+    if(d === "LEFT") setDirection(-1, 0);
+    if(d === "RIGHT") setDirection(1, 0);
+  });
+});
+
+// Keyboard
+window.addEventListener("keydown", e => {
+  if(e.key === "ArrowUp" || e.key === "w") setDirection(0, -1);
+  if(e.key === "ArrowDown" || e.key === "s") setDirection(0, 1);
+  if(e.key === "ArrowLeft" || e.key === "a") setDirection(-1, 0);
+  if(e.key === "ArrowRight" || e.key === "d") setDirection(1, 0);
+});
+
+// Touch Swipe
+let touchStartX = 0, touchStartY = 0;
+const wrap = $("stageWrap");
+
+wrap.addEventListener("touchstart", e => {
+  if(e.touches.length > 0){
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }
+}, { passive: true });
+
+wrap.addEventListener("touchend", e => {
+  if(e.changedTouches.length > 0){
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if(Math.abs(dx) > Math.abs(dy)){
+      if(Math.abs(dx) > 20) setDirection(dx > 0 ? 1 : -1, 0);
+    } else {
+      if(Math.abs(dy) > 20) setDirection(0, dy > 0 ? 1 : -1);
+    }
+  }
+}, { passive: true });
+
+// Quota Select
+$("quotaGrid").onclick = e => {
+  const b = e.target.closest(".opt-btn"); if(!b) return;
+  document.querySelectorAll("#quotaGrid .opt-btn").forEach(x => x.classList.remove("is-active"));
+  b.classList.add("is-active");
+  S.quota = parseInt(b.dataset.q, 10);
+};
+
+// Roster
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${p}</span>
+      <span style="color:var(--accent);">PILOT</span>
+    </li>
+  `).join("");
+}
+
+$("btnStartTourney").onclick = () => {
+  S.playerIdx = 0;
+  startTurn();
+};
+
+function startTurn(){
+  const player = roster[S.playerIdx];
+  $("topSub").textContent = `${player}'s Run`;
+  $("hudPlayer").textContent = player;
+  openCurtain(player, () => {
+    showScreen("scrPlay");
+    resizeCanvas();
+    resetGameForPlayer();
+    lastT = performance.now();
+    requestAnimationFrame(loop);
+  });
+}
+
+$("btnNextPilot").onclick = () => {
+  S.playerIdx = (S.playerIdx + 1) % roster.length;
+  startTurn();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

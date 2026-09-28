@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#08090c" />
 <title>One Night Werewolf | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(!/^(nordic-slate|tokyo-sunset|terracotta-clay|emerald-lounge|alpine-mist|synthwave-84)$/.test(t||""))t="nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","nordic-slate");}})();
+</script>
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{--font-body:'Plus Jakarta Sans',system-ui,sans-serif;--font-display:'Space Grotesk',system-ui,sans-serif;--font-mono:'Space Mono',monospace;--r-sm:8px;--r-md:14px;--r-lg:20px;--ease:cubic-bezier(.2,.8,.3,1);}
@@ -82,6 +87,7 @@ p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:4
 .ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
 .ico svg{width:100%;height:100%;display:block;}
 </style>
+<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
 <header class="pd-hud">
@@ -383,7 +389,7 @@ function showActionScreen(role, playerIdx, onContinue){
    var h='';
    for(var c=0;c<3;c++) h+='<button class="tile" type="button" data-c="'+c+'">Center '+(c+1)+'</button>';
    grid.innerHTML=h;
-   grid.onclick=function(e){var b=e.target.closest('[data-c]');if(b){ alert('Center '+((+b.dataset.c)+1)+' is: '+S.centerCards[+b.dataset.c]); b.classList.add('is-on'); $('btnActionDone').disabled=false; Sfx.play('click'); }};
+  grid.onclick=function(e){var b=e.target.closest('[data-c]');if(b){ showPartyDeckMessage('Center '+((+b.dataset.c)+1)+' is: '+S.centerCards[+b.dataset.c]); b.classList.add('is-on'); $('btnActionDone').disabled=false; Sfx.play('click'); }};
   } else { $('btnActionDone').disabled=false; }
  }
  else if(role==='Seer'){
@@ -394,10 +400,10 @@ function showActionScreen(role, playerIdx, onContinue){
   grid.innerHTML=h;
   grid.onclick=function(e){
    var pb=e.target.closest('[data-p]'); var cb=e.target.closest('[data-c]');
-   if(pb){ alert(roster[+pb.dataset.p]+"'s card is: "+S.currentRoles[+pb.dataset.p]); pb.classList.add('is-on'); $('btnActionDone').disabled=false; Sfx.play('click'); }
+  if(pb){ showPartyDeckMessage(roster[+pb.dataset.p]+"'s card is: "+S.currentRoles[+pb.dataset.p]); pb.classList.add('is-on'); $('btnActionDone').disabled=false; Sfx.play('click'); }
    else if(cb){
     cb.classList.add('is-on'); selected.push(+cb.dataset.c);
-    alert('Center '+((+cb.dataset.c)+1)+' is: '+S.centerCards[+cb.dataset.c]);
+    showPartyDeckMessage('Center '+((+cb.dataset.c)+1)+' is: '+S.centerCards[+cb.dataset.c]);
     Sfx.play('click');
     if(selected.length>=1) $('btnActionDone').disabled=false;
    }
@@ -412,7 +418,7 @@ function showActionScreen(role, playerIdx, onContinue){
    var b=e.target.closest('[data-p]'); if(!b)return;
    var targetIdx=+b.dataset.p;
    var tmp=S.currentRoles[playerIdx]; S.currentRoles[playerIdx]=S.currentRoles[targetIdx]; S.currentRoles[targetIdx]=tmp;
-   alert("You swapped with "+roster[targetIdx]+". Your new role is: "+S.currentRoles[playerIdx]);
+  showPartyDeckMessage("You swapped with "+roster[targetIdx]+". Your new role is: "+S.currentRoles[playerIdx]);
    grid.querySelectorAll('.tile').forEach(function(t){t.classList.remove('is-on');}); b.classList.add('is-on');
    $('btnActionDone').disabled=false; Sfx.play('click');
   };
@@ -546,5 +552,7 @@ $('btnExit').onclick=function(){Narrator.stop();PD.exitToHub();};
 renderRoster();
 })();
 </script>
+<script src="../../js/theme-sync.js"></script>
+<script src="../../js/feedback-dialog.js"></script>
 </body>
 </html>

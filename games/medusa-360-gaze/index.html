@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="tokyo-sunset">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#120e24" id="metaThemeColor" />
+<title>Medusa 360 Gaze | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #120e24; --bg-surface: #1e173b; --bg-elevated: #2d2354;
+    --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+    --accent: #f43f8e; --accent-glow: rgba(244,63,142,0.45); --accent-contrast: #ffffff;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(244,63,142,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
+  }
+  .screen.is-active { display: flex; }
+
+  /* Radial Tabletop Stage */
+  .tabletop-arena {
+    flex: 1; position: relative; width: 100%; height: 100%; min-height: 340px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .medusa-core {
+    width: 140px; height: 140px; border-radius: 50%;
+    background: radial-gradient(circle, var(--bg-elevated) 0%, var(--bg-surface) 100%);
+    border: 3px solid var(--accent); box-shadow: 0 0 30px var(--accent-glow);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 8px; z-index: 5; transition: all .2s;
+  }
+  .medusa-core.alert {
+    border-color: var(--danger); box-shadow: 0 0 45px rgba(255,0,85,0.7);
+    background: radial-gradient(circle, #400018 0%, #1a000a 100%);
+  }
+
+  /* Radial Player Nodes */
+  .seat-node {
+    position: absolute; width: 68px; height: 68px; border-radius: 50%;
+    background: var(--bg-elevated); border: 2px solid var(--accent);
+    box-shadow: 0 0 14px var(--accent-glow); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; font-family: 'Space Mono', monospace;
+    font-size: .65rem; font-weight: 800; cursor: pointer; transform: translate(-50%, -50%);
+    touch-action: none; z-index: 10; color: #fff; text-align: center; padding: 4px;
+    transition: transform .1s, background-color .1s;
+  }
+  .seat-node:active, .seat-node.slammed {
+    transform: translate(-50%, -50%) scale(0.92);
+    background: var(--accent); color: var(--accent-contrast);
+    box-shadow: 0 0 25px var(--accent-glow);
+  }
+  .seat-node.shocked {
+    background: var(--danger); border-color: #fff; color: #fff;
+    box-shadow: 0 0 30px rgba(255,0,85,0.8); animation: shake .2s infinite;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+    25% { transform: translate(-52%, -48%) rotate(-6deg); }
+    75% { transform: translate(-48%, -52%) rotate(6deg); }
+  }
+
+  /* Panels */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: #fff; border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,85,.4); }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Medusa 360 Gaze</span>
+    <span class="gm-sub" id="topSub">Radial Table Referee</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Tabletop Setup Instructions</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • <strong>Lay the phone flat in the center</strong> of your group table.<br>
+        • Ensure all players sit in circular alignment matching their radial node.<br>
+        • When the referee says <strong>"HEADS DOWN"</strong>, everyone looks at the phone.<br>
+        • On <strong>"HEADS UP!"</strong>, look directly at one opponent in real life.<br>
+        • <em>If two players make eye contact, BOTH race to slam their radial seat node!</em> Slower player gets shocked & drinks!
+      </p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Seated Players (3 to 10)</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:25vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+    <button class="btn" id="btnStartTabletop" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Enter Gaze Arena
+    </button>
+  </section>
+
+  <!-- 2. RADIAL ARENA SCREEN -->
+  <section class="screen" id="scrArena" style="padding:0;max-width:none;gap:0;">
+    <div class="tabletop-arena" id="tableArena">
+      <div class="medusa-core" id="medusaCore">
+        <span class="ico" style="width:32px;height:32px;color:var(--accent);" id="coreIcon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </span>
+        <div style="font-family:'Space Grotesk',sans-serif;font-weight:900;font-size:1.1rem;margin-top:4px;" id="coreLabel">READY</div>
+      </div>
+      <div id="radialSeatsContainer"></div>
+    </div>
+  </section>
+
+  <!-- 3. DUEL VERDICT SCREEN -->
+  <section class="screen" id="scrVerdict">
+    <div class="panel" style="text-align:center;padding:1.6rem 1rem;border-color:var(--danger);">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--danger);">MEDUSA GAZE LOCK</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="verdictLoser">Player</h2>
+      <div style="font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:900;color:var(--danger);margin-bottom:.4rem;" id="verdictSips">3 SIPS</div>
+      <p style="font-size:.9rem;color:var(--text-secondary);" id="verdictDetails">Slower on the trigger during mutual gaze showdown.</p>
+    </div>
+    <button class="btn" id="btnNextRound" style="margin-top:auto;">Next Gaze Round</button>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const Synth = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  tone(freq, dur, type="sine", gain=0.15, slide=null){
+    try {
+      this.init();
+      const t0 = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t0);
+      if(slide) o.frequency.exponentialRampToValueAtTime(slide, t0 + dur);
+      g.gain.setValueAtTime(gain, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(t0); o.stop(t0 + dur);
+    }catch(e){}
+  },
+  countdown(val){ this.tone(440 + val * 100, 0.08, "sine", 0.12); },
+  headsUp(){
+    try {
+      this.init();
+      [587, 880, 1174].forEach((f, i) => {
+        setTimeout(() => this.tone(f, 0.15, "triangle", 0.2), i * 50);
+      });
+    }catch(e){}
+  },
+  slamWinner(){ this.tone(980, 0.08, "square", 0.18); },
+  shockZap(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(240, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(45, this.ctx.currentTime + 0.35);
+      g.gain.setValueAtTime(0.35, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.35);
+    }catch(e){}
+  }
+};
+
+/* ================= ROSTER & RADIAL GEOMETRY ================= */
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 3) roster = ["Alex", "Jordan", "Taylor", "Morgan"];
+
+const S = {
+  phase: "idle", // idle, countdown, gaze, duel
+  slammedOrder: [],
+  roundTimer: null
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+function buildRadialSeats(){
+  const container = $("radialSeatsContainer");
+  container.innerHTML = "";
+  const count = roster.length;
+  const arena = $("tableArena");
+  const rect = arena.getBoundingClientRect();
+  const radius = Math.min(rect.width, rect.height) * 0.38;
+
+  roster.forEach((name, idx) => {
+    const angle = (idx / count) * (Math.PI * 2) - (Math.PI / 2);
+    const x = 50 + (Math.cos(angle) * (radius / rect.width) * 100);
+    const y = 50 + (Math.sin(angle) * (radius / rect.height) * 100);
+
+    const btn = document.createElement("button");
+    btn.className = "seat-node";
+    btn.id = `seat_${idx}`;
+    btn.style.left = `${x}%`;
+    btn.style.top = `${y}%`;
+    btn.textContent = name;
+    btn.dataset.idx = idx;
+
+    btn.onpointerdown = e => {
+      e.preventDefault();
+      handleSeatSlam(idx);
+    };
+
+    container.appendChild(btn);
+  });
+}
+window.addEventListener("resize", buildRadialSeats);
+
+/* ================= GAZE REFEREE ROUND LOOP ================= */
+function startGazeRound(){
+  S.phase = "countdown";
+  S.slammedOrder = [];
+  document.querySelectorAll(".seat-node").forEach(b => {
+    b.className = "seat-node";
+  });
+
+  $("medusaCore").classList.remove("alert");
+  $("coreLabel").textContent = "HEADS DOWN";
+  Synth.countdown(1);
+
+  let count = 3;
+  clearInterval(S.roundTimer);
+  S.roundTimer = setInterval(() => {
+    count--;
+    if(count > 0){
+      $("coreLabel").textContent = `${count}...`;
+      Synth.countdown(4 - count);
+    } else {
+      clearInterval(S.roundTimer);
+      triggerHeadsUp();
+    }
+  }, 1000);
+}
+
+function triggerHeadsUp(){
+  S.phase = "gaze";
+  $("medusaCore").classList.add("alert");
+  $("coreLabel").textContent = "HEADS UP!";
+  Synth.headsUp();
+
+  // 12-second window for players to make eye contact and duel
+  clearTimeout(S.roundTimer);
+  S.roundTimer = setTimeout(() => {
+    if(S.phase === "gaze" && S.slammedOrder.length === 0){
+      $("coreLabel").textContent = "NO EYE CONTACT";
+      $("medusaCore").classList.remove("alert");
+      setTimeout(startGazeRound, 2000);
+    }
+  }, 10000);
+}
+
+function handleSeatSlam(seatIdx){
+  if(S.phase !== "gaze") return;
+  if(S.slammedOrder.includes(seatIdx)) return;
+
+  S.slammedOrder.push(seatIdx);
+  const seatBtn = $(`seat_${seatIdx}`);
+  seatBtn.classList.add("slammed");
+  Synth.slamWinner();
+
+  if(S.slammedOrder.length === 1){
+    $("coreLabel").textContent = `${roster[seatIdx]} CLAIMED!`;
+  } else if(S.slammedOrder.length >= 2){
+    // Second slam triggers loser shock
+    S.phase = "duel";
+    clearTimeout(S.roundTimer);
+    const winnerIdx = S.slammedOrder[0];
+    const loserIdx = S.slammedOrder[1];
+
+    const loserBtn = $(`seat_${loserIdx}`);
+    loserBtn.classList.add("shocked");
+    Synth.shockZap();
+
+    setTimeout(() => {
+      $("verdictLoser").textContent = roster[loserIdx];
+      $("verdictSips").textContent = "3 SIPS";
+      $("verdictDetails").textContent = `${roster[winnerIdx]} out-reacted ${roster[loserIdx]} in mutual gaze!`;
+      showScreen("scrVerdict");
+    }, 1200);
+  }
+}
+
+$("medusaCore").onclick = () => {
+  if(S.phase === "idle" || S.phase === "duel"){
+    startGazeRound();
+  }
+};
+
+$("btnStartTabletop").onclick = () => {
+  showScreen("scrArena");
+  setTimeout(() => {
+    buildRadialSeats();
+    startGazeRound();
+  }, 150);
+};
+
+$("btnNextRound").onclick = () => {
+  showScreen("scrArena");
+  startGazeRound();
+};
+
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${p}</span>
+      <span style="color:var(--accent);">SEAT ${i+1}</span>
+    </li>
+  `).join("");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

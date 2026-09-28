@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nordic-slate">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Quick-Draw Tap Duel | PartyDeck</title>
+
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme")||"nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+
+<style>
+  body { overflow: hidden; height: 100dvh; }
+  .hub-exit { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 8px); left: 8px; z-index: 100; }
+  .screen { display: none; width: 100%; height: 100%; }
+  .screen.is-active { display: flex; flex-direction: column; }
+
+  .duel-container { display: flex; flex-direction: column; width: 100%; height: 100%; }
+  .duel-half { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem; padding: 1.5rem; text-align: center; user-select: none; -webkit-user-select: none; touch-action: manipulation; transition: background .12s ease; }
+  
+  .half-top { transform: rotate(180deg); background: var(--bg-surface); border-bottom: 2px solid var(--border-ui); }
+  .half-bot { background: var(--bg-elevated); border-top: 2px solid var(--border-ui); }
+
+  .cue-badge { font-family: var(--font-display); font-size: 2.8rem; font-weight: 900; letter-spacing: .04em; }
+  .player-tag { font-family: var(--font-mono); font-size: .85rem; font-weight: 700; color: var(--accent); text-transform: uppercase; }
+  .reaction-time { font-family: var(--font-mono); font-size: 1.1rem; color: var(--text-secondary); }
+
+  .round-pips { display: flex; gap: 8px; }
+  .pip { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border-ui); }
+  .pip.filled { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+
+  .duel-half.winner-flash { background: var(--accent); color: var(--accent-contrast); }
+  .duel-half.foul-flash { background: var(--danger); color: #fff; }
+
+  .setup-wrap { max-width: 600px; margin: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+  .panel { background: var(--bg-surface); border: 1px solid var(--border-ui); border-radius: var(--r-lg); padding: 1.25rem; }
+
+  .champ-screen { align-items: center; justify-content: center; text-align: center; padding: 2rem 1.5rem; }
+  .champ-card { background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg); padding: 2rem; max-width: 460px; width: 100%; box-shadow: var(--card-shadow); }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+<a class="btn btn-ghost btn-icon-only hub-exit" href="../../index.html" aria-label="Return to PartyDeck" title="Return to PartyDeck">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+</a>
+
+<!-- SETUP SCREEN -->
+<section class="screen is-active" id="scrSetup">
+  <div class="setup-wrap">
+    <div>
+      <h2 style="font-family:var(--font-display);font-size:2rem;font-weight:900">Quick-Draw Duel</h2>
+      <p style="color:var(--text-secondary);font-size:.9rem;margin-top:.3rem">Split-screen 2-player reaction battle. Lift immediately when green fires.</p>
+    </div>
+
+    <div class="panel">
+      <span style="font-family:var(--font-mono);font-size:.7rem;color:var(--text-muted);text-transform:uppercase">Match Target</span>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.6rem" id="ptsGrid">
+        <button class="btn opt-btn" data-pts="2">First to 2</button>
+        <button class="btn opt-btn is-active" data-pts="3">First to 3</button>
+        <button class="btn opt-btn" data-pts="5">First to 5</button>
+      </div>
+    </div>
+
+    <button class="btn btn-accent" id="btnStartDuel" style="min-height:58px;font-size:1.05rem">Enter Showdown</button>
+  </div>
+</section>
+
+<!-- SPLIT-SCREEN DUEL ARENA -->
+<section class="screen" id="scrArena">
+  <div class="duel-container">
+    <div class="duel-half half-top" id="halfTop">
+      <div class="round-pips" id="pipsTop"></div>
+      <div class="player-tag">Player 1 (North)</div>
+      <div class="cue-badge" id="cueTop">READY</div>
+      <div class="reaction-time" id="timeTop">—</div>
+    </div>
+
+    <div class="duel-half half-bot" id="halfBot">
+      <div class="round-pips" id="pipsBot"></div>
+      <div class="player-tag">Player 2 (South)</div>
+      <div class="cue-badge" id="cueBot">READY</div>
+      <div class="reaction-time" id="timeBot">—</div>
+    </div>
+  </div>
+</section>
+
+<!-- IN-APP CHAMPION SCREEN -->
+<section class="screen champ-screen" id="scrChamp">
+  <div class="champ-card">
+    <span style="font-family:var(--font-mono);font-size:.75rem;font-weight:700;letter-spacing:.2em;color:var(--accent);text-transform:uppercase">SHOWDOWN COMPLETE</span>
+    <h2 style="font-family:var(--font-display);font-size:2.4rem;font-weight:900;margin:.4rem 0" id="champWinnerTitle">North Wins!</h2>
+    <p style="font-size:1rem;color:var(--text-secondary)" id="champSubtitle">Faster trigger reflexes across all rounds. Loser takes 2 penalty sips.</p>
+    <button class="btn btn-accent" id="btnRematch" style="min-height:54px;width:100%;margin-top:1.5rem">Rematch Duel</button>
+  </div>
+</section>
+
+<script>
+"use strict";
+(function(){
+  const SFX = {
+    ctx: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext||window.webkitAudioContext)(); },
+    ready(){ this.init(); const o=this.ctx.createOscillator(), g=this.ctx.createGain(); o.frequency.value=400; o.connect(g); g.connect(this.ctx.destination); g.gain.setValueAtTime(0.08, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime+0.06); o.start(); o.stop(this.ctx.currentTime+0.06); },
+    fire(){ this.init(); const o=this.ctx.createOscillator(), g=this.ctx.createGain(); o.type="square"; o.frequency.value=880; o.connect(g); g.connect(this.ctx.destination); g.gain.setValueAtTime(0.2, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime+0.2); o.start(); o.stop(this.ctx.currentTime+0.2); },
+    foul(){ this.init(); const o=this.ctx.createOscillator(), g=this.ctx.createGain(); o.type="sawtooth"; o.frequency.value=150; o.connect(g); g.connect(this.ctx.destination); g.gain.setValueAtTime(0.2, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime+0.3); o.start(); o.stop(this.ctx.currentTime+0.3); }
+  };
+
+  let state = { targetPts: 3, scoreTop: 0, scoreBot: 0, phase: "idle", fireTime: 0, timer: null };
+
+  const $ = id => document.getElementById(id);
+  function showScreen(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("is-active", s.id===id)); }
+
+  function renderPips(){
+    let htmlTop = "", htmlBot = "";
+    for(let i=0; i<state.targetPts; i++){
+      htmlTop += `<span class="pip ${i < state.scoreTop ? 'filled' : ''}"></span>`;
+      htmlBot += `<span class="pip ${i < state.scoreBot ? 'filled' : ''}"></span>`;
+    }
+    $("pipsTop").innerHTML = htmlTop;
+    $("pipsBot").innerHTML = htmlBot;
+  }
+
+  function startRound(){
+    state.phase = "waiting";
+    $("halfTop").className = "duel-half half-top";
+    $("halfBot").className = "duel-half half-bot";
+    $("cueTop").textContent = "READY...";
+    $("cueBot").textContent = "READY...";
+    $("timeTop").textContent = "—";
+    $("timeBot").textContent = "—";
+    SFX.ready();
+
+    clearTimeout(state.timer);
+    const delay = Math.floor(Math.random() * 3200) + 1800;
+
+    state.timer = setTimeout(() => {
+      if(state.phase !== "waiting") return;
+      state.phase = "fired";
+      state.fireTime = performance.now();
+      $("cueTop").textContent = "FIRE!";
+      $("cueBot").textContent = "FIRE!";
+      SFX.fire();
+    }, delay);
+  }
+
+  function handleTap(player){
+    if(state.phase === "waiting"){
+      state.phase = "roundOver";
+      clearTimeout(state.timer);
+      SFX.foul();
+
+      if(player === "top"){
+        state.scoreBot++;
+        $("halfTop").classList.add("foul-flash");
+        $("cueTop").textContent = "FOUL!";
+        $("timeTop").textContent = "Early Release";
+      } else {
+        state.scoreTop++;
+        $("halfBot").classList.add("foul-flash");
+        $("cueBot").textContent = "FOUL!";
+        $("timeBot").textContent = "Early Release";
+      }
+      renderPips();
+      checkMatchWinner();
+    } 
+    else if(state.phase === "fired"){
+      state.phase = "roundOver";
+      const reaction = Math.round(performance.now() - state.fireTime);
+
+      if(player === "top"){
+        state.scoreTop++;
+        $("halfTop").classList.add("winner-flash");
+        $("cueTop").textContent = "WIN!";
+        $("timeTop").textContent = `${reaction} ms`;
+        $("timeBot").textContent = "Too slow!";
+      } else {
+        state.scoreBot++;
+        $("halfBot").classList.add("winner-flash");
+        $("cueBot").textContent = "WIN!";
+        $("timeBot").textContent = `${reaction} ms`;
+        $("timeTop").textContent = "Too slow!";
+      }
+      renderPips();
+      checkMatchWinner();
+    }
+  }
+
+  function checkMatchWinner(){
+    if(state.scoreTop >= state.targetPts || state.scoreBot >= state.targetPts){
+      setTimeout(() => {
+        const champ = state.scoreTop >= state.targetPts ? "Player 1 (North)" : "Player 2 (South)";
+        $("champWinnerTitle").textContent = `${champ} Wins!`;
+        $("champSubtitle").textContent = `Decisive victory (${state.scoreTop} vs ${state.scoreBot}). Loser drinks!`;
+        showScreen("scrChamp");
+      }, 1000);
+    } else {
+      setTimeout(startRound, 1800);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    $("ptsGrid").onclick = e => {
+      const b = e.target.closest(".opt-btn"); if(!b) return;
+      document.querySelectorAll("#ptsGrid .opt-btn").forEach(x=>x.classList.remove("is-active"));
+      b.classList.add("is-active");
+      state.targetPts = parseInt(b.dataset.pts, 10);
+    };
+
+    $("btnStartDuel").onclick = () => {
+      state.scoreTop = 0;
+      state.scoreBot = 0;
+      renderPips();
+      showScreen("scrArena");
+      startRound();
+    };
+
+    $("btnRematch").onclick = () => showScreen("scrSetup");
+
+    $("halfTop").onpointerdown = e => { e.preventDefault(); handleTap("top"); };
+    $("halfBot").onpointerdown = e => { e.preventDefault(); handleTap("bot"); };
+  });
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

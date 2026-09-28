@@ -181,7 +181,7 @@
   flex: 1; min-height: 46px;
   background: var(--bg-elevated); color: var(--text-primary);
   border: 1px solid rgba(255,255,255,.14); border-radius: var(--r-sm);
-  font-family: var(--font-mono); font-size: .9rem;
+  font-family: var(--font-mono); font-size: 16px;
   padding: .5rem .7rem; outline: none;
 }
 .roster-add input:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="synthwave-84">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#100b1a" id="metaThemeColor" />
+<title>Ticking Heartbeat Buzzer | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #100b1a; --bg-surface: #1a1228; --bg-elevated: #281b3d;
+    --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+    --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-contrast: #ffffff;
+    --danger: #ff0044; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(255,0,127,0.28); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow-x: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+  }
+  .screen.is-active { display: flex; }
+
+  /* Pulsing Heart Centerpiece */
+  .heart-stage {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 1.2rem; min-height: 240px; position: relative;
+  }
+  .heart-pulse-disc {
+    width: 150px; height: 150px; border-radius: 50%;
+    background: radial-gradient(circle, var(--accent) 0%, rgba(255,0,127,0.1) 70%, transparent 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 35px var(--accent-glow); transition: transform 0.08s ease-out;
+  }
+  .heart-pulse-disc.beat { transform: scale(1.22); filter: brightness(1.4); }
+
+  /* Giant Big Pass Button */
+  .btn-pass-bomb {
+    width: 100%; min-height: 75px; background: linear-gradient(135deg, var(--accent), #b30059);
+    border: 2px solid var(--accent); border-radius: var(--r-md); color: #fff;
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.35rem; font-weight: 900;
+    letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+    box-shadow: 0 0 25px var(--accent-glow);
+  }
+  .btn-pass-bomb:active { transform: scale(0.97); }
+
+  /* Panels */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: #fff; border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Ticking Heartbeat Buzzer</span>
+    <span class="gm-sub" id="topSub">Pass The Bomb</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP SCREEN -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Hot Potato Instructions</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • Say a word matching the active category aloud.<br>
+        • Tap <strong>PASS WORD</strong> and hand the phone to the next player in the circle.<br>
+        • The biological heartbeat accelerates unpredictably.<br>
+        • <em>Holding the phone when the buzzer detonates = Drink penalty & dare!</em>
+      </p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Seated Circle Roster</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:25vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+    <button class="btn" id="btnArmBuzzer" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Arm Heartbeat Fuse
+    </button>
+  </section>
+
+  <!-- 2. TICKING GAMEPLAY SCREEN -->
+  <section class="screen" id="scrPlay">
+    <div class="panel" style="text-align:center;">
+      <div style="font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;">ACTIVE CATEGORY</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:900;margin:.3rem 0;color:#fff;" id="activeCategory">Animals That Fly</h2>
+      <p style="font-size:.85rem;color:var(--text-secondary);">Current Carrier: <strong id="currentHolder" style="color:var(--accent);">Alex</strong></p>
+    </div>
+
+    <div class="heart-stage">
+      <div class="heart-pulse-disc" id="pulseDisc">
+        <span class="ico" style="width:58px;height:58px;color:#fff;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <button class="btn-pass-bomb" id="btnPassBomb">PASS BOMB &rarr;</button>
+  </section>
+
+  <!-- 3. DETONATION VERDICT -->
+  <section class="screen" id="scrDetonation">
+    <div class="panel" style="text-align:center;padding:1.8rem 1rem;border-color:var(--danger);">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--danger);">DETONATION DETECTED</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="loserName">Alex</h2>
+      <div style="font-family:'Space Mono',monospace;font-size:2rem;font-weight:900;color:var(--danger);margin-bottom:.6rem;">BLOWN UP!</div>
+      <div style="background:var(--bg-elevated);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;">
+        <p style="font-size:1rem;font-weight:800;color:#fff;" id="loserDare">Take 3 sips and do 5 jumping jacks!</p>
+      </div>
+    </div>
+    <button class="btn" id="btnArmAgain" style="margin-top:auto;">Arm Next Fuse</button>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO ACCELERATING HEARTBEAT ================= */
+const HeartbeatSynth = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  playLubDub(){
+    try {
+      this.init();
+      const t0 = this.ctx.currentTime;
+      // Lub
+      const o1 = this.ctx.createOscillator(), g1 = this.ctx.createGain();
+      o1.type = "sine"; o1.frequency.setValueAtTime(75, t0);
+      o1.frequency.exponentialRampToValueAtTime(35, t0 + 0.08);
+      g1.gain.setValueAtTime(0.3, t0); g1.gain.exponentialRampToValueAtTime(0.001, t0 + 0.08);
+      o1.connect(g1); g1.connect(this.ctx.destination);
+      o1.start(t0); o1.stop(t0 + 0.08);
+
+      // Dub (slightly higher pitch, 110ms later)
+      const o2 = this.ctx.createOscillator(), g2 = this.ctx.createGain();
+      o2.type = "sine"; o2.frequency.setValueAtTime(95, t0 + 0.11);
+      o2.frequency.exponentialRampToValueAtTime(45, t0 + 0.19);
+      g2.gain.setValueAtTime(0.24, t0 + 0.11); g2.gain.exponentialRampToValueAtTime(0.001, t0 + 0.19);
+      o2.connect(g2); g2.connect(this.ctx.destination);
+      o2.start(t0 + 0.11); o2.stop(t0 + 0.19);
+    }catch(e){}
+  },
+  explosion(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(160, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(25, this.ctx.currentTime + 0.6);
+      g.gain.setValueAtTime(0.45, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.6);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.6);
+    }catch(e){}
+  }
+};
+
+/* ================= DATA & FORFEITS ================= */
+const CATEGORIES = [
+  "Things you shouldn't say on a first date", "Pizza toppings", "Car brands",
+  "Things found in a bathroom", "Items you take camping", "Breakfast foods",
+  "Things that are sticky", "Words ending in 'ING'", "Cartoon characters",
+  "Things you can wear on your head", "Excuses for being late", "Dog breeds",
+  "Things in a refrigerator", "Jobs with uniforms", "Things made of plastic",
+  "Spicy foods", "Movie genres", "Things found at a beach", "Cocktails / Drinks"
+];
+
+const DARES = [
+  "Take 3 sips and speak in an accent for 1 round.",
+  "Take 4 sips of your drink immediately.",
+  "Do 8 quick squats or take 3 sips.",
+  "Give a genuine compliment to the person on your right.",
+  "Let the group choose your penalty drink amount."
+];
+
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 2) roster = ["Alex", "Jordan", "Taylor", "Morgan"];
+
+const S = {
+  holderIdx: 0,
+  fuseTimer: null,
+  pulseTimer: null,
+  bpm: 60,
+  durationSec: 30,
+  startTime: 0,
+  running: false
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+function armBuzzer(){
+  S.running = true;
+  S.durationSec = Math.floor(Math.random() * 35) + 15; // 15s to 50s random fuse
+  S.startTime = performance.now();
+  S.holderIdx = 0;
+  S.bpm = 65;
+
+  const cat = CATEGORIES[Math.floor(Math.random() * CATEGORIES.length)];
+  $("activeCategory").textContent = cat;
+  $("currentHolder").textContent = roster[S.holderIdx];
+
+  showScreen("scrPlay");
+  scheduleHeartbeat();
+}
+
+function scheduleHeartbeat(){
+  if(!S.running) return;
+
+  const elapsed = (performance.now() - S.startTime) / 1000;
+  const progress = Math.min(1, elapsed / S.durationSec);
+
+  // Accelerate from 65 BPM to 220 BPM
+  S.bpm = 65 + Math.pow(progress, 1.6) * 160;
+  const intervalMs = (60 / S.bpm) * 1000;
+
+  HeartbeatSynth.playLubDub();
+  const disc = $("pulseDisc");
+  disc.classList.add("beat");
+  setTimeout(() => disc.classList.remove("beat"), 180);
+
+  if(elapsed >= S.durationSec){
+    detonate();
+    return;
+  }
+
+  S.pulseTimer = setTimeout(scheduleHeartbeat, intervalMs);
+}
+
+function detonate(){
+  S.running = false;
+  clearTimeout(S.pulseTimer);
+  HeartbeatSynth.explosion();
+
+  const loser = roster[S.holderIdx];
+  $("loserName").textContent = loser;
+  const dare = DARES[Math.floor(Math.random() * DARES.length)];
+  $("loserDare").textContent = dare;
+
+  showScreen("scrDetonation");
+}
+
+$("btnPassBomb").onclick = () => {
+  if(!S.running) return;
+  S.holderIdx = (S.holderIdx + 1) % roster.length;
+  $("currentHolder").textContent = roster[S.holderIdx];
+};
+
+$("btnArmBuzzer").onclick = armBuzzer;
+$("btnArmAgain").onclick = armBuzzer;
+
+/* ================= ROSTER ================= */
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${p}</span>
+      <span style="color:var(--accent);">CARRIER</span>
+    </li>
+  `).join("");
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

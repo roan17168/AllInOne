@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PARTYDECK BASE RESET, TYPOGRAPHY & INTERACTION ENGINE
+   PARTYDECK — BASE RESET, TYPE, TAP TARGETS & SHARED COMPONENTS
    ========================================================================== */
 
 *, *::before, *::after {
@@ -12,6 +12,8 @@
 html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--bg-primary);
 }
 
 body {
@@ -24,28 +26,88 @@ body {
   flex-direction: column;
   line-height: 1.5;
   overflow-x: hidden;
+  overflow-wrap: break-word;
   user-select: none;
   -webkit-user-select: none;
   touch-action: pan-y;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
-  padding-left: env(safe-area-inset-left);
-  padding-right: env(safe-area-inset-right);
+  /* Games rely on this top inset. The hub overrides it and insets its own bar. */
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  padding-left: var(--sal);
+  padding-right: var(--sar);
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-/* Typography Helpers */
+/* FIX H4 — form fields must remain selectable, and >=16px to stop iOS zoom */
+input, textarea, select {
+  user-select: text;
+  -webkit-user-select: text;
+  font-size: 16px;
+  font-family: inherit;
+  color: inherit;
+}
+
+body input, body textarea, body select {
+  user-select: text;
+  -webkit-user-select: text;
+  font-size: 16px !important;
+}
+
+body button.btn-icon-only,
+body a.btn-icon-only,
+body button.mini-x,
+body button.chip {
+  min-width: var(--tap);
+  min-height: var(--tap);
+}
+
+body button.btn-icon-only,
+body a.btn-icon-only,
+body button.mini-x {
+  width: var(--tap);
+  height: var(--tap);
+}
+
+body button.btn,
+body button.chip {
+  min-height: var(--tap);
+}
+
+body button {
+  min-width: var(--tap) !important;
+  min-height: var(--tap) !important;
+}
+
+body a.btn-icon-only {
+  width: var(--tap) !important;
+  height: var(--tap) !important;
+  min-width: var(--tap) !important;
+  min-height: var(--tap) !important;
+}
+
+/* Scroll lock for open drawers */
+html.pd-locked, body.pd-locked { overflow: hidden; }
+
+/* ---------- Typography ---------- */
 h1, h2, h3, h4, .font-display {
   font-family: var(--font-display);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -.02em;
+  line-height: 1.15;
+}
+.font-mono { font-family: var(--font-mono); }
+
+::selection { background: var(--accent); color: var(--accent-contrast); }
+
+/* ---------- Focus ring (was entirely missing) ---------- */
+:focus { outline: none; }
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
 }
 
-.font-mono {
-  font-family: var(--font-mono);
-}
-
-/* SVG Icon System (Zero Emojis) */
+/* ---------- SVG icon system (zero emojis) ---------- */
 .ico {
   display: inline-flex;
   align-items: center;
@@ -53,6 +115,7 @@ h1, h2, h3, h4, .font-display {
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
+  line-height: 0;
 }
 .ico svg {
   width: 100%;
@@ -63,33 +126,36 @@ h1, h2, h3, h4, .font-display {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.ico-sm { width: 1rem; height: 1rem; }
+.ico-sm { width: 1rem;    height: 1rem; }
 .ico-lg { width: 1.75rem; height: 1.75rem; }
-.ico-xl { width: 2.5rem; height: 2.5rem; }
+.ico-xl { width: 2.5rem;  height: 2.5rem; }
 
-/* Tactile Buttons */
+/* ---------- Buttons — 48px floor enforced ---------- */
 button, .btn {
   font-family: var(--font-display);
-  font-size: 0.9rem;
+  font-size: .9rem;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: .02em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  min-height: 48px;
+  gap: .5rem;
+  padding: .75rem 1.25rem;
+  min-height: var(--tap);
   border-radius: var(--r-md);
   border: 1px solid var(--border-ui);
   background: var(--bg-surface);
   color: var(--text-primary);
   cursor: pointer;
-  transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  text-decoration: none;
+  transition: transform var(--transition-fast),
+              background var(--transition-fast),
+              border-color var(--transition-fast),
+              box-shadow var(--transition-fast);
 }
-
-button:active, .btn:active {
-  transform: scale(0.97);
-}
+button:active, .btn:active { transform: scale(.97); }
+button[disabled], .btn[disabled] { opacity: .35; cursor: not-allowed; }
+button[disabled]:active, .btn[disabled]:active { transform: none; }
 
 .btn-accent {
   background: var(--accent);
@@ -97,106 +163,146 @@ button:active, .btn:active {
   border-color: var(--accent);
   box-shadow: 0 4px 14px var(--accent-glow);
 }
-.btn-accent:hover {
-  filter: brightness(1.08);
-}
-
 .btn-ghost {
   background: transparent;
   border-color: var(--border-ui);
   color: var(--text-secondary);
 }
-.btn-ghost:hover {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-}
 
+/* FIX — was 44px, now meets the 48px contract */
 .btn-icon-only {
-  width: 44px;
-  height: 44px;
-  min-height: 44px;
+  width: var(--tap);
+  height: var(--tap);
+  min-height: var(--tap);
   padding: 0;
-  border-radius: var(--r-sm);
+  border-radius: var(--r-md);
+}
+/* Small visual chips that still need a 48px hit area */
+.tap-pad { position: relative; }
+.tap-pad::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: var(--tap); height: var(--tap);
+  transform: translate(-50%, -50%);
 }
 
-/* Glassmorphism Dialogs / Drawers */
+/* Hover effects only where a real pointer exists */
+@media (hover: hover) and (pointer: fine) {
+  .btn-accent:hover { filter: brightness(1.08); }
+  .btn-ghost:hover  { background: var(--bg-elevated); color: var(--text-primary); }
+}
+
+/* ---------- Drawers / sheets ---------- */
 .pd-drawer {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--scrim);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: flex-end;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity var(--transition-normal);
+  transition: opacity var(--transition-normal), visibility var(--transition-normal);
 }
-
-.pd-drawer.is-open {
-  opacity: 1;
-  pointer-events: auto;
-}
+.pd-drawer.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
 
 .pd-drawer-card {
   width: 100%;
   max-width: 580px;
   margin: 0 auto;
-  max-height: 88vh;
+  max-height: min(88vh, 88dvh);
   background: var(--bg-surface);
   border: 1px solid var(--border-ui);
   border-bottom: none;
-  border-top-left-radius: var(--r-lg);
-  border-top-right-radius: var(--r-lg);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
   box-shadow: var(--card-shadow);
   display: flex;
   flex-direction: column;
   transform: translateY(100%);
-  transition: transform 0.3s var(--ease-spring);
-  padding: 1.5rem;
-  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  transition: transform .3s var(--ease-spring);
+  padding: 1.25rem;
+  padding-bottom: max(1.25rem, var(--sab));
+  overscroll-behavior: contain;
 }
+.pd-drawer.is-open .pd-drawer-card { transform: translateY(0); }
 
-.pd-drawer.is-open .pd-drawer-card {
-  transform: translateY(0);
+.pd-feedback-dialog {
+  width: min(92vw, 420px);
+  margin: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--border-ui);
+  border-radius: var(--r-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--card-shadow);
 }
+.pd-feedback-dialog::backdrop { background: var(--scrim); }
+.pd-feedback-dialog h2 { margin-bottom: .65rem; font-size: 1.1rem; }
+.pd-feedback-dialog p { margin-bottom: 1rem; color: var(--text-secondary); }
+.pd-feedback-dialog form { display: flex; justify-content: flex-end; }
 
+.pd-drawer-handle {
+  width: 42px; height: 4px;
+  border-radius: var(--r-full);
+  background: var(--border-ui);
+  margin: -.35rem auto .9rem;
+  flex-shrink: 0;
+}
 .pd-drawer-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.75rem;
+  gap: .75rem;
+  margin-bottom: 1rem;
+  padding-bottom: .75rem;
   border-bottom: 1px solid var(--border-ui);
+  flex-shrink: 0;
 }
+.pd-drawer-body { overflow-y: auto; flex: 1; overscroll-behavior: contain; }
 
-.pd-drawer-body {
-  overflow-y: auto;
-  flex: 1;
-}
-
-/* Toast Notification Utility */
+/* ---------- Toast ---------- */
 .pd-toast {
   position: fixed;
-  bottom: calc(20px + env(safe-area-inset-bottom));
+  bottom: calc(20px + var(--sab));
   left: 50%;
   transform: translateX(-50%) translateY(30px);
   background: var(--bg-elevated);
   border: 1px solid var(--border-ui-active);
   color: var(--text-primary);
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: .8rem;
   font-weight: 700;
-  padding: 0.65rem 1.25rem;
+  padding: .65rem 1.25rem;
   border-radius: var(--r-full);
   box-shadow: var(--card-shadow);
   opacity: 0;
   pointer-events: none;
   z-index: 2000;
+  max-width: calc(100vw - 2rem);
+  text-align: center;
   transition: transform var(--transition-normal), opacity var(--transition-normal);
 }
-.pd-toast.show {
-  transform: translateX(-50%) translateY(0);
-  opacity: 1;
+.pd-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ---------- Utilities ---------- */
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ---------- Accessibility: reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

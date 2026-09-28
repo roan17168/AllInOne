@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="tokyo-sunset">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#120e24" id="metaThemeColor" />
+<title>Gyro Labyrinth Run | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #120e24; --bg-surface: #1e173b; --bg-elevated: #2d2354;
+    --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+    --accent: #f43f8e; --accent-glow: rgba(244,63,142,0.38); --accent-contrast: #ffffff;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(244,63,142,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.is-active { display: flex; }
+
+  /* HUD */
+  .hud-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+  }
+  .hud-stat {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); padding: .3rem .4rem;
+  }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .55rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 800; color: var(--accent); }
+
+  /* Maze Stage & Joystick Overlay */
+  .maze-stage { flex: 1; position: relative; width: 100%; height: 100%; background: #070410; touch-action: none; }
+  #mazeCanvas { width: 100%; height: 100%; display: block; }
+  
+  .touch-stick-zone {
+    position: absolute; bottom: 15px; right: 15px; width: 100px; height: 100px;
+    border-radius: 50%; border: 2px dashed rgba(244,63,142,0.3); background: rgba(30,23,59,0.5);
+    display: flex; align-items: center; justify-content: center; pointer-events: auto;
+  }
+  .stick-knob {
+    width: 38px; height: 38px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow); transform: translate(0px, 0px);
+    pointer-events: none;
+  }
+
+  /* Panels */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: #fff; border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+
+  /* Privacy Curtain */
+  .curtain {
+    position: fixed; inset: 0; z-index: 100; background: rgba(18, 14, 36, 0.96);
+    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
+  }
+  .curtain.is-open { display: flex; }
+  .cur-card {
+    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
+    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
+  }
+  .hold-btn {
+    position: relative; overflow: hidden; width: 100%; min-height: 60px;
+    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
+    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
+    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
+  }
+  .hold-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: var(--accent); opacity: .85; transition: width .04s linear;
+  }
+  .hold-label { position: relative; z-index: 2; pointer-events: none; }
+  .hold-btn.armed .hold-label { color: #fff; }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">Gyro Labyrinth Run</span>
+    <span class="gm-sub" id="topSub">Motion Gauntlet</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Mission Briefing</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • Tilt device physically (or use bottom touch stick) to roll the neon marble.<br>
+        • Evade black hole gravity traps and pulsing laser gates.<br>
+        • Reach the green extraction core before the <strong>45-Second</strong> countdown runs out.<br>
+        • Timeout or trap fall = Penalty sips calculated by remaining distance!
+      </p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Active Pilots</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+    <button class="btn" id="btnStartMaze" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Enter Maze Run
+    </button>
+  </section>
+
+  <!-- 2. GAMEPLAY -->
+  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
+    <div class="hud-bar">
+      <div class="hud-stat">
+        <span class="hud-lbl">Pilot</span>
+        <span class="hud-val" id="hudPlayer" style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-lbl">Time Left</span>
+        <span class="hud-val" id="hudTimer" style="color:var(--warning);">45.0s</span>
+      </div>
+      <div class="hud-stat">
+        <span class="hud-lbl">Checkpoint</span>
+        <span class="hud-val" id="hudNodes">0 / 3</span>
+      </div>
+    </div>
+
+    <div class="maze-stage" id="mazeWrap">
+      <canvas id="mazeCanvas"></canvas>
+      <div class="touch-stick-zone" id="touchStick">
+        <div class="stick-knob" id="stickKnob"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. VERDICT -->
+  <section class="screen" id="scrVerdict">
+    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">EXTRACTION LOG</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="verdictPlayer">Player</h2>
+      <div style="font-family:'Space Mono',monospace;font-size:2rem;font-weight:900;color:var(--accent);margin-bottom:.4rem;" id="verdictStatus">FAILED</div>
+
+      <div id="forfeitBox" style="background:rgba(255,0,85,.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
+        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--danger);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">TRAP DETONATION / TIMEOUT</span>
+        <p style="font-size:1.05rem;font-weight:800;color:#fff;margin-top:.4rem;" id="forfeitText">Take 3 sips!</p>
+      </div>
+
+      <div id="passBox" style="background:rgba(0,255,170,.1);border:2px solid var(--success);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
+        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--success);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">LABYRINTH CLEARED</span>
+        <p style="font-size:1rem;font-weight:800;color:#fff;margin-top:.4rem;">Flawless run! Nominate 2 pilots to drink.</p>
+      </div>
+    </div>
+    <button class="btn" id="btnNextPilot" style="margin-top:auto;">Next Labyrinth Runner</button>
+  </section>
+</div>
+
+<!-- 4. PRIVACY CURTAIN -->
+<div class="curtain" id="curtain">
+  <div class="cur-card">
+    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 14.14 14.14"/></svg>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT RUNNER</div>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
+    <p style="font-size:.82rem;color:var(--text-secondary);">Goal: Escape under <strong style="color:var(--accent);">45.0s</strong></p>
+    <button class="hold-btn" id="btnCurtainHold">
+      <span class="hold-fill" id="holdFill"></span>
+      <span class="hold-label">HOLD 700MS TO ENTER MAZE</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const AudioMaze = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  wallBump(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(240, this.ctx.currentTime);
+      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.04);
+    }catch(e){}
+  },
+  checkpoint(){
+    try {
+      this.init();
+      [587, 880].forEach((f, i) => {
+        setTimeout(() => {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
+          g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(); o.stop(this.ctx.currentTime + 0.1);
+        }, i * 70);
+      });
+    }catch(e){}
+  },
+  trapFall(){
+    try {
+      this.init();
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = "sawtooth"; o.frequency.setValueAtTime(320, this.ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.35);
+      g.gain.setValueAtTime(0.25, this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime + 0.35);
+    }catch(e){}
+  },
+  escapeVictory(){
+    try {
+      this.init();
+      [523, 659, 784, 1046, 1318].forEach((f, i) => {
+        setTimeout(() => {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
+          g.gain.setValueAtTime(0.18, this.ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
+          o.connect(g); g.connect(this.ctx.destination);
+          o.start(); o.stop(this.ctx.currentTime + 0.18);
+        }, i * 65);
+      });
+    }catch(e){}
+  }
+};
+
+/* ================= ROSTER & STATE ================= */
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 2) roster = ["Runner 1", "Runner 2"];
+
+const S = {
+  playerIdx: 0,
+  timeLeft: 45.0,
+  running: false,
+  checkpointsCollected: 0,
+  ball: { x: 40, y: 40, vx: 0, vy: 0, r: 8 },
+  tilt: { ax: 0, ay: 0 },
+  walls: [],
+  holes: [],
+  nodes: [],
+  goal: { x: 0, y: 0, r: 20 }
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+/* ================= PRIVACY CURTAIN ================= */
+let holdTimer = null, holdStart = 0;
+const HOLD_MS = 700;
+
+function openCurtain(pName, onUnlock){
+  $("curName").textContent = pName;
+  $("holdFill").style.width = "0%";
+  $("btnCurtainHold").classList.remove("armed");
+  $("curtain").classList.add("is-open");
+
+  const btn = $("btnCurtainHold");
+  const cancel = () => {
+    if(holdTimer) cancelAnimationFrame(holdTimer);
+    holdTimer = null;
+    $("holdFill").style.width = "0%";
+    btn.classList.remove("armed");
+  };
+  const start = e => {
+    e.preventDefault();
+    btn.classList.add("armed");
+    holdStart = performance.now();
+    const tick = now => {
+      const el = now - holdStart;
+      const pct = Math.min(100, (el / HOLD_MS) * 100);
+      $("holdFill").style.width = pct + "%";
+      if(el >= HOLD_MS){
+        cancel();
+        $("curtain").classList.remove("is-open");
+        onUnlock();
+      } else {
+        holdTimer = requestAnimationFrame(tick);
+      }
+    };
+    holdTimer = requestAnimationFrame(tick);
+  };
+
+  btn.onpointerdown = start;
+  btn.onpointerup = cancel;
+  btn.onpointercancel = cancel;
+  btn.onpointerleave = cancel;
+}
+
+/* ================= CANVAS PHYSICS ENGINE ================= */
+const cvs = $("mazeCanvas");
+const ctx = cvs.getContext("2d");
+let W = 360, H = 540, DPR = 1;
+
+function resizeCanvas(){
+  const wrap = cvs.parentElement;
+  DPR = Math.min(window.devicePixelRatio || 1, 3);
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  cvs.width = W * DPR;
+  cvs.height = H * DPR;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  buildMazeLayout();
+}
+window.addEventListener("resize", resizeCanvas);
+
+function buildMazeLayout(){
+  S.walls = [
+    // Outer boundaries
+    { x: 10, y: 10, w: W - 20, h: 6 },
+    { x: 10, y: H - 16, w: W - 20, h: 6 },
+    { x: 10, y: 10, w: 6, h: H - 20 },
+    { x: W - 16, y: 10, w: 6, h: H - 20 },
+    
+    // Internal Labyrinth Partitions
+    { x: 10, y: H * 0.22, w: W * 0.65, h: 6 },
+    { x: W * 0.35, y: H * 0.42, w: W * 0.65, h: 6 },
+    { x: 10, y: H * 0.62, w: W * 0.65, h: 6 },
+    { x: W * 0.35, y: H * 0.82, w: W * 0.65, h: 6 },
+    { x: W * 0.52, y: H * 0.22, w: 6, h: H * 0.2 }
+  ];
+
+  // Black Hole Gravity Traps
+  S.holes = [
+    { x: W * 0.25, y: H * 0.32, r: 14 },
+    { x: W * 0.75, y: H * 0.52, r: 14 },
+    { x: W * 0.30, y: H * 0.72, r: 14 }
+  ];
+
+  // 3 Checkpoint Nodes
+  S.nodes = [
+    { x: W * 0.82, y: H * 0.12, collected: false },
+    { x: W * 0.18, y: H * 0.52, collected: false },
+    { x: W * 0.82, y: H * 0.72, collected: false }
+  ];
+
+  // Extraction Goal
+  S.goal = { x: W * 0.18, y: H * 0.90, r: 20 };
+}
+
+function resetRun(){
+  S.timeLeft = 45.0;
+  S.checkpointsCollected = 0;
+  S.ball = { x: 40, y: 40, vx: 0, vy: 0, r: 8 };
+  S.tilt = { ax: 0, ay: 0 };
+  buildMazeLayout();
+  updateHUD();
+  S.running = true;
+}
+
+function updateHUD(){
+  $("hudTimer").textContent = `${Math.max(0, S.timeLeft).toFixed(1)}s`;
+  $("hudNodes").textContent = `${S.checkpointsCollected} / 3`;
+}
+
+let lastT = performance.now();
+function loop(t){
+  if(!S.running) return;
+  const dt = Math.min((t - lastT) / 1000, 0.033);
+  lastT = t;
+
+  S.timeLeft -= dt;
+  updateHUD();
+
+  if(S.timeLeft <= 0){
+    endGauntlet(false, "Timer expired before extraction.");
+    return;
+  }
+
+  // Physics Movement
+  const accel = 520;
+  S.ball.vx += S.tilt.ax * accel * dt;
+  S.ball.vy += S.tilt.ay * accel * dt;
+  S.ball.vx *= 0.94; // Friction
+  S.ball.vy *= 0.94;
+
+  S.ball.x += S.ball.vx * dt;
+  S.ball.y += S.ball.vy * dt;
+
+  // Clear Surface
+  ctx.fillStyle = "#070410";
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw Grid Overlay
+  ctx.strokeStyle = "rgba(244, 63, 142, 0.08)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(let x = 0; x < W; x += 26){ ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+  for(let y = 0; y < H; y += 26){ ctx.moveTo(0, y); ctx.lineTo(W, y); }
+  ctx.stroke();
+
+  // Draw Goal Extraction Portal
+  ctx.fillStyle = (S.checkpointsCollected >= 3) ? "#00ffaa" : "#445566";
+  ctx.shadowColor = (S.checkpointsCollected >= 3) ? "#00ffaa" : "transparent";
+  ctx.shadowBlur = 14;
+  ctx.beginPath(); ctx.arc(S.goal.x, S.goal.y, S.goal.r, 0, Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Draw Checkpoints
+  S.nodes.forEach(node => {
+    if(!node.collected){
+      ctx.fillStyle = "#ffd000";
+      ctx.shadowColor = "#ffd000"; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(node.x, node.y, 8, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Check Collection
+      if(Math.hypot(S.ball.x - node.x, S.ball.y - node.y) < S.ball.r + 8){
+        node.collected = true;
+        S.checkpointsCollected++;
+        AudioMaze.checkpoint();
+        updateHUD();
+      }
+    }
+  });
+
+  // Draw Black Hole Traps
+  S.holes.forEach(hole => {
+    ctx.fillStyle = "#ff0055";
+    ctx.shadowColor = "#ff0055"; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.arc(hole.x, hole.y, hole.r, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#000000";
+    ctx.beginPath(); ctx.arc(hole.x, hole.y, hole.r * 0.65, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Hole Collision Check
+    if(Math.hypot(S.ball.x - hole.x, S.ball.y - hole.y) < hole.r * 0.75){
+      AudioMaze.trapFall();
+      endGauntlet(false, "Fell into an anti-matter trap hole!");
+      return;
+    }
+  });
+
+  // Draw Walls & Collisions
+  S.walls.forEach(w => {
+    ctx.fillStyle = "#f43f8e";
+    ctx.shadowColor = "#f43f8e"; ctx.shadowBlur = 8;
+    ctx.fillRect(w.x, w.y, w.w, w.h);
+    ctx.shadowBlur = 0;
+
+    // Bounding Box Collision
+    if(S.ball.x + S.ball.r > w.x && S.ball.x - S.ball.r < w.x + w.w &&
+       S.ball.y + S.ball.r > w.y && S.ball.y - S.ball.r < w.y + w.h){
+      // Push out & Bounce
+      if(S.ball.x < w.x || S.ball.x > w.x + w.w){ S.ball.vx = -S.ball.vx * 0.5; }
+      if(S.ball.y < w.y || S.ball.y > w.y + w.h){ S.ball.vy = -S.ball.vy * 0.5; }
+      S.ball.x = Math.max(w.x - S.ball.r, Math.min(w.x + w.w + S.ball.r, S.ball.x));
+      S.ball.y = Math.max(w.y - S.ball.r, Math.min(w.y + w.h + S.ball.r, S.ball.y));
+      AudioMaze.wallBump();
+    }
+  });
+
+  // Draw Rolling Marble
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "#00ffaa"; ctx.shadowBlur = 10;
+  ctx.beginPath(); ctx.arc(S.ball.x, S.ball.y, S.ball.r, 0, Math.PI*2); ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Check Goal Escape
+  if(S.checkpointsCollected >= 3 && Math.hypot(S.ball.x - S.goal.x, S.ball.y - S.goal.y) < S.ball.r + S.goal.r){
+    AudioMaze.escapeVictory();
+    endGauntlet(true);
+    return;
+  }
+
+  requestAnimationFrame(loop);
+}
+
+function endGauntlet(escaped, reason=""){
+  S.running = false;
+  const pName = roster[S.playerIdx];
+
+  $("verdictPlayer").textContent = pName;
+  $("verdictStatus").textContent = escaped ? "EXTRACTED!" : "FAILED";
+  $("verdictStatus").style.color = escaped ? "var(--success)" : "var(--danger)";
+
+  if(escaped){
+    $("passBox").style.display = "block";
+    $("forfeitBox").style.display = "none";
+  } else {
+    $("passBox").style.display = "none";
+    $("forfeitBox").style.display = "block";
+    const sips = 4 - S.checkpointsCollected;
+    $("forfeitText").textContent = `${reason} Take ${sips} penalty sips!`;
+  }
+  showScreen("scrVerdict");
+}
+
+/* ================= GYRO & TOUCH STICK CONTROLS ================= */
+// Device Orientation API
+window.addEventListener("deviceorientation", e => {
+  if(!S.running || e.gamma === null || e.beta === null) return;
+  // Gamma = Left/Right [-90, 90], Beta = Front/Back [-180, 180]
+  S.tilt.ax = Math.max(-1, Math.min(1, e.gamma / 25));
+  S.tilt.ay = Math.max(-1, Math.min(1, (e.beta - 30) / 25));
+});
+
+// Touch Joystick Fallback
+const stick = $("touchStick"), knob = $("stickKnob");
+let stickActive = false;
+
+stick.addEventListener("pointerdown", e => {
+  stickActive = true;
+  stick.setPointerCapture(e.pointerId);
+  handleStickMove(e);
+});
+
+const handleStickMove = e => {
+  if(!stickActive) return;
+  const r = stick.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const dx = e.clientX - cx, dy = e.clientY - cy;
+  const dist = Math.hypot(dx, dy);
+  const maxR = 32;
+
+  const nx = (dist > 0) ? dx / dist : 0;
+  const ny = (dist > 0) ? dy / dist : 0;
+  const clampedDist = Math.min(maxR, dist);
+
+  knob.style.transform = `translate(${nx * clampedDist}px, ${ny * clampedDist}px)`;
+  S.tilt.ax = (nx * clampedDist) / maxR;
+  S.tilt.ay = (ny * clampedDist) / maxR;
+};
+
+const releaseStick = () => {
+  if(!stickActive) return;
+  stickActive = false;
+  knob.style.transform = "translate(0px, 0px)";
+  S.tilt.ax = 0;
+  S.tilt.ay = 0;
+};
+
+stick.addEventListener("pointermove", handleStickMove);
+stick.addEventListener("pointerup", releaseStick);
+stick.addEventListener("pointercancel", releaseStick);
+
+// Roster
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${p}</span>
+      <span style="color:var(--accent);">PILOT</span>
+    </li>
+  `).join("");
+}
+
+$("btnStartMaze").onclick = () => {
+  S.playerIdx = 0;
+  startTurn();
+};
+
+function startTurn(){
+  const player = roster[S.playerIdx];
+  $("topSub").textContent = `${player}'s Flight`;
+  $("hudPlayer").textContent = player;
+  openCurtain(player, () => {
+    showScreen("scrPlay");
+    resizeCanvas();
+    resetRun();
+    lastT = performance.now();
+    requestAnimationFrame(loop);
+  });
+}
+
+$("btnNextPilot").onclick = () => {
+  S.playerIdx = (S.playerIdx + 1) % roster.length;
+  startTurn();
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>

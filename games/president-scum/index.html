@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nordic-slate">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<title>President & Scum | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #08090c; --bg-surface: #10141b; --bg-elevated: #181e29;
+    --text-primary: #ffffff; --text-secondary: #9ba3b4; --text-muted: #5c6577;
+    --accent: #00ffcc; --accent-glow: rgba(0,255,204,0.35); --accent-contrast: #041215;
+    --danger: #ff0055; --success: #00ff66; --warning: #ffd000;
+    --border-ui: rgba(0,255,204,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    overflow-x: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .gm-actions { display: flex; gap: .4rem; }
+  .btn-icon-only {
+    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+  }
+  .screen.is-active { display: flex; }
+
+  /* Table Mat Hub */
+  .trick-hub {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 1.4rem; background: var(--bg-surface); border: 2px solid var(--border-ui);
+    border-radius: var(--r-lg); text-align: center;
+  }
+  .trick-cards-display {
+    display: flex; gap: 6px; justify-content: center; margin: .8rem 0;
+  }
+
+  /* Hand Card Tiles */
+  .hand-grid-scroll {
+    display: flex; gap: 6px; overflow-x: auto; padding: 6px 2px; -webkit-overflow-scrolling: touch;
+  }
+  .c-tile {
+    min-width: 58px; height: 84px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); display: flex; flex-direction: column; align-items: center;
+    justify-content: space-between; padding: 4px; font-family: 'Space Mono', monospace; font-weight: 800;
+    cursor: pointer; flex-shrink: 0; transition: transform .1s, border-color .1s;
+  }
+  .c-tile.selected {
+    transform: translateY(-8px); border-color: var(--accent);
+    background: rgba(0,255,204,0.15); box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .c-tile.red { color: #ff0055; }
+
+  /* Hierarchy Ledger */
+  .rank-badge {
+    font-family: 'Space Mono', monospace; font-size: .65rem; font-weight: 800;
+    padding: .2rem .5rem; border-radius: var(--r-sm); text-transform: uppercase;
+  }
+  .rank-pres { background: rgba(0,255,204,0.2); color: var(--accent); border: 1px solid var(--accent); }
+  .rank-vp { background: rgba(0,230,255,0.2); color: #00e5ff; border: 1px solid #00e5ff; }
+  .rank-cit { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+  .rank-scum { background: rgba(255,0,85,0.2); color: var(--danger); border: 1px solid var(--danger); }
+
+  /* Panels */
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .62rem;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
+  }
+  .btn-row { display: flex; gap: .5rem; }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-ui); box-shadow: none; }
+  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,85,.4); }
+
+  /* Privacy Curtain */
+  .curtain {
+    position: fixed; inset: 0; z-index: 100; background: rgba(8, 9, 12, 0.96);
+    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
+  }
+  .curtain.is-open { display: flex; }
+  .cur-card {
+    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
+    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
+  }
+  .hold-btn {
+    position: relative; overflow: hidden; width: 100%; min-height: 60px;
+    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
+    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
+    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
+  }
+  .hold-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    background: var(--accent); opacity: .85; transition: width .04s linear;
+  }
+  .hold-label { position: relative; z-index: 2; pointer-events: none; }
+  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
+
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+<script src="../../js/roster-normalize.js"></script>
+</head>
+<body>
+
+<header class="gm-top">
+  <div class="gm-idblock">
+    <span class="gm-title">President & Scum</span>
+    <span class="gm-sub" id="topSub">Hierarchy Setup</span>
+  </div>
+  <div class="gm-actions">
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+    </a>
+  </div>
+</header>
+
+<div class="stage">
+  <!-- 1. SETUP -->
+  <section class="screen is-active" id="scrSetup">
+    <div class="panel">
+      <div class="panel-title">Hierarchy Directives</div>
+      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+        • <strong>Card Power:</strong> 3 (Lowest) &rarr; 4 &rarr; ... &rarr; K &rarr; A &rarr; <strong>2 (Highest & Clears Pile)</strong>.<br>
+        • Play singles, pairs, or triples that match the quantity and beat the top card.<br>
+        • First player out becomes <strong>President</strong>; last player becomes <strong>Scum</strong>.<br>
+        • <strong>Tax Phase:</strong> Scum forfeits their 2 highest cards to the President; President gives back any 2 cards.<br>
+        • President commands drink penalties to lower social classes!
+      </p>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Active Roster</div>
+      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:25vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    </div>
+    <button class="btn" id="btnStartGame" style="margin-top:auto;">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
+      Start Hierarchy Round
+    </button>
+  </section>
+
+  <!-- 2. TRICK TABLE VIEW -->
+  <section class="screen" id="scrTable">
+    <div class="trick-hub">
+      <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);text-transform:uppercase;">CURRENT TOP TRICK</div>
+      <div class="trick-cards-display" id="trickCards">
+        <span style="color:var(--text-muted);font-family:'Space Mono',monospace;font-size:.85rem;">Pile is empty (Lead freely)</span>
+      </div>
+      <div style="font-size:.82rem;color:var(--accent);" id="trickLeadInfo">Lead single, pair, or triple</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Table Standings</div>
+      <div id="hierarchyStandings" style="display:flex;flex-direction:column;gap:.4rem;font-family:'Space Mono',monospace;font-size:.78rem;"></div>
+    </div>
+
+    <button class="btn" id="btnNextTurn">Next Player Turn</button>
+  </section>
+
+  <!-- 3. PRIVATE PLAY SCREEN -->
+  <section class="screen" id="scrPlay">
+    <div class="panel" style="text-align:center;">
+      <div style="font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;" id="playRoleBadge">PRESIDENT</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0;" id="playPlayerName">Player</h2>
+      <p style="font-size:.85rem;color:var(--text-secondary);" id="playHint">Select matching cards to beat the trick</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Your Hand</div>
+      <div class="hand-grid-scroll" id="playerHandGrid"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn ghost" id="btnPassTrick">Pass</button>
+      <button class="btn" id="btnSubmitCards" disabled>Play</button>
+    </div>
+  </section>
+
+  <!-- 4. ROUND FINALE / HIERARCHY CORONATION -->
+  <section class="screen" id="scrCoronation">
+    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
+      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">NEW HIERARCHY DECREED</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="newPresident">President</h2>
+      <div id="coronationRoles" style="display:flex;flex-direction:column;gap:.4rem;margin:1rem 0;text-align:left;font-family:'Space Mono',monospace;font-size:.8rem;"></div>
+      <p style="font-size:.85rem;color:var(--text-secondary);">
+        President: Assign 3 sips to Scum. Automatic tax will execute on the next deal.
+      </p>
+    </div>
+    <button class="btn" id="btnNextRoundDeal" style="margin-top:auto;">Execute Taxation & Next Deal</button>
+  </section>
+</div>
+
+<!-- 5. PRIVACY CURTAIN -->
+<div class="curtain" id="curtain">
+  <div class="cur-card">
+    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;" id="curRole">CITIZEN</div>
+    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
+    <p style="font-size:.82rem;color:var(--text-secondary);">Your turn to shed cards.</p>
+    <button class="hold-btn" id="btnCurtainHold">
+      <span class="hold-fill" id="holdFill"></span>
+      <span class="hold-label">HOLD 700MS TO UNLOCK</span>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const Synth = {
+  ctx: null,
+  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+  tone(freq, dur, type="sine", gain=0.15, slide=null){
+    try {
+      this.init();
+      const t0 = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = type; o.frequency.setValueAtTime(freq, t0);
+      if(slide) o.frequency.exponentialRampToValueAtTime(slide, t0 + dur);
+      g.gain.setValueAtTime(gain, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(t0); o.stop(t0 + dur);
+    }catch(e){}
+  },
+  cardPlay(){ this.tone(550, 0.05, "triangle", 0.1, 750); },
+  clearPile(){ [523, 784, 1046].forEach((f, i)=>setTimeout(()=>this.tone(f, 0.08, "square", 0.16), i*60)); },
+  coronation(){ [440, 554, 659, 880, 1108].forEach((f, i)=>setTimeout(()=>this.tone(f, 0.15, "triangle", 0.18), i*75)); }
+};
+
+/* ================= STATE & HIERARCHY ================= */
+// Power: 3 lowest (idx 0), 2 highest (idx 12)
+const POWER_RANKS = ["3","4","5","6","7","8","9","10","J","Q","K","A","2"];
+const SUITS = [
+  { s: "♠", red: false },
+  { s: "♥", red: true },
+  { s: "♦", red: true },
+  { s: "♣", red: false }
+];
+
+let roster = [];
+try {
+  const raw = localStorage.getItem("partydeck_players");
+  roster = raw ? JSON.parse(raw) : [];
+} catch(e){}
+if(!Array.isArray(roster) || roster.length < 3) roster = ["Player 1", "Player 2", "Player 3"];
+
+const S = {
+  playerIdx: 0,
+  hands: {}, // player -> array of cards
+  roles: {}, // player -> 'President', 'VP', 'Citizen', 'Scum'
+  finishedOrder: [],
+  trick: null, // { count: 1, val: 5, rank: '8', cards: [] }
+  consecutivePasses: 0,
+  selectedIndices: []
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+function createDeck(){
+  const d = [];
+  SUITS.forEach(st => {
+    POWER_RANKS.forEach((rk, pIdx) => {
+      d.push({ rank: rk, power: pIdx, suit: st.s, red: st.red });
+    });
+  });
+  return d.sort(() => Math.random() - 0.5);
+}
+
+/* ================= PRIVACY CURTAIN ================= */
+let holdTimer = null, holdStart = 0;
+const HOLD_MS = 700;
+
+function openCurtain(pName, role, onUnlock){
+  $("curName").textContent = pName;
+  $("curRole").textContent = role || "CITIZEN";
+  $("holdFill").style.width = "0%";
+  $("btnCurtainHold").classList.remove("armed");
+  $("curtain").classList.add("is-open");
+
+  const btn = $("btnCurtainHold");
+  const cancel = () => {
+    if(holdTimer) cancelAnimationFrame(holdTimer);
+    holdTimer = null;
+    $("holdFill").style.width = "0%";
+    btn.classList.remove("armed");
+  };
+  const start = e => {
+    e.preventDefault();
+    btn.classList.add("armed");
+    holdStart = performance.now();
+    const tick = now => {
+      const el = now - holdStart;
+      const pct = Math.min(100, (el / HOLD_MS) * 100);
+      $("holdFill").style.width = pct + "%";
+      if(el >= HOLD_MS){
+        cancel();
+        $("curtain").classList.remove("is-open");
+        onUnlock();
+      } else {
+        holdTimer = requestAnimationFrame(tick);
+      }
+    };
+    holdTimer = requestAnimationFrame(tick);
+  };
+
+  btn.onpointerdown = start;
+  btn.onpointerup = cancel;
+  btn.onpointercancel = cancel;
+  btn.onpointerleave = cancel;
+}
+
+/* ================= GAMEPLAY ENGINE ================= */
+function startPresidentRound(isTaxation = false){
+  const deck = createDeck();
+  S.hands = {};
+  roster.forEach(p => { S.hands[p] = []; });
+
+  let pIdx = 0;
+  while(deck.length > 0){
+    S.hands[roster[pIdx]].push(deck.pop());
+    pIdx = (pIdx + 1) % roster.length;
+  }
+
+  // Sort hands by power
+  roster.forEach(p => {
+    S.hands[p].sort((a,b) => a.power - b.power);
+  });
+
+  // Automated Taxation if not Round 1
+  if(isTaxation && S.finishedOrder.length === roster.length){
+    const pres = S.finishedOrder[0];
+    const scum = S.finishedOrder[S.finishedOrder.length - 1];
+
+    // Scum gives 2 best cards to President
+    const tax1 = S.hands[scum].pop();
+    const tax2 = S.hands[scum].pop();
+    S.hands[pres].push(tax1, tax2);
+
+    // President gives 2 worst cards to Scum
+    const return1 = S.hands[pres].shift();
+    const return2 = S.hands[pres].shift();
+    S.hands[scum].push(return1, return2);
+
+    S.hands[pres].sort((a,b) => a.power - b.power);
+    S.hands[scum].sort((a,b) => a.power - b.power);
+  }
+
+  S.finishedOrder = [];
+  S.trick = null;
+  S.consecutivePasses = 0;
+  S.playerIdx = 0;
+
+  renderTableMat();
+  showScreen("scrTable");
+}
+
+function renderTableMat(){
+  if(S.trick){
+    $("trickCards").innerHTML = S.trick.cards.map(c => `
+      <div style="width:48px;height:68px;background:#fff;color:${c.red?'#ff0055':'#000'};border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:900;">
+        <span>${c.rank}</span>
+        <span>${c.suit}</span>
+      </div>
+    `).join("");
+    $("trickLeadInfo").textContent = `Beat with ${S.trick.count}× cards > ${S.trick.rank}`;
+  } else {
+    $("trickCards").innerHTML = `<span style="color:var(--text-muted);font-family:'Space Mono',monospace;font-size:.85rem;">Pile is empty (Lead freely)</span>`;
+    $("trickLeadInfo").textContent = "Lead single, pair, or triple";
+  }
+
+  $("hierarchyStandings").innerHTML = roster.map(p => {
+    const role = S.roles[p] || "Citizen";
+    let badgeClass = "rank-cit";
+    if(role === "President") badgeClass = "rank-pres";
+    if(role === "Vice President") badgeClass = "rank-vp";
+    if(role === "Scum") badgeClass = "rank-scum";
+
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg-elevated);padding:.35rem .6rem;border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+        <span>${p}</span>
+        <div>
+          <span class="rank-badge ${badgeClass}">${role}</span>
+          <span style="color:var(--accent);margin-left:6px;">${S.hands[p].length} Left</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+$("btnNextTurn").onclick = () => {
+  // Skip players who are already out of cards
+  while(S.hands[roster[S.playerIdx]].length === 0){
+    S.playerIdx = (S.playerIdx + 1) % roster.length;
+  }
+
+  const p = roster[S.playerIdx];
+  openCurtain(p, S.roles[p], () => {
+    showScreen("scrPlay");
+    renderPlayerHand();
+  });
+};
+
+function renderPlayerHand(){
+  const p = roster[S.playerIdx];
+  const hand = S.hands[p];
+  $("playRoleBadge").textContent = S.roles[p] || "CITIZEN";
+  $("playPlayerName").textContent = p;
+  S.selectedIndices = [];
+  $("btnSubmitCards").disabled = true;
+
+  $("playerHandGrid").innerHTML = hand.map((c, i) => `
+    <div class="c-tile ${c.red ? 'red' : ''}" data-idx="${i}">
+      <span>${c.rank}</span>
+      <span>${c.suit}</span>
+    </div>
+  `).join("");
+
+  $("playerHandGrid").onclick = e => {
+    const tile = e.target.closest(".c-tile"); if(!tile) return;
+    const idx = parseInt(tile.dataset.idx, 10);
+    const pos = S.selectedIndices.indexOf(idx);
+
+    if(pos >= 0){
+      S.selectedIndices.splice(pos, 1);
+      tile.classList.remove("selected");
+    } else {
+      S.selectedIndices.push(idx);
+      tile.classList.add("selected");
+    }
+
+    validateSelection();
+  };
+}
+
+function validateSelection(){
+  const p = roster[S.playerIdx];
+  const hand = S.hands[p];
+  const selCards = S.selectedIndices.map(i => hand[i]);
+
+  if(selCards.length === 0){
+    $("btnSubmitCards").disabled = true;
+    return;
+  }
+
+  // All selected cards must have identical ranks
+  const sameRank = selCards.every(c => c.rank === selCards[0].rank);
+  if(!sameRank){
+    $("btnSubmitCards").disabled = true;
+    return;
+  }
+
+  if(S.trick){
+    // Must match count and beat power
+    const valid = (selCards.length === S.trick.count) && (selCards[0].power > S.trick.power);
+    $("btnSubmitCards").disabled = !valid;
+  } else {
+    // Leading trick
+    $("btnSubmitCards").disabled = (selCards.length > 3);
+  }
+}
+
+$("btnSubmitCards").onclick = () => {
+  const p = roster[S.playerIdx];
+  const hand = S.hands[p];
+  const played = [];
+
+  S.selectedIndices.sort((a,b) => b - a).forEach(idx => {
+    played.push(hand.splice(idx, 1)[0]);
+  });
+
+  Synth.cardPlay();
+  S.consecutivePasses = 0;
+
+  // 2 Clears the Trick Pile immediately!
+  if(played[0].rank === "2"){
+    Synth.clearPile();
+    S.trick = null;
+  } else {
+    S.trick = {
+      count: played.length,
+      power: played[0].power,
+      rank: played[0].rank,
+      cards: played
+    };
+  }
+
+  // Check if player shed all cards
+  if(hand.length === 0){
+    S.finishedOrder.push(p);
+    if(S.finishedOrder.length === roster.length - 1){
+      // Last player remaining is Scum
+      const lastPlayer = roster.find(x => !S.finishedOrder.includes(x));
+      S.finishedOrder.push(lastPlayer);
+      endRound();
+      return;
+    }
+  }
+
+  S.playerIdx = (S.playerIdx + 1) % roster.length;
+  renderTableMat();
+  showScreen("scrTable");
+};
+
+$("btnPassTrick").onclick = () => {
+  S.consecutivePasses++;
+  const activePlayersCount = roster.filter(p => S.hands[p].length > 0).length;
+
+  if(S.consecutivePasses >= activePlayersCount - 1){
+    // Everyone passed -> Pile Cleared
+    Synth.clearPile();
+    S.trick = null;
+    S.consecutivePasses = 0;
+  }
+
+  S.playerIdx = (S.playerIdx + 1) % roster.length;
+  renderTableMat();
+  showScreen("scrTable");
+};
+
+function endRound(){
+  Synth.coronation();
+  // Assign roles based on finished order
+  S.roles = {};
+  S.finishedOrder.forEach((p, idx) => {
+    if(idx === 0) S.roles[p] = "President";
+    else if(idx === 1 && roster.length >= 4) S.roles[p] = "Vice President";
+    else if(idx === S.finishedOrder.length - 1) S.roles[p] = "Scum";
+    else S.roles[p] = "Citizen";
+  });
+
+  $("newPresident").textContent = `${S.finishedOrder[0]} is President!`;
+  $("coronationRoles").innerHTML = S.finishedOrder.map((p, idx) => `
+    <div style="background:var(--bg-elevated);padding:.4rem .7rem;border-radius:var(--r-sm);border:1px solid var(--border-ui);display:flex;justify-content:space-between;">
+      <span>#${idx+1} ${p}</span>
+      <span style="color:var(--accent);">${S.roles[p]}</span>
+    </div>
+  `).join("");
+
+  showScreen("scrCoronation");
+}
+
+$("btnNextRoundDeal").onclick = () => {
+  startPresidentRound(true);
+};
+
+/* ================= ROSTER ================= */
+function renderRoster(){
+  $("rosterList").innerHTML = roster.map((p, i) => `
+    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
+      <span>#${i+1} ${p}</span>
+      <span style="color:var(--accent);">CITIZEN</span>
+    </li>
+  `).join("");
+}
+
+$("btnStartGame").onclick = () => {
+  startPresidentRound(false);
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderRoster();
+});
+})();
+</script>
+<script src="../../js/theme-sync.js"></script>
+</body>
+</html>
