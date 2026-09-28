@@ -1,391 +1,812 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cyber-neon">
+<html lang="en" data-theme="nordic-slate">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#08090c" />
-<title>Skull: Digital Bluff | PartyDeck</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{--font-body:'Plus Jakarta Sans',system-ui,sans-serif;--font-display:'Space Grotesk',system-ui,sans-serif;--font-mono:'Space Mono',monospace;--r-sm:8px;--r-md:14px;--r-lg:20px;--ease:cubic-bezier(.2,.8,.3,1);}
-[data-theme="cyber-neon"]{--bg-primary:#08090c;--bg-surface:#10141b;--bg-elevated:#181e29;--text-primary:#fff;--text-secondary:#9ba3b4;--text-muted:#5c6577;--accent:#00ffcc;--accent-glow:rgba(0,255,204,.35);--accent-secondary:#ff007f;--danger:#ff0055;--success:#00ff66;--border-color:rgba(0,255,204,.22);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(0,255,204,.12);}
-[data-theme="sunset-rave"]{--bg-primary:#0f071d;--bg-surface:#1e0f38;--bg-elevated:#321659;--text-primary:#fff;--text-secondary:#d6b4fc;--text-muted:#8b62b8;--accent:#ff007f;--accent-glow:rgba(255,0,127,.45);--accent-secondary:#ff8800;--danger:#ff0044;--success:#00ffaa;--border-color:rgba(255,0,127,.3);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(255,0,127,.2);}
-[data-theme="retro-arcade"]{--bg-primary:#12131c;--bg-surface:#1a1b28;--bg-elevated:#26273b;--text-primary:#f5f5f5;--text-secondary:#a2a8d3;--text-muted:#6873a8;--accent:#ffd400;--accent-glow:rgba(255,212,0,.35);--accent-secondary:#ff3860;--danger:#ff3860;--success:#42e2b8;--border-color:rgba(255,212,0,.25);--card-shadow:0 12px 32px rgba(0,0,0,.8),0 0 15px rgba(255,212,0,.15);}
-[data-theme="minimal-light"]{--bg-primary:#f4f6f9;--bg-surface:#fff;--bg-elevated:#e8ecf2;--text-primary:#101828;--text-secondary:#475467;--text-muted:#98a2b3;--accent:#2563eb;--accent-glow:rgba(37,99,235,.2);--accent-secondary:#7c3aed;--danger:#d92d20;--success:#0f9d58;--border-color:rgba(16,24,40,.15);--card-shadow:0 8px 24px rgba(16,24,40,.08);}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-body);overflow-x:hidden;-webkit-user-select:none;user-select:none;}
-.pd-hud{position:sticky;top:0;z-index:40;background:var(--bg-surface);border-bottom:2px solid var(--border-color);padding:.55rem .85rem;padding-top:max(.55rem,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;gap:.5rem;}
-.hud-exit{display:flex;align-items:center;gap:6px;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border-color);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.7rem;font-weight:700;padding:.42rem .65rem;cursor:pointer;}
-.hud-mid{display:flex;flex-direction:column;align-items:center;min-width:0;}
-.hud-badge{font-family:var(--font-mono);font-size:.56rem;font-weight:800;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;}
-.hud-label{font-family:var(--font-display);font-size:.95rem;font-weight:800;max-width:44vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.hud-count{font-family:var(--font-mono);font-size:.92rem;font-weight:700;color:var(--accent);background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.28rem .55rem;min-width:52px;text-align:center;}
-main{flex:1;max-width:640px;margin:0 auto;padding:1rem;padding-bottom:max(1.2rem,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:.9rem;}
-.phase{display:none;flex-direction:column;gap:.9rem;flex:1;}
-.phase.on{display:flex;animation:pFade .2s var(--ease);}
-@keyframes pFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.hero{display:flex;justify-content:center;color:var(--accent);margin-top:.2rem;}
-.hero .ico{width:44px;height:44px;filter:drop-shadow(0 0 12px var(--accent-glow));}
-h1.title{font-family:var(--font-display);font-size:1.55rem;font-weight:900;letter-spacing:-.02em;text-align:center;}
-p.sub{text-align:center;font-size:.86rem;color:var(--text-secondary);max-width:46ch;margin:0 auto;line-height:1.45;}
-.panel{background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--r-md);padding:.9rem;box-shadow:var(--card-shadow);}
-.ptitle{font-family:var(--font-mono);font-size:.64rem;text-transform:uppercase;letter-spacing:.14em;color:var(--text-muted);margin-bottom:.55rem;}
-.btn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:var(--bg-primary);border:none;border-radius:var(--r-sm);font-family:var(--font-mono);font-size:.88rem;font-weight:800;text-transform:uppercase;box-shadow:0 0 16px var(--accent-glow);cursor:pointer;}
-.btn:active{transform:scale(.98);}
-.btn:disabled{opacity:.35;box-shadow:none;pointer-events:none;}
-.btn.ghost{background:transparent;color:var(--text-secondary);border:1px solid rgba(255,255,255,.16);box-shadow:none;}
-.btn.push{margin-top:auto;}
-.btn-row{display:flex;gap:.6rem;}.btn-row>*{flex:1;}
-.rlist{list-style:none;display:flex;flex-direction:column;gap:.35rem;max-height:28vh;overflow-y:auto;}
-.ritem{display:flex;align-items:center;gap:.6rem;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.07);border-radius:var(--r-sm);padding:.45rem .65rem;font-family:var(--font-mono);font-size:.82rem;}
-.ritem .seat{color:var(--accent);font-weight:700;}
-.ritem .nm{flex:1;font-weight:700;}
-.ritem button{background:none;border:none;color:var(--text-muted);cursor:pointer;}
-.card-choices{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.4rem;}
-.choice-btn{background:var(--bg-elevated);border:2px solid var(--border-color);border-radius:var(--r-md);padding:1.2rem .6rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;cursor:pointer;color:var(--text-primary);}
-.choice-btn.is-on{border-color:var(--accent);box-shadow:0 0 14px var(--accent-glow);}
-.choice-name{font-family:var(--font-display);font-size:1.1rem;font-weight:900;}
-.choice-count{font-family:var(--font-mono);font-size:.7rem;color:var(--accent);}
-.table-mat{display:flex;flex-direction:column;gap:.5rem;}
-.player-stack-row{display:flex;align-items:center;justify-content:space-between;background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:var(--r-sm);padding:.6rem .8rem;cursor:pointer;}
-.player-stack-row.can-flip{border-color:var(--accent);box-shadow:0 0 10px var(--accent-glow);}
-.stack-info{display:flex;align-items:center;gap:.5rem;}
-.stack-name{font-family:var(--font-display);font-size:.9rem;font-weight:800;}
-.stack-count{font-family:var(--font-mono);font-size:.75rem;color:var(--accent);}
-.revealed-pill{font-family:var(--font-mono);font-size:.7rem;font-weight:800;padding:.2rem .5rem;border-radius:var(--r-sm);}
-.revealed-pill.rose{background:rgba(0,255,204,.15);color:var(--accent);border:1px solid var(--accent);}
-.revealed-pill.skull{background:rgba(255,0,85,.15);color:var(--danger);border:1px solid var(--danger);}
-.bid-controls{display:flex;align-items:center;justify-content:center;gap:14px;margin:.6rem 0;}
-.bid-num{font-family:var(--font-display);font-size:2.2rem;font-weight:900;color:var(--accent);min-width:50px;text-align:center;}
-.step-btn{width:44px;height:44px;border-radius:var(--r-sm);background:var(--bg-surface);border:1px solid var(--border-color);color:var(--accent);font-family:var(--font-mono);font-size:1.4rem;font-weight:800;cursor:pointer;display:grid;place-items:center;}
-.curtain{position:fixed;inset:0;z-index:90;background:rgba(8,9,12,.94);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:1.4rem;}
-.curtain.on{display:flex;}
-.cur-card{background:var(--bg-surface);border:2px solid var(--border-color);border-radius:var(--r-lg);padding:1.6rem 1.2rem;width:100%;max-width:380px;text-align:center;box-shadow:0 0 30px var(--accent-glow);}
-.cur-tag{font-family:var(--font-mono);font-size:.6rem;font-weight:800;letter-spacing:.16em;color:var(--accent);text-transform:uppercase;}
-.cur-name{font-family:var(--font-display);font-size:1.5rem;font-weight:900;margin:.4rem 0 .65rem;}
-.pulse{animation:ring 2s infinite}
-@keyframes ring{0%{box-shadow:0 0 0 0 var(--accent-glow)}70%{box-shadow:0 0 0 16px rgba(0,0,0,0)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
-.ico{display:inline-flex;width:17px;height:17px;flex-shrink:0;}
-.ico svg{width:100%;height:100%;display:block;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>PartyDeck | Client-Side Offline Game Station</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/themes.css" />
+  <link rel="stylesheet" href="css/base.css" />
+
+  <style>
+    /* Hub Layout Styles */
+    .hub-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-ui);
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .hub-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--r-sm);
+      background: var(--accent);
+      color: var(--accent-contrast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+
+    .hub-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .hero-banner {
+      padding: 2.25rem 1.25rem 1.75rem;
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .hero-kicker {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .hero-title {
+      font-size: 2.2rem;
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+    }
+    .hero-desc {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      max-width: 52ch;
+      margin: 0 auto 1.5rem;
+    }
+
+    .roster-quick-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-ui);
+      padding: 0.5rem 1rem;
+      border-radius: var(--r-full);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+    }
+    .roster-pill-btn {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-ui);
+      color: var(--accent);
+      border-radius: var(--r-full);
+      padding: 0.25rem 0.6rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+
+    /* Category Filter Grid */
+    .filter-section {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 1.25rem 1.5rem;
+    }
+    .filter-scroller {
+      display: flex;
+      gap: 0.6rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      scrollbar-width: none;
+    }
+    .filter-scroller::-webkit-scrollbar { display: none; }
+
+    .filter-btn {
+      flex-shrink: 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-ui);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.55rem 0.95rem;
+      min-height: 40px;
+      border-radius: var(--r-full);
+      cursor: pointer;
+    }
+    .filter-btn.is-active {
+      background: var(--accent);
+      color: var(--accent-contrast);
+      border-color: var(--accent);
+      box-shadow: 0 2px 10px var(--accent-glow);
+    }
+
+    /* Game Cards Grid */
+    .games-container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 1.25rem 3rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .game-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-ui);
+      border-radius: var(--r-lg);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+      box-shadow: var(--card-shadow);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .game-card:hover {
+      border-color: var(--border-ui-active);
+      transform: translateY(-3px);
+    }
+    .game-card:active {
+      transform: scale(0.98);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+    .card-icon-box {
+      width: 44px;
+      height: 44px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-ui);
+      border-radius: var(--r-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+    .card-category-badge {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.3rem 0.6rem;
+      border-radius: var(--r-sm);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-ui);
+    }
+
+    .card-body h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.25rem;
+    }
+    .card-tagline {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .card-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-ui);
+      padding-top: 0.75rem;
+    }
+    .meta-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .drink-alert {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    /* Roster Drawer Styles */
+    .roster-input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .roster-input-row input {
+      flex: 1;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-ui);
+      border-radius: var(--r-md);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      padding: 0.75rem 1rem;
+      outline: none;
+    }
+    .roster-input-row input:focus {
+      border-color: var(--accent);
+    }
+
+    .roster-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 40vh;
+      overflow-y: auto;
+    }
+    .roster-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-ui);
+      border-radius: var(--r-sm);
+      padding: 0.5rem 0.85rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    /* Theme Picker Grid in Drawer */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+    }
+    .theme-choice-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.4rem;
+      padding: 0.85rem;
+      border-radius: var(--r-md);
+      text-align: left;
+      cursor: pointer;
+    }
+    .theme-choice-btn.is-active {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .theme-preview-dots {
+      display: flex;
+      gap: 5px;
+    }
+    .theme-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+  </style>
 </head>
 <body>
-<header class="pd-hud">
-  <button class="hud-exit" id="btnHub" type="button"><span class="ico" data-ic="home"></span><span>HUB</span></button>
-  <div class="hud-mid"><span class="hud-badge" id="hudBadge">SKULL</span><span class="hud-label" id="hudLabel">The Table</span></div>
-  <div class="hud-count" id="hudCount">0 PTS</div>
-</header>
-<main>
-  <!-- SETUP -->
-  <section class="phase on" id="phSetup">
-    <div class="hero"><span class="ico" data-ic="skull"></span></div>
-    <h1 class="title">Skull: Digital Bluff</h1>
-    <p class="sub">Play Roses and Skulls face down. Bid on how many cards you can flip without hitting a single Skull. Score 2 points to win.</p>
-    <div class="panel">
-      <p class="ptitle">Roster (3–6)</p>
-      <ul class="rlist" id="rList"></ul>
-      <div style="display:flex;gap:.5rem;margin-top:.6rem;">
-        <input type="text" id="rInput" placeholder="Add player..." maxlength="14" style="flex:1;background:var(--bg-elevated);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);color:#fff;font-family:var(--font-mono);padding:.5rem .7rem;outline:none;">
-        <button class="btn" id="rAdd" style="width:54px;min-height:auto;">+</button>
+
+  <!-- HEADER -->
+  <header class="hub-header">
+    <a href="#" class="hub-brand">
+      <div class="brand-logo">
+        <span class="ico ico-sm" data-ic="sparkle"></span>
+      </div>
+      <span class="brand-title">PartyDeck</span>
+    </a>
+
+    <div class="hub-controls">
+      <button class="btn btn-ghost btn-icon-only" id="btnToggleFullscreen" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
+        <span class="ico" data-ic="fullscreen"></span>
+      </button>
+      <button class="btn btn-ghost btn-icon-only" id="btnOpenThemeDrawer" title="Select Theme" aria-label="Select Theme">
+        <span class="ico" data-ic="palette"></span>
+      </button>
+      <button class="btn btn-ghost" id="btnOpenRosterDrawer" aria-label="Manage Roster">
+        <span class="ico" data-ic="users"></span>
+        <span id="headerRosterCount">Roster</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- HERO BANNER -->
+  <section class="hero-banner">
+    <div class="hero-kicker">
+      <span class="ico ico-sm" data-ic="zap"></span>
+      <span>100% Client-Side &middot; Offline Station</span>
+    </div>
+    <h1 class="hero-title">Zero Setups. Pure Play.</h1>
+    <p class="hero-desc">Pass-and-play, tabletop, and multi-device party games with zero network lag, room codes, or app downloads.</p>
+    
+    <div class="roster-quick-bar">
+      <span class="ico ico-sm" data-ic="users"></span>
+      <span id="quickRosterText">3 Players active</span>
+      <button class="roster-pill-btn" id="btnEditRosterQuick">Edit Roster</button>
+    </div>
+  </section>
+
+  <!-- CATEGORY FILTER BAR -->
+  <nav class="filter-section">
+    <div class="filter-scroller" id="filterScroller">
+      <button class="filter-btn is-active" data-cat="all">All Games</button>
+      <button class="filter-btn" data-cat="quick">🚀 Quick & Casual (2–4P)</button>
+      <button class="filter-btn" data-cat="social">👥 Big Party (5–12+P)</button>
+      <button class="filter-btn" data-cat="drinking">🍻 Drinking & Chaos</button>
+      <button class="filter-btn" data-cat="creative">🎨 Drawing & Words</button>
+      <button class="filter-btn" data-cat="multiphone">📱 Multi-Phone</button>
+      <button class="filter-btn" data-cat="arcade">⚡ Mini-Action</button>
+    </div>
+  </nav>
+
+  <!-- GAMES GRID -->
+  <main class="games-container" id="gamesContainer" aria-live="polite">
+    <!-- Rendered dynamically via JavaScript -->
+  </main>
+
+  <!-- ROSTER DRAWER -->
+  <div class="pd-drawer" id="rosterDrawer" aria-hidden="true">
+    <div class="pd-drawer-card">
+      <div class="pd-drawer-header">
+        <h2 style="font-size: 1.25rem;">Party Roster</h2>
+        <button class="btn btn-ghost btn-icon-only" id="btnCloseRoster" aria-label="Close Roster Drawer">
+          <span class="ico" data-ic="close"></span>
+        </button>
+      </div>
+      <div class="pd-drawer-body">
+        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          Names registered here automatically sync across all party games on this device.
+        </p>
+        <form class="roster-input-row" id="rosterForm">
+          <input type="text" id="rosterInput" placeholder="Add player name..." maxlength="16" autocomplete="off" />
+          <button type="submit" class="btn btn-accent" id="btnAddPlayer">Add</button>
+        </form>
+        <ul class="roster-list" id="rosterList"></ul>
       </div>
     </div>
-    <button class="btn push" id="btnStart" type="button">Deal Hands (3 Roses + 1 Skull)</button>
-  </section>
-
-  <!-- PLACE CARD (Pass & Play) -->
-  <section class="phase" id="phPlace">
-    <div class="panel" style="text-align:center;">
-      <p class="ptitle" id="placeWho">PLAYER'S TURN</p>
-      <p class="sub">Choose a card to place face down on your stack.</p>
-      <div class="card-choices">
-        <button class="choice-btn" id="btnPlaceRose" type="button"><span class="ico" data-ic="rose" style="width:28px;height:28px;"></span><span class="choice-name">Rose</span><span class="choice-count" id="roseCount">3 left</span></button>
-        <button class="choice-btn" id="btnPlaceSkull" type="button"><span class="ico" data-ic="skull" style="width:28px;height:28px;"></span><span class="choice-name">Skull</span><span class="choice-count" id="skullCount">1 left</span></button>
-      </div>
-    </div>
-    <div class="btn-row push">
-      <button class="btn ghost" id="btnOpenBidding" type="button">Open Bidding Instead</button>
-      <button class="btn" id="btnConfirmPlace" type="button" disabled>Place Card</button>
-    </div>
-  </section>
-
-  <!-- BIDDING WAR -->
-  <section class="phase" id="phBidding">
-    <div class="panel" style="text-align:center;">
-      <p class="ptitle" id="bidderWho">BIDDING WAR</p>
-      <p class="sub">Raise the challenge or pass. Highest bidder must flip that many cards.</p>
-      <div class="bid-controls">
-        <button class="step-btn" id="btnBidDown" type="button">-</button>
-        <span class="bid-num" id="currentBidNum">1</span>
-        <button class="step-btn" id="btnBidUp" type="button">+</button>
-      </div>
-    </div>
-    <div class="btn-row push">
-      <button class="btn ghost" id="btnPassBid" type="button">Pass Bid</button>
-      <button class="btn" id="btnRaiseBid" type="button">Lock In Bid</button>
-    </div>
-  </section>
-
-  <!-- FLIP CARDS CHALLENGE -->
-  <section class="phase" id="phFlip">
-    <div class="panel" style="text-align:center;">
-      <p class="ptitle" id="challengerHeader">CHALLENGE IN PROGRESS</p>
-      <h1 class="title" id="flipGoal" style="color:var(--accent);font-size:1.3rem;">Flipped: 0 / 3</h1>
-      <p class="sub" id="flipRuleNote">Must flip all your own cards first, then pick from any player stack.</p>
-    </div>
-    <div class="panel">
-      <p class="ptitle">Table Stacks (Tap top card to reveal)</p>
-      <div class="table-mat" id="tableMat"></div>
-    </div>
-  </section>
-
-  <!-- ROUND OUTCOME -->
-  <section class="phase" id="phOutcome">
-    <div class="hero"><span class="ico" data-ic="trophy"></span></div>
-    <h1 class="title" id="outTitle">Round Resolved</h1>
-    <p class="sub" id="outSub">—</p>
-    <div class="panel">
-      <p class="ptitle">Standings (2 Points to Win)</p>
-      <ul class="rlist" id="scoreList" style="max-height:none;"></ul>
-    </div>
-    <button class="btn push" id="btnNextRound" type="button">Next Round</button>
-  </section>
-</main>
-
-<div class="curtain" id="curtain" aria-hidden="true">
-  <div class="cur-card">
-    <div class="hero" style="margin-bottom:.5rem;"><span class="ico" data-ic="lock" style="width:36px;height:36px;"></span></div>
-    <span class="cur-tag">SECRET HAND</span>
-    <h2 class="cur-name" id="curWho">Pass Phone</h2>
-    <p class="sub" style="margin-bottom:1.2rem;">Hold screen securely to place your card secretly.</p>
-    <button class="btn pulse" id="btnCurtainUnlock" type="button">I am ready</button>
   </div>
-</div>
 
-<script>
-(function(){
-"use strict";
-var LOCAL={home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
-skull:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M9 22h6M8 2a6 6 0 0 0-6 6c0 3 2 4 2 7h12c0-3 2-4 2-7a6 6 0 0 0-6-6"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>',
-rose:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M12 13v9M12 16l-3-2M12 18l3-2"/></svg>',
-trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M17 5h3a2 2 0 0 1-2 5M7 5H4a2 2 0 0 0 2 5"/></svg>',
-lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'};
-function ICO(k){return LOCAL[k]||'';}
-document.querySelectorAll('[data-ic]').forEach(function(el){el.innerHTML=ICO(el.getAttribute('data-ic'));});
-var PD={getPlayers:function(){try{return JSON.parse(localStorage.getItem("partydeck_players")||"[]");}catch(e){return[];}},
-setPlayers:function(a){try{localStorage.setItem("partydeck_players",JSON.stringify(a));}catch(e){} },
-exitToHub:function(){window.location.href="../../index.html";},
-vibrate:function(p){if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){} }};
-(function(){var t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}document.documentElement.setAttribute("data-theme",t);})();
-var Sfx={ctx:null,ok:function(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume();return !!this.ctx;},
-t:function(f,d,type,vol,delay){if(!this.ok())return;var c=this.ctx,t0=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();o.type=type||"square";o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(vol||.14,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d);},
-play:function(n){if(n==="click")this.t(880,.045,"square",.1);else if(n==="rose"){this.t(523,.08,"triangle",.15);this.t(659,.1,"triangle",.14,.06);}else if(n==="skull")this.t(160,.4,"sawtooth",.24);else if(n==="win"){this.t(523,.08,"triangle",.15);this.t(659,.08,"triangle",.15,.07);this.t(784,.14,"triangle",.15,.14);}}};
+  <!-- THEME SELECTOR DRAWER -->
+  <div class="pd-drawer" id="themeDrawer" aria-hidden="true">
+    <div class="pd-drawer-card">
+      <div class="pd-drawer-header">
+        <h2 style="font-size: 1.25rem;">Visual Palettes</h2>
+        <button class="btn btn-ghost btn-icon-only" id="btnCloseTheme" aria-label="Close Theme Drawer">
+          <span class="ico" data-ic="close"></span>
+        </button>
+      </div>
+      <div class="pd-drawer-body">
+        <div class="theme-grid" id="themeGrid">
+          <button class="btn theme-choice-btn" data-theme-id="nordic-slate">
+            <strong>Nordic Slate</strong>
+            <div class="theme-preview-dots">
+              <span class="theme-dot" style="background:#0e1117"></span>
+              <span class="theme-dot" style="background:#1f2633"></span>
+              <span class="theme-dot" style="background:#38bdf8"></span>
+            </div>
+          </button>
+          <button class="btn theme-choice-btn" data-theme-id="tokyo-sunset">
+            <strong>Tokyo Sunset</strong>
+            <div class="theme-preview-dots">
+              <span class="theme-dot" style="background:#120e24"></span>
+              <span class="theme-dot" style="background:#281f4a"></span>
+              <span class="theme-dot" style="background:#f97316"></span>
+            </div>
+          </button>
+          <button class="btn theme-choice-btn" data-theme-id="terracotta-clay">
+            <strong>Terracotta</strong>
+            <div class="theme-preview-dots">
+              <span class="theme-dot" style="background:#1c1815"></span>
+              <span class="theme-dot" style="background:#362f2a"></span>
+              <span class="theme-dot" style="background:#e07a5f"></span>
+            </div>
+          </button>
+          <button class="btn theme-choice-btn" data-theme-id="emerald-lounge">
+            <strong>Emerald Lounge</strong>
+            <div class="theme-preview-dots">
+              <span class="theme-dot" style="background:#071712"></span>
+              <span class="theme-dot" style="background:#15352b"></span>
+              <span class="theme-dot" style="background:#eab308"></span>
+            </div>
+          </button>
+          <button class="btn theme-choice-btn" data-theme-id="alpine-mist">
+            <strong>Alpine Mist</strong>
+            <div class="theme-preview-dots">
+              <span class="theme-dot" style="background:#f3f6fa"></span>
+              <span class="theme-dot" style="background:#e3eaf3"></span>
+              <span class="theme-dot" style="background:#2563eb"></span>
+            </div>
+          </button>
+          <button class="btn theme-choice-btn" data-theme-id="synthwave-84">
+            <strong>Synthwave '84</strong>
+            <div class="theme-preview-dots">
+              <span class="theme-dot" style="background:#100b1a"></span>
+              <span class="theme-dot" style="background:#291a43"></span>
+              <span class="theme-dot" style="background:#f43f8e"></span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-var roster=PD.getPlayers().slice(0,6);
-if(roster.length<3) roster=["Player 1","Player 2","Player 3"];
+  <!-- TOAST NOTIFICATION -->
+  <div class="pd-toast" id="pdToast">Notification</div>
 
-var S={
- hands:{}, stacks:{}, scores:{}, turnIdx:0, placedCount:0,
- currentBid:0, highestBidder:null, activeBidders:[], bidderIdx:0,
- chosenCardType:null, targetFlips:0, currentFlips:0, flippedLog:[]
-};
+  <script>
+    /* ==========================================================================
+       PARTYDECK CORE HUB CONTROLLER & SVG VECTOR REGISTRY (Zero Unicode Emojis)
+       ========================================================================== */
+    (function () {
+      "use strict";
 
-function $(id){return document.getElementById(id);}
-function hud(b,l,c){$('hudBadge').textContent=b;$('hudLabel').textContent=l;if(c!==undefined)$('hudCount').textContent=c;}
-function go(id){var all=document.querySelectorAll('.phase');for(var i=0;i<all.length;i++)all[i].classList.remove('on');$(id).classList.add('on');window.scrollTo(0,0);}
+      const ICONS = {
+        sparkle: '<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>',
+        fullscreen: '<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>',
+        palette: '<circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/>',
+        users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+        close: '<path d="M18 6 6 18M6 6l12 12"/>',
+        zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+        clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+        flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+        brush: '<path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/>',
+        crown: '<path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5z"/>',
+        skull: '<circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><path d="M8 20v2h8v-2M12.5 17l-.5-1-.5 1M16 20a3 3 0 0 0 3-3V9a7 7 0 1 0-14 0v8a3 3 0 0 0 3 3z"/>',
+        phone: '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+        eye: '<path d="2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+        beer: '<path d="M17 11h1a3 3 0 0 1 0 6h-1"/><path d="M9 12v6"/><path d="M13 12v6"/><path d="M5 8h12v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8z"/><path d="M5 8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2"/>'
+      };
 
-function renderRoster(){
- $('rList').innerHTML=roster.map(function(p,i){return '<li class="ritem"><span class="seat">#'+(i+1)+'</span><span class="nm">'+p+'</span><button type="button" data-del="'+i+'">'+ICO('close')+'</button></li>';}).join('');
- $('btnStart').disabled=roster.length<3;
- PD.setPlayers(roster);
-}
-$('rAdd').onclick=function(){var v=$('rInput').value.trim();if(v&&roster.indexOf(v)===-1&&roster.length<6){roster.push(v);$('rInput').value='';renderRoster();Sfx.play('click');}};
-$('rList').onclick=function(e){var b=e.target.closest('[data-del]');if(b){roster.splice(+b.dataset.del,1);renderRoster();Sfx.play('click');}};
+      function renderIcons() {
+        document.querySelectorAll("[data-ic]").forEach((el) => {
+          const key = el.getAttribute("data-ic");
+          if (ICONS[key]) {
+            el.innerHTML = `<svg viewBox="0 0 24 24">${ICONS[key]}</svg>`;
+          }
+        });
+      }
 
-$('btnStart').onclick=function(){
- S.hands={}; S.stacks={}; S.scores={}; S.turnIdx=0;
- roster.forEach(function(p){
-  S.hands[p]={roses:3,skulls:1};
-  S.stacks[p]=[];
-  S.scores[p]=0;
- });
- startPlacementRound();
-};
+      /* Master Game Configuration Registry */
+      const GAMES = [
+        {
+          id: "telestrations",
+          title: "Tele-Sketch",
+          tagline: "Draw, Guess, Laugh, Repeat",
+          category: "creative",
+          minP: 4, maxP: 12, time: "15-25m",
+          drink: true,
+          icon: "brush",
+          path: "games/telestrations/index.html"
+        },
+        {
+          id: "fake-artist",
+          title: "Fake Artist in NY",
+          tagline: "One Shared Masterpiece, One Impostor",
+          category: "creative",
+          minP: 4, maxP: 10, time: "15m",
+          drink: false,
+          icon: "brush",
+          path: "games/fake-artist/index.html"
+        },
+        {
+          id: "skull-digital",
+          title: "Skull Digital",
+          tagline: "Bluff, Bid, and Push Your Luck",
+          category: "quick",
+          minP: 3, maxP: 6, time: "15-20m",
+          drink: false,
+          icon: "skull",
+          path: "games/skull/index.html"
+        },
+        {
+          id: "coup-pocket",
+          title: "Coup: Pocket",
+          tagline: "Claim Roles, Collect Tax, Assassinate",
+          category: "quick",
+          minP: 2, maxP: 6, time: "15m",
+          drink: false,
+          icon: "crown",
+          path: "games/coup/index.html"
+        },
+        {
+          id: "dual-tele-relay",
+          title: "Parallel Drawing Relay",
+          tagline: "Simultaneous Multi-Phone Drawing Chains",
+          category: "multiphone",
+          minP: 6, maxP: 16, time: "15-20m",
+          drink: true,
+          icon: "phone",
+          path: "games/dual-tele-relay/index.html"
+        },
+        {
+          id: "bomb-countdown",
+          title: "Ticking Timebomb",
+          tagline: "Rapid Word Pass Before Detonation",
+          category: "arcade",
+          minP: 3, maxP: 12, time: "5-10m",
+          drink: true,
+          icon: "flame",
+          path: "games/bomb-countdown/index.html"
+        },
+        {
+          id: "two-rooms-spy",
+          title: "Two Rooms: Classified",
+          tagline: "2-Phone Hostage & President Swap",
+          category: "multiphone",
+          minP: 6, maxP: 14, time: "15m",
+          drink: false,
+          icon: "phone",
+          path: "games/two-rooms-spy/index.html"
+        },
+        {
+          id: "flappy-penalty",
+          title: "Flappy Gauntlet",
+          tagline: "Single-Tap Flight Arcade with Drink Dares",
+          category: "arcade",
+          minP: 2, maxP: 8, time: "5-10m",
+          drink: true,
+          icon: "zap",
+          path: "games/flappy-penalty/index.html"
+        },
+        {
+          id: "finger-roulette",
+          title: "Finger Roulette",
+          tagline: "Multi-Touch Electric Chooser",
+          category: "arcade",
+          minP: 2, maxP: 6, time: "2m",
+          drink: true,
+          icon: "zap",
+          path: "games/finger-roulette/index.html"
+        },
+        {
+          id: "wavelength-pocket",
+          title: "Mind Dial",
+          tagline: "Spectrum Guessing on the Secret Target",
+          category: "social",
+          minP: 4, maxP: 12, time: "15m",
+          drink: false,
+          icon: "eye",
+          path: "games/wavelength-pocket/index.html"
+        },
+        {
+          id: "chameleon-word",
+          title: "Chameleon Word",
+          tagline: "Blend in or Expose the Secret Coordinate",
+          category: "creative",
+          minP: 4, maxP: 8, time: "10m",
+          drink: false,
+          icon: "eye",
+          path: "games/word-chameleon/index.html"
+        },
+        {
+          id: "most-likely",
+          title: "Most Likely To...",
+          tagline: "Hot-Seat Anonymous & 3-2-1 Points",
+          category: "social",
+          minP: 3, maxP: 12, time: "10-20m",
+          drink: true,
+          icon: "users",
+          path: "games/most-likely/index.html"
+        }
+      ];
 
-function startPlacementRound(){
- S.placedCount=0;
- S.stacks={}; roster.forEach(function(p){ S.stacks[p]=[]; });
- promptPlacementTurn();
-}
+      /* Toast Helper */
+      function showToast(msg) {
+        const toast = document.getElementById("pdToast");
+        toast.textContent = msg;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2000);
+      }
 
-function promptPlacementTurn(){
- var who=roster[S.turnIdx % roster.length];
- $('curTag').textContent="SECRET PLACEMENT";
- $('curWho').textContent=who;
- $('curtain').classList.add('on');
- $('btnCurtainUnlock').onclick=function(){
-  $('curtain').classList.remove('on'); Sfx.play('click');
-  renderPlaceUI(who);
-  go('phPlace');
- };
-}
+      /* Theme Controller */
+      function setTheme(themeId) {
+        document.documentElement.setAttribute("data-theme", themeId);
+        try {
+          localStorage.setItem("partydeck_theme", themeId);
+        } catch (e) {}
 
-function renderPlaceUI(who){
- $('placeWho').textContent=who.toUpperCase()+"'S TURN";
- $('roseCount').textContent=S.hands[who].roses+" left";
- $('skullCount').textContent=S.hands[who].skulls+" left";
- $('btnPlaceRose').classList.toggle('dead',S.hands[who].roses<=0);
- $('btnPlaceSkull').classList.toggle('dead',S.hands[who].skulls<=0);
- $('btnPlaceRose').classList.remove('is-on');
- $('btnPlaceSkull').classList.remove('is-on');
- S.chosenCardType=null;
- $('btnConfirmPlace').disabled=true;
- $('btnOpenBidding').disabled = S.placedCount < roster.length;
- hud("PLACE",who);
-}
+        const metaTheme = document.getElementById("metaThemeColor");
+        const colors = {
+          "nordic-slate": "#0e1117",
+          "tokyo-sunset": "#120e24",
+          "terracotta-clay": "#1c1815",
+          "emerald-lounge": "#071712",
+          "alpine-mist": "#f3f6fa",
+          "synthwave-84": "#100b1a"
+        };
+        if (metaTheme && colors[themeId]) metaTheme.setAttribute("content", colors[themeId]);
 
-$('btnPlaceRose').onclick=function(){
- if(S.hands[roster[S.turnIdx%roster.length]].roses<=0)return;
- $('btnPlaceRose').classList.add('is-on'); $('btnPlaceSkull').classList.remove('is-on');
- S.chosenCardType='rose'; $('btnConfirmPlace').disabled=false; Sfx.play('click');
-};
-$('btnPlaceSkull').onclick=function(){
- if(S.hands[roster[S.turnIdx%roster.length]].skulls<=0)return;
- $('btnPlaceSkull').classList.add('is-on'); $('btnPlaceRose').classList.remove('is-on');
- S.chosenCardType='skull'; $('btnConfirmPlace').disabled=false; Sfx.play('click');
-};
+        document.querySelectorAll(".theme-choice-btn").forEach((btn) => {
+          btn.classList.toggle("is-active", btn.getAttribute("data-theme-id") === themeId);
+        });
+      }
 
-$('btnConfirmPlace').onclick=function(){
- var who=roster[S.turnIdx % roster.length];
- S.hands[who][S.chosenCardType==='rose'?'roses':'skulls']--;
- S.stacks[who].push(S.chosenCardType);
- S.placedCount++;
- Sfx.play('click'); PD.vibrate(20);
- S.turnIdx++;
- promptPlacementTurn();
-};
+      /* Player Roster Controller */
+      function getRoster() {
+        try {
+          return JSON.parse(localStorage.getItem("partydeck_players") || '["Alex", "Jordan", "Taylor"]');
+        } catch (e) {
+          return ["Alex", "Jordan", "Taylor"];
+        }
+      }
 
-$('btnOpenBidding').onclick=function(){
- S.currentBid=1;
- S.highestBidder=roster[S.turnIdx % roster.length];
- S.activeBidders=roster.slice();
- S.bidderIdx=S.turnIdx % roster.length;
- startBiddingRound();
-};
+      function saveRoster(list) {
+        try {
+          localStorage.setItem("partydeck_players", JSON.stringify(list));
+        } catch (e) {}
+        updateRosterUI();
+      }
 
-function startBiddingRound(){
- var totalCardsOnTable=0;
- roster.forEach(function(p){ totalCardsOnTable+=S.stacks[p].length; });
- 
- if(S.activeBidders.length===1 || S.currentBid>=totalCardsOnTable){
-  startChallenge(S.highestBidder, S.currentBid);
-  return;
- }
- 
- var who=S.activeBidders[S.bidderIdx % S.activeBidders.length];
- $('bidderWho').textContent="CURRENT BID: "+S.currentBid+" (BY "+S.highestBidder.toUpperCase()+")";
- $('currentBidNum').textContent=S.currentBid+1;
- hud("BIDDING",who,S.currentBid+" MAX");
- go('phBidding');
-}
+      function updateRosterUI() {
+        const list = getRoster();
+        const countText = `${list.length} Player${list.length === 1 ? "" : "s"}`;
+        document.getElementById("quickRosterText").textContent = `${countText} Active (${list.join(", ")})`;
+        document.getElementById("headerRosterCount").textContent = `Roster (${list.length})`;
 
-$('btnBidUp').onclick=function(){
- var total=0; roster.forEach(function(p){ total+=S.stacks[p].length; });
- var v=+ $('currentBidNum').textContent;
- if(v<total){ $('currentBidNum').textContent=v+1; Sfx.play('click'); }
-};
-$('btnBidDown').onclick=function(){
- var v=+ $('currentBidNum').textContent;
- if(v>S.currentBid+1){ $('currentBidNum').textContent=v-1; Sfx.play('click'); }
-};
-$('btnRaiseBid').onclick=function(){
- var who=S.activeBidders[S.bidderIdx % S.activeBidders.length];
- S.currentBid=+ $('currentBidNum').textContent;
- S.highestBidder=who;
- Sfx.play('click');
- S.bidderIdx++;
- startBiddingRound();
-};
-$('btnPassBid').onclick=function(){
- var who=S.activeBidders[S.bidderIdx % S.activeBidders.length];
- S.activeBidders.splice(S.bidderIdx % S.activeBidders.length, 1);
- Sfx.play('click');
- startBiddingRound();
-};
+        const rosterUl = document.getElementById("rosterList");
+        rosterUl.innerHTML = list
+          .map(
+            (p, i) => `
+          <li class="roster-item">
+            <span><strong>#${i + 1}</strong> ${p}</span>
+            <button class="btn btn-ghost btn-icon-only" style="width:32px;height:32px;min-height:32px;" data-del-idx="${i}" aria-label="Remove ${p}">
+              <span class="ico ico-sm" data-ic="close"></span>
+            </button>
+          </li>`
+          )
+          .join("");
+        renderIcons();
+      }
 
-function startChallenge(challenger, goal){
- S.targetFlips=goal;
- S.currentFlips=0;
- S.flippedLog=[];
- hud("CHALLENGE",challenger,goal+" TO FLIP");
- $('challengerHeader').textContent="CHALLENGER: "+challenger.toUpperCase();
- renderTableMat(challenger);
- go('phFlip');
-}
+      /* Game Cards Renderer */
+      function renderGames(activeCategory) {
+        const container = document.getElementById("gamesContainer");
+        const filtered = activeCategory === "all" ? GAMES : GAMES.filter((g) => {
+          if (activeCategory === "quick") return g.category === "quick" || g.minP <= 3;
+          if (activeCategory === "social") return g.category === "social" || g.maxP >= 8;
+          if (activeCategory === "drinking") return g.drink;
+          if (activeCategory === "creative") return g.category === "creative";
+          if (activeCategory === "multiphone") return g.category === "multiphone";
+          if (activeCategory === "arcade") return g.category === "arcade";
+          return true;
+        });
 
-function renderTableMat(challenger){
- $('flipGoal').textContent="Flipped: "+S.currentFlips+" / "+S.targetFlips;
- var ownHasCards = S.stacks[challenger].length > 0;
- $('flipRuleNote').textContent = ownHasCards ? "Must flip all cards from your own stack first." : "Pick any remaining stack on the table.";
- 
- $('tableMat').innerHTML=roster.map(function(p){
-  var stackCount=S.stacks[p].length;
-  var canFlip = ownHasCards ? (p===challenger && stackCount>0) : (stackCount>0);
-  return '<div class="player-stack-row'+(canFlip?' can-flip':'')+'" data-p="'+p+'"><div class="stack-info"><span class="stack-name">'+p+'</span><span class="stack-count">'+stackCount+' cards</span></div><div id="pill-'+p+'"></div></div>';
- }).join('');
-}
+        container.innerHTML = filtered
+          .map(
+            (g) => `
+          <a href="${g.path}" class="game-card">
+            <div class="card-head">
+              <div class="card-icon-box">
+                <span class="ico" data-ic="${g.icon}"></span>
+              </div>
+              <span class="card-category-badge">${g.category}</span>
+            </div>
+            <div class="card-body">
+              <h3>${g.title}</h3>
+              <p class="card-tagline">${g.tagline}</p>
+            </div>
+            <div class="card-meta-bar">
+              <span class="meta-tag"><span class="ico ico-sm" data-ic="users"></span> ${g.minP}–${g.maxP}P</span>
+              <span class="meta-tag"><span class="ico ico-sm" data-ic="clock"></span> ${g.time}</span>
+              ${g.drink ? '<span class="meta-tag drink-alert"><span class="ico ico-sm" data-ic="beer"></span> Drink</span>' : ""}
+            </div>
+          </a>`
+          )
+          .join("");
+        renderIcons();
+      }
 
-$('tableMat').onclick=function(e){
- var row=e.target.closest('[data-p]'); if(!row||!row.classList.contains('can-flip'))return;
- var p=row.dataset.p;
- var card=S.stacks[p].pop();
- S.currentFlips++;
- 
- if(card==='skull'){
-  Sfx.play('skull'); PD.vibrate([120,60,120]);
-  $('outTitle').textContent="SKULL HIT! Challenge Failed";
-  $('outSub').textContent=S.highestBidder+" flipped a SKULL from "+p+"'s stack and loses 1 card from hand.";
-  // Lose random card
-  if(S.hands[S.highestBidder].skulls>0 && Math.random()>.7) S.hands[S.highestBidder].skulls--;
-  else if(S.hands[S.highestBidder].roses>0) S.hands[S.highestBidder].roses--;
-  resolveRoundOutcome(false);
- } else {
-  Sfx.play('rose'); PD.vibrate(20);
-  if(S.currentFlips>=S.targetFlips){
-   S.scores[S.highestBidder]++;
-   $('outTitle').textContent="CHALLENGE COMPLETE! +1 Point";
-   $('outSub').textContent=S.highestBidder+" successfully flipped "+S.targetFlips+" Roses without hitting a Skull.";
-   resolveRoundOutcome(true);
-  } else {
-   renderTableMat(S.highestBidder);
-  }
- }
-};
+      /* DOM Initializer */
+      document.addEventListener("DOMContentLoaded", () => {
+        // 1. Initial Theme Bootstrap
+        const savedTheme = localStorage.getItem("partydeck_theme") || "nordic-slate";
+        setTheme(savedTheme);
 
-function resolveRoundOutcome(success){
- var sorted=roster.slice().sort(function(a,b){return S.scores[b]-S.scores[a];});
- $('scoreList').innerHTML=sorted.map(function(p,i){
-  return '<li class="ritem"><span class="seat">#'+(i+1)+'</span><span class="nm">'+p+'</span><span style="color:var(--accent);font-weight:800;">'+S.scores[p]+' / 2 PTS</span></li>';
- }).join('');
- 
- if(S.scores[S.highestBidder]>=2){
-  $('outTitle').textContent=S.highestBidder.toUpperCase()+" WINS THE GAME!";
-  $('btnNextRound').textContent="New Match";
-  $('btnNextRound').onclick=function(){ renderRoster(); hud("SKULL","Setup"); go('phSetup'); Sfx.play('click'); };
- } else {
-  $('btnNextRound').textContent="Next Round";
-  $('btnNextRound').onclick=function(){ startPlacementRound(); };
- }
- 
- hud("RESOLVED","Round Over");
- go('phOutcome');
- if(success) Sfx.play('win');
-}
+        // 2. Initial Roster & Game Grid
+        updateRosterUI();
+        renderGames("all");
+        renderIcons();
 
-$('btnHub').onclick=function(){PD.exitToHub();};
+        // 3. Category Filter Switches
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("is-active"));
+            btn.classList.add("is-active");
+            renderGames(btn.getAttribute("data-cat"));
+          });
+        });
 
-renderRoster();
-})();
-</script>
+        // 4. Fullscreen API
+        const fsBtn = document.getElementById("btnToggleFullscreen");
+        fsBtn.addEventListener("click", () => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {
+              showToast("Add to Home Screen for Fullscreen on iOS");
+            });
+          } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+          }
+        });
+
+        // 5. Drawer Triggers
+        const rosterDrawer = document.getElementById("rosterDrawer");
+        const themeDrawer = document.getElementById("themeDrawer");
+
+        document.getElementById("btnOpenRosterDrawer").onclick = () => rosterDrawer.classList.add("is-open");
+        document.getElementById("btnEditRosterQuick").onclick = () => rosterDrawer.classList.add("is-open");
+        document.getElementById("btnCloseRoster").onclick = () => rosterDrawer.classList.remove("is-open");
+
+        document.getElementById("btnOpenThemeDrawer").onclick = () => themeDrawer.classList.add("is-open");
+        document.getElementById("btnCloseTheme").onclick = () => themeDrawer.classList.remove("is-open");
+
+        // Close drawers when clicking background
+        [rosterDrawer, themeDrawer].forEach((drawer) => {
+          drawer.addEventListener("click", (e) => {
+            if (e.target === drawer) drawer.classList.remove("is-open");
+          });
+        });
+
+        // Theme Choice Buttons
+        document.querySelectorAll(".theme-choice-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const tid = btn.getAttribute("data-theme-id");
+            setTheme(tid);
+            showToast(`Theme switched to ${btn.querySelector("strong").textContent}`);
+          });
+        });
+
+        // Roster Add & Delete
+        document.getElementById("rosterForm").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const input = document.getElementById("rosterInput");
+          const val = input.value.trim();
+          if (val) {
+            const list = getRoster();
+            if (!list.includes(val)) {
+              list.push(val);
+              saveRoster(list);
+              input.value = "";
+              showToast(`Added ${val}`);
+            }
+          }
+        });
+
+        document.getElementById("rosterList").addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-del-idx]");
+          if (btn) {
+            const idx = parseInt(btn.getAttribute("data-del-idx"), 10);
+            const list = getRoster();
+            const removed = list.splice(idx, 1);
+            saveRoster(list);
+            showToast(`Removed ${removed}`);
+          }
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
