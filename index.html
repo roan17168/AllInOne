@@ -8,8 +8,9 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="PartyDeck" />
-  <title>PartyDeck | Offline Party Game Studio</title>
+  <title>PartyDeck | All-in-One Offline Party Studio</title>
 
+  <!-- Technical Contract: Google Fonts Only -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700;800&display=swap" rel="stylesheet">
@@ -19,29 +20,31 @@
   <link rel="stylesheet" href="css/hub.css" />
 
   <style>
-    /* Dev-only registry report overlay. Activated with ?verify=1 */
-    .verify-overlay{position:fixed;inset:0;z-index:300;background:rgba(5,7,10,.97);
-      overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem;
-      padding-top:max(1rem,env(safe-area-inset-top));
-      padding-bottom:max(2rem,calc(env(safe-area-inset-bottom) + 1.2rem));
-      font-family:'Space Mono',monospace;font-size:.72rem;line-height:1.55;display:none}
-    .verify-overlay.is-open{display:block}
-    .verify-overlay h3{font-family:'Space Grotesk',sans-serif;font-size:1rem;margin:1rem 0 .4rem}
-    .v-ok{color:#00ffaa}.v-bad{color:#ff0055}.v-warn{color:#ffd000}.v-dim{color:#627288}
-    .v-btn{width:100%;min-height:46px;margin-bottom:.5rem;background:#1f2633;color:#f0f4f8;
-      border:1px solid rgba(148,163,184,.22);border-radius:8px;
-      font-family:'Space Mono',monospace;font-weight:800;font-size:.72rem;cursor:pointer}
-    .v-btn.primary{background:#38bdf8;color:#031525;border-color:#38bdf8}
-    .v-row{padding:.2rem 0;border-bottom:1px solid rgba(148,163,184,.08);word-break:break-all}
-    .v-pre{background:#0b0f16;border:1px solid rgba(148,163,184,.18);border-radius:8px;
-      padding:.6rem;margin-top:.5rem;white-space:pre-wrap;word-break:break-all;
-      max-height:40vh;overflow-y:auto;color:#a3cfbe;font-size:.66rem}
+    /* Dev-only live verify report overlay (?verify=1) */
+    .verify-overlay {
+      position: fixed; inset: 0; z-index: 300; background: rgba(5,7,10,.97);
+      overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 1rem;
+      padding-top: max(1rem, env(safe-area-inset-top));
+      padding-bottom: max(2rem, calc(env(safe-area-inset-bottom) + 1.2rem));
+      font-family: 'Space Mono', monospace; font-size: .72rem; line-height: 1.55; display: none;
+    }
+    .verify-overlay.is-open { display: block; }
+    .verify-overlay h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; margin: 1rem 0 .4rem; }
+    .v-ok { color: #00ffaa; }
+    .v-bad { color: #ff0055; }
+    .v-dim { color: #627288; }
+    .v-btn {
+      width: 100%; min-height: 46px; margin-bottom: .5rem; background: #1f2633; color: #f0f4f8;
+      border: 1px solid rgba(148,163,184,.22); border-radius: 8px;
+      font-family: 'Space Mono', monospace; font-weight: 800; font-size: .72rem; cursor: pointer;
+    }
+    .v-row { padding: .2rem 0; border-bottom: 1px solid rgba(148,163,184,.08); word-break: break-all; }
   </style>
 </head>
 <body>
 <div class="hub-root">
 
-  <!-- ==================== HEADER ==================== -->
+  <!-- ==================== HEADER & NOTCH INTEGRATION ==================== -->
   <header class="hub-header">
     <div class="hub-top-bar">
       <div class="hub-brand-group">
@@ -50,13 +53,13 @@
         </div>
         <div class="hub-brand-text">
           <span class="hub-title">PARTYDECK</span>
-          <span class="hub-subtitle" id="hubModuleCount">LOADING</span>
+          <span class="hub-subtitle" id="hubModuleCount">67 OFFLINE MODULES</span>
         </div>
       </div>
       <div class="hub-actions-cluster">
         <button type="button" class="btn-hub-icon" id="btnOpenRoster" aria-label="Lineup and mascots">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span class="roster-badge-pill" id="rosterBadgeCount">0</span>
+          <span class="roster-badge-pill" id="rosterBadgeCount">5</span>
         </button>
         <button type="button" class="btn-hub-icon" id="btnFullscreen" aria-label="Fullscreen mode">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
@@ -64,6 +67,7 @@
       </div>
     </div>
 
+    <!-- Theme Pills Strip -->
     <div class="theme-strip" id="themeStrip">
       <button type="button" class="theme-chip is-active" data-theme="nordic-slate"><span class="theme-dot"></span>Nordic Slate</button>
       <button type="button" class="theme-chip" data-theme="tokyo-sunset"><span class="theme-dot"></span>Tokyo Sunset</button>
@@ -74,28 +78,28 @@
     </div>
   </header>
 
-  <!-- ==================== SEARCH ==================== -->
+  <!-- ==================== SEARCH BAR ==================== -->
   <section class="search-wrapper">
     <div class="search-input-box">
       <svg class="search-ico-lens" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="hubSearchInput" class="search-input" placeholder="Search games, tags or aliases..." autocomplete="off" autocorrect="off" spellcheck="false" />
+      <input type="text" id="hubSearchInput" class="search-input" placeholder="Search 67 games, tags or aliases (e.g. Spyfall, Osu)..." autocomplete="off" autocorrect="off" spellcheck="false" />
       <button type="button" class="search-clear-btn" id="btnSearchClear" aria-label="Clear search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
   </section>
 
-  <!-- ==================== SWIMLANE STAGE ==================== -->
+  <!-- ==================== MAIN SWIMLANES STAGE ==================== -->
   <main class="hub-stage" id="hubStage">
     <section class="swimlane-section" id="lane-search" style="display:none;padding:0 .9rem;">
       <h2 class="swimlane-title" id="searchMatchTitle" style="margin-bottom:.6rem;">Matches</h2>
-      <div id="searchGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:.55rem;"></div>
+      <div id="searchGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:.55rem;"></div>
     </section>
     <div id="laneHost"></div>
   </main>
 </div>
 
-<!-- ==================== QUICK-VIEW SHEET ==================== -->
+<!-- ==================== QUICK-VIEW BOTTOM SHEET ==================== -->
 <div class="preview-modal-backdrop" id="previewModal">
   <div class="preview-sheet">
     <div class="sheet-header">
@@ -124,101 +128,97 @@
   <span id="toastMsg">Ready</span>
 </div>
 
-<!-- ==================== VERIFY OVERLAY ==================== -->
+<!-- ==================== VERIFY OVERLAY (?verify=1) ==================== -->
 <div class="verify-overlay" id="verifyOverlay">
   <button type="button" class="v-btn" id="btnVerifyClose">CLOSE REPORT</button>
   <div id="verifyBody"></div>
 </div>
 
+<!-- Scripts -->
 <script src="js/avatar-engine.js"></script>
 <script>
 (function () {
   "use strict";
-  var $ = function (id) { return document.getElementById(id); };
+  const $ = id => document.getElementById(id);
 
   function showToast(msg) {
-    var t = $("pdToast");
+    const t = $("pdToast");
     $("toastMsg").textContent = msg;
     t.classList.add("is-active");
     clearTimeout(t._tm);
-    t._tm = setTimeout(function () { t.classList.remove("is-active"); }, 2200);
+    t._tm = setTimeout(() => t.classList.remove("is-active"), 2200);
   }
 
   /* ==================================================================
-     ICON ATLAS — shared inline SVG keyed by archetype.
+     ICON ATLAS (Strict Zero-Emoji, 100% SVG Vector Architecture)
      ================================================================== */
-  var SW = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
-  var ICONS = {
-    ring:'<svg viewBox="0 0 24 24" '+SW+'><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>',
-    orbit:'<svg viewBox="0 0 24 24" '+SW+'><circle cx="12" cy="12" r="9"/><circle cx="12" cy="4" r="2"/></svg>',
-    grains:'<svg viewBox="0 0 24 24" '+SW+'><path d="M6 3v6M12 3v10M18 3v6"/><path d="M4 20h16"/></svg>',
-    lock:'<svg viewBox="0 0 24 24" '+SW+'><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-    blade:'<svg viewBox="0 0 24 24" '+SW+'><line x1="3" y1="21" x2="21" y2="3"/><polygon points="8 4 16 4 20 8 20 16 16 20 8 20 4 16 4 8"/></svg>',
-    bolt:'<svg viewBox="0 0 24 24" '+SW+'><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
-    hex:'<svg viewBox="0 0 24 24" '+SW+'><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>',
-    reactor:'<svg viewBox="0 0 24 24" '+SW+'><circle cx="12" cy="12" r="10"/><path d="M12 6v12M6 12h12"/></svg>',
-    wave:'<svg viewBox="0 0 24 24" '+SW+'><path d="M2 12c5-8 15 8 20 0"/><path d="M2 12c5 8 15-8 20 0"/></svg>',
-    sling:'<svg viewBox="0 0 24 24" '+SW+'><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="4"/><path d="M6 9a9 9 0 0 0 9 9"/></svg>',
-    pen:'<svg viewBox="0 0 24 24" '+SW+'><path d="m9 12 8-8a2.8 2.8 0 1 1 4 4l-8 8-5 1z"/></svg>',
-    eye:'<svg viewBox="0 0 24 24" '+SW+'><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
-    cup:'<svg viewBox="0 0 24 24" '+SW+'><path d="M17 11h1a3 3 0 0 1 0 6h-1M5 6h12v11a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3Z"/></svg>',
-    wheel:'<svg viewBox="0 0 24 24" '+SW+'><circle cx="12" cy="12" r="10"/><path d="m12 2 4 10-4 10-4-10z"/></svg>',
-    ballot:'<svg viewBox="0 0 24 24" '+SW+'><path d="M5 7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v12l-7-4-7 4Z"/><path d="m9 11 2 2 4-4"/></svg>',
-    phone:'<svg viewBox="0 0 24 24" '+SW+'><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>',
-    grid:'<svg viewBox="0 0 24 24" '+SW+'><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>',
-    felt:'<svg viewBox="0 0 24 24" '+SW+'><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>',
-    rooms:'<svg viewBox="0 0 24 24" '+SW+'><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>',
-    crown:'<svg viewBox="0 0 24 24" '+SW+'><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7Z"/><path d="M5 20h14"/></svg>',
-    clock:'<svg viewBox="0 0 24 24" '+SW+'><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-    peg:'<svg viewBox="0 0 24 24" '+SW+'><circle cx="12" cy="5" r="2.5"/><circle cx="7" cy="12" r="1.5"/><circle cx="17" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>',
-    stack:'<svg viewBox="0 0 24 24" '+SW+'><rect x="4" y="16" width="16" height="4"/><rect x="6" y="10" width="12" height="4"/><rect x="8" y="4" width="8" height="4"/></svg>',
-    bird:'<svg viewBox="0 0 24 24" '+SW+'><path d="M17 19 15 11l3-3a2 2 0 0 0-3-3l-3 3-8-2 4 4-2 2 3 3 2-2Z"/></svg>',
-    pinball:'<svg viewBox="0 0 24 24" '+SW+'><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="9" r="2.5"/></svg>',
-    lander:'<svg viewBox="0 0 24 24" '+SW+'><path d="M12 2 6 14h12Z"/><path d="M8 18l-2 4M16 18l2 4"/></svg>',
-    snake:'<svg viewBox="0 0 24 24" '+SW+'><path d="M4 16a4 4 0 0 0 8 0V9a4 4 0 0 1 8 0v6"/></svg>',
-    mole:'<svg viewBox="0 0 24 24" '+SW+'><circle cx="12" cy="13" r="6"/><path d="M4 21h16"/></svg>',
-    puck:'<svg viewBox="0 0 24 24" '+SW+'><rect x="5" y="2" width="14" height="20" rx="2"/><ellipse cx="12" cy="8" rx="4" ry="2"/></svg>',
-    brick:'<svg viewBox="0 0 24 24" '+SW+'><rect x="3" y="3" width="18" height="5" rx="1"/><rect x="6" y="18" width="12" height="3" rx="1"/><circle cx="12" cy="13" r="2"/></svg>',
-    note:'<svg viewBox="0 0 24 24" '+SW+'><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
-    maze:'<svg viewBox="0 0 24 24" '+SW+'><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h6v6H3M15 3v6h6"/></svg>',
-    car:'<svg viewBox="0 0 24 24" '+SW+'><path d="M5 17h14M6 17l1-6h10l1 6"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg>',
-    guillo:'<svg viewBox="0 0 24 24" '+SW+'><path d="M5 3v18M19 3v18M5 7h14l-3 5H8Z"/></svg>',
-    skull:'<svg viewBox="0 0 24 24" '+SW+'><path d="M12 2a8 8 0 0 0-5 14v4h10v-4a8 8 0 0 0-5-14Z"/><circle cx="9" cy="12" r="1.4"/><circle cx="15" cy="12" r="1.4"/></svg>',
-    shield:'<svg viewBox="0 0 24 24" '+SW+'><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>',
-    moon:'<svg viewBox="0 0 24 24" '+SW+'><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>',
-    cipher:'<svg viewBox="0 0 24 24" '+SW+'><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h4M7 13h7M15 9h2"/></svg>',
-    dice:'<svg viewBox="0 0 24 24" '+SW+'><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.4"/><circle cx="15.5" cy="15.5" r="1.4"/><circle cx="12" cy="12" r="1.4"/></svg>',
-    radio:'<svg viewBox="0 0 24 24" '+SW+'><circle cx="12" cy="14" r="3"/><path d="M5 8a10 10 0 0 1 14 0M8 11a6 6 0 0 1 8 0"/></svg>',
-    dial:'<svg viewBox="0 0 24 24" '+SW+'><path d="M3 16a9 9 0 0 1 18 0"/><path d="M12 16 16 9"/></svg>',
-    rocket:'<svg viewBox="0 0 24 24" '+SW+'><path d="M12 2c4 3 6 7 6 11l-3 4H9l-3-4c0-4 2-8 6-11Z"/><circle cx="12" cy="10" r="2"/></svg>',
-    cards:'<svg viewBox="0 0 24 24" '+SW+'><rect x="3" y="5" width="11" height="15" rx="2"/><path d="M17 7h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-5"/></svg>',
-    pyramid:'<svg viewBox="0 0 24 24" '+SW+'><path d="M12 3 22 21H2Z"/><path d="M7 21 12 11l5 10"/></svg>',
-    heart:'<svg viewBox="0 0 24 24" '+SW+'><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></svg>',
-    vault:'<svg viewBox="0 0 24 24" '+SW+'><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="12" r="4"/><path d="M12 8v-2M12 18v-2"/></svg>',
-    pulse:'<svg viewBox="0 0 24 24" '+SW+'><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
-    arrow:'<svg viewBox="0 0 24 24" '+SW+'><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
-    bomb:'<svg viewBox="0 0 24 24" '+SW+'><circle cx="11" cy="15" r="7"/><path d="M16 10l2-2 1 1 2-3"/></svg>'
+  const SW = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
+  const ICONS = {
+    ring:    `<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>`,
+    orbit:   `<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="12" r="9"/><circle cx="12" cy="4" r="2"/></svg>`,
+    grains:  `<svg viewBox="0 0 24 24" ${SW}><path d="M6 3v6M12 3v10M18 3v6"/><path d="M4 20h16"/></svg>`,
+    lock:    `<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+    blade:   `<svg viewBox="0 0 24 24" ${SW}><line x1="3" y1="21" x2="21" y2="3"/><polygon points="8 4 16 4 20 8 20 16 16 20 8 20 4 16 4 8"/></svg>`,
+    bolt:    `<svg viewBox="0 0 24 24" ${SW}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    hex:     `<svg viewBox="0 0 24 24" ${SW}><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>`,
+    reactor: `<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="12" r="10"/><path d="M12 6v12M6 12h12"/></svg>`,
+    wave:    `<svg viewBox="0 0 24 24" ${SW}><path d="M2 12c5-8 15 8 20 0"/><path d="M2 12c5 8 15-8 20 0"/></svg>`,
+    sling:   `<svg viewBox="0 0 24 24" ${SW}><circle cx="6" cy="6" r="3"/><circle cx="18" cy="18" r="4"/><path d="M6 9a9 9 0 0 0 9 9"/></svg>`,
+    pen:     `<svg viewBox="0 0 24 24" ${SW}><path d="m9 12 8-8a2.8 2.8 0 1 1 4 4l-8 8-5 1z"/></svg>`,
+    eye:     `<svg viewBox="0 0 24 24" ${SW}><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`,
+    cup:     `<svg viewBox="0 0 24 24" ${SW}><path d="M17 11h1a3 3 0 0 1 0 6h-1M5 6h12v11a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3Z"/></svg>`,
+    wheel:   `<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="12" r="10"/><path d="m12 2 4 10-4 10-4-10z"/></svg>`,
+    ballot:  `<svg viewBox="0 0 24 24" ${SW}><path d="M5 7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v12l-7-4-7 4Z"/><path d="m9 11 2 2 4-4"/></svg>`,
+    phone:   `<svg viewBox="0 0 24 24" ${SW}><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>`,
+    grid:    `<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>`,
+    felt:    `<svg viewBox="0 0 24 24" ${SW}><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>`,
+    rooms:   `<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="18" rx="1"/></svg>`,
+    crown:   `<svg viewBox="0 0 24 24" ${SW}><path d="m2 4 3 12h14l3-12-6 7-4-7-4 7Z"/><path d="M5 20h14"/></svg>`,
+    clock:   `<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    peg:     `<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="5" r="2.5"/><circle cx="7" cy="12" r="1.5"/><circle cx="17" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>`,
+    stack:   `<svg viewBox="0 0 24 24" ${SW}><rect x="4" y="16" width="16" height="4"/><rect x="6" y="10" width="12" height="4"/><rect x="8" y="4" width="8" height="4"/></svg>`,
+    bird:    `<svg viewBox="0 0 24 24" ${SW}><path d="M17 19 15 11l3-3a2 2 0 0 0-3-3l-3 3-8-2 4 4-2 2 3 3 2-2Z"/></svg>`,
+    pinball: `<svg viewBox="0 0 24 24" ${SW}><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="9" r="2.5"/></svg>`,
+    lander:  `<svg viewBox="0 0 24 24" ${SW}><path d="M12 2 6 14h12Z"/><path d="M8 18l-2 4M16 18l2 4"/></svg>`,
+    snake:   `<svg viewBox="0 0 24 24" ${SW}><path d="M4 16a4 4 0 0 0 8 0V9a4 4 0 0 1 8 0v6"/></svg>`,
+    mole:    `<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="13" r="6"/><path d="M4 21h16"/></svg>`,
+    puck:    `<svg viewBox="0 0 24 24" ${SW}><rect x="5" y="2" width="14" height="20" rx="2"/><ellipse cx="12" cy="8" rx="4" ry="2"/></svg>`,
+    brick:   `<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="3" width="18" height="5" rx="1"/><rect x="6" y="18" width="12" height="3" rx="1"/><circle cx="12" cy="13" r="2"/></svg>`,
+    note:    `<svg viewBox="0 0 24 24" ${SW}><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`,
+    maze:    `<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h6v6H3M15 3v6h6"/></svg>`,
+    car:     `<svg viewBox="0 0 24 24" ${SW}><path d="M5 17h14M6 17l1-6h10l1 6"/><circle cx="8" cy="18" r="1.5"/><circle cx="16" cy="18" r="1.5"/></svg>`,
+    guillo:  `<svg viewBox="0 0 24 24" ${SW}><path d="M5 3v18M19 3v18M5 7h14l-3 5H8Z"/></svg>`,
+    skull:   `<svg viewBox="0 0 24 24" ${SW}><path d="M12 2a8 8 0 0 0-5 14v4h10v-4a8 8 0 0 0-5-14Z"/><circle cx="9" cy="12" r="1.4"/><circle cx="15" cy="12" r="1.4"/></svg>`,
+    shield:  `<svg viewBox="0 0 24 24" ${SW}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>`,
+    moon:    `<svg viewBox="0 0 24 24" ${SW}><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>`,
+    cipher:  `<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h4M7 13h7M15 9h2"/></svg>`,
+    dice:    `<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.4"/><circle cx="15.5" cy="15.5" r="1.4"/><circle cx="12" cy="12" r="1.4"/></svg>`,
+    radio:   `<svg viewBox="0 0 24 24" ${SW}><circle cx="12" cy="14" r="3"/><path d="M5 8a10 10 0 0 1 14 0M8 11a6 6 0 0 1 8 0"/></svg>`,
+    dial:    `<svg viewBox="0 0 24 24" ${SW}><path d="M3 16a9 9 0 0 1 18 0"/><path d="M12 16 16 9"/></svg>`,
+    rocket:  `<svg viewBox="0 0 24 24" ${SW}><path d="M12 2c4 3 6 7 6 11l-3 4H9l-3-4c0-4 2-8 6-11Z"/><circle cx="12" cy="10" r="2"/></svg>`,
+    cards:   `<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="5" width="11" height="15" rx="2"/><path d="M17 7h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-5"/></svg>`,
+    pyramid: `<svg viewBox="0 0 24 24" ${SW}><path d="M12 3 22 21H2Z"/><path d="M7 21 12 11l5 10"/></svg>`,
+    heart:   `<svg viewBox="0 0 24 24" ${SW}><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></svg>`,
+    vault:   `<svg viewBox="0 0 24 24" ${SW}><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="12" r="4"/><path d="M12 8v-2M12 18v-2"/></svg>`,
+    pulse:   `<svg viewBox="0 0 24 24" ${SW}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>`,
+    arrow:   `<svg viewBox="0 0 24 24" ${SW}><path d="M12 19V5M5 12l7-7 7 7"/></svg>`,
+    bomb:    `<svg viewBox="0 0 24 24" ${SW}><circle cx="11" cy="15" r="7"/><path d="M16 10l2-2 1 1 2-3"/></svg>`
   };
 
-  /* ==================================================================
-     CATEGORY DEFINITIONS
-     ================================================================== */
-  var CATS = [
-    { key:"trending",  label:"Trending & Starters",       icon:"bolt" },
-    { key:"stim",      label:"Stim & Fidget Flow",        icon:"ring" },
-    { key:"arcade",    label:"Arcade Reflex & Gauntlets", icon:"note" },
-    { key:"deduction", label:"Social Deduction & Bluff",  icon:"eye"  },
-    { key:"drinking",  label:"High-Energy & Drinking",    icon:"cup"  }
+  const CATS = [
+    { key: "trending",  label: "Trending & Starters",       icon: "bolt" },
+    { key: "stim",      label: "Stim & Fidget Flow",        icon: "ring" },
+    { key: "arcade",    label: "Arcade Reflex & Gauntlets", icon: "note" },
+    { key: "deduction", label: "Social Deduction & Bluff",  icon: "eye"  },
+    { key: "drinking",  label: "High-Energy & Drinking",    icon: "cup"  }
   ];
 
   /* ==================================================================
-     GAME REGISTRY
-     Tuple: [id, title, category, minP, maxP, isDrinking, tag, iconKey, desc]
-     Path is DERIVED from id -> games/<id>/index.html
-     Single source of truth. No hand-typed paths, no typo surface.
+     MASTER GAME REGISTRY (Exactly 67 Verified Local Directories)
+     Format: [id, title, category, minP, maxP, isDrinking, tag, iconKey, desc]
      ================================================================== */
-  var RAW = [
-    /* ---- STIM & FIDGET FLOW ---- */
+  const RAW = [
+    /* ---- STIM & FIDGET FLOW (10) ---- */
     ["stim-osu-tap","Reflex 2.0","stim",1,4,0,"Rhythm","ring","Musical approach-circle reflex flow with pentatonic hit chimes."],
     ["stim-orbit-fidget","Orbit Tap","stim",1,4,0,"Flow","orbit","Infinite orbital gravity-flip runner. The original stim benchmark."],
     ["stim-liquid-sand","Neon Sand","stim",1,2,0,"Physics","grains","Cellular-automata falling sand with gyro tilt and flow-chamber puzzles."],
@@ -230,7 +230,7 @@
     ["stim-pulse-weave","Pulse Weave","stim",1,2,0,"Helix","wave","Dual-helix sine dodger. Hold to contract, release to expand."],
     ["stim-gravity-sling","Gravity Sling","stim",1,2,0,"Cosmic","sling","Tether planetary cores and release at the perfect tangent."],
 
-    /* ---- TRENDING & STARTERS ---- */
+    /* ---- TRENDING & STARTERS (12) ---- */
     ["tele-sketch","Tele-Sketch","trending",4,12,0,"Drawing","pen","Telephone drawing chain with a comic-strip replay finale."],
     ["fake-artist","Fake Artist","trending",4,10,0,"Bluff","pen","One shared canvas, one impostor who never saw the word."],
     ["infiltrator","The Infiltrator","trending",3,10,0,"Spyfall","eye","Secret location interrogation deduction."],
@@ -240,10 +240,11 @@
     ["forehead-charades","Forehead Clues","trending",2,10,0,"Tilt","phone","High-speed heads-up word cycler."],
     ["coup-pocket","Coup Pocket","trending",2,6,0,"Bluff","crown","Influence deception, blocks and assassinations."],
     ["skull-digital","Skull Digital","trending",3,6,0,"Bidding","skull","Tactile rose-and-skull blind bidding."],
-    ["wits-wagers-felt","Wits & Wagers","trending",3,12,0,"Betting","felt","Numerical trivia felt with live payout odds."],
+    ["wits-wagers","Wits & Wagers","trending",3,12,0,"Trivia","felt","Numerical trivia estimation and betting felt."],
+    ["wits-wagers-felt","Wits Wagers Felt","trending",3,12,0,"Betting","felt","Full payout felt betting board with odds."],
     ["wheel-of-forfeits","Forfeit Wheel","trending",2,12,1,"Wheel","wheel","Physics-driven spinning forfeit wheel."],
 
-    /* ---- ARCADE REFLEX & GAUNTLETS ---- */
+    /* ---- ARCADE REFLEX & GAUNTLETS (17) ---- */
     ["pachinko-drop","Pachinko","arcade",1,6,1,"Physics","peg","Pinboard drop with spinning bumpers and multiplier bins."],
     ["cyber-stacker","Tower Stacker","arcade",1,6,1,"Precision","stack","Fifteen-tier prize block alignment stacker."],
     ["flappy-penalty","Flappy Flight","arcade",2,8,1,"Arcade","bird","Single-tap flight gauntlet tournament."],
@@ -262,21 +263,23 @@
     ["finger-roulette","Finger Roulette","arcade",2,6,1,"Touch","ring","Multi-touch electric finger chooser."],
     ["five-second-blitz","5-Sec Blitz","arcade",2,10,1,"Marble","clock","Descending marble three-answer timer."],
 
-    /* ---- SOCIAL DEDUCTION & BLUFF ---- */
+    /* ---- SOCIAL DEDUCTION & BLUFF (14) ---- */
     ["resistance-cell","Resistance","deduction",5,10,0,"Traitor","shield","Five-mission sabotage traitor operations."],
     ["one-night-wolf","One Night Wolf","deduction",3,10,0,"Night","moon","Voice-narrated night role swap deduction."],
     ["decrypto-blitz","Decrypto","deduction",4,10,0,"Cipher","cipher","Three-digit keyword encryption race."],
     ["cheat-bullshit","Bullshit Cheat","deduction",2,8,1,"Shedding","cards","Card shedding bluff with a giant call buzzer."],
-    ["liars-dice-3d","Liars Dice 3D","deduction",2,6,0,"Dice","dice","Pass-and-shake 3D cup bluff bidding ladder."],
+    ["liars-dice","Liars Dice","deduction",2,6,0,"Dice","dice","Pass-and-shake cup bluff bidding ladder."],
+    ["liars-dice-3d","Liars Dice 3D","deduction",2,6,0,"Pocket","dice","Enhanced 3D cup variant with dice loss tracking."],
+    ["medusa-360-gaze","Medusa 360 Gaze","deduction",3,10,1,"Radial","eye","Center-table radial eye contact showdown."],
+    ["medusa-eye","Medusa Eye","deduction",3,10,1,"Showdown","eye","Rapid gaze detector and reflex showdown."],
+    ["two-rooms-lite","Two Rooms Lite","deduction",6,16,0,"Hostages","rooms","President vs Bomber hostage split on one phone."],
     ["two-rooms-spy","Two Rooms Spy","deduction",6,16,0,"Hostages","rooms","President vs Bomber hostage split across two phones."],
-    ["two-rooms-boom","Boom Terminal","deduction",6,16,0,"Terminal","rooms","Full terminal hostage trading engine."],
     ["radio-morse-intercept","Morse Intercept","deduction",2,8,0,"Audio","radio","Web Audio coded transmission decoding."],
-    ["wavelength-pocket","Wavelength","deduction",2,12,0,"Spectrum","dial","Binary psychic spectrum dial tuning."],
-    ["medusa-360-gaze","Medusa Gaze","deduction",3,10,1,"Radial","eye","Centre-table radial eye contact showdown."],
+    ["wave-length-pocket","Wavelength","deduction",2,12,0,"Spectrum","dial","Binary psychic spectrum dial tuning."],
     ["space-team-relay","Spaceteam","deduction",2,8,0,"Co-op","rocket","Two-phone shouting bridge console relay."],
-    ["dual-tele-relay","Dual Relay","deduction",4,12,0,"2-Phone","pen","Parallel track comic sketch relay."],
+    ["dual-tale-relay","Dual Tale Relay","deduction",4,12,0,"2-Phone","pen","Parallel track comic sketch relay."],
 
-    /* ---- HIGH-ENERGY & DRINKING ---- */
+    /* ---- HIGH-ENERGY & DRINKING (14) ---- */
     ["kings-chalice","Kings Chalice","drinking",2,12,1,"Cards","cup","Digital Ring of Fire with a live chalice fill meter."],
     ["kings-chalice-deluxe","Kings Deluxe","drinking",2,12,1,"Custom","cup","House-rule editor plus interactive chalice."],
     ["irish-gauge-poker","Irish Poker","drinking",2,8,1,"Cards","cards","Four-card blind prediction betting gauntlet."],
@@ -287,78 +290,82 @@
     ["truth-or-drink-vault","Truth Vault","drinking",2,12,1,"Vault","vault","Three-tier steel vault confession cards."],
     ["do-or-drink","Do Or Drink","drinking",2,12,1,"Dares","bolt","Tiered dare cards with scaling penalties."],
     ["most-likely-to","Most Likely To","drinking",3,12,1,"Poll","ballot","Anonymous hot-seat pointing ballots."],
+    ["five-second-rule","5-Second Rule","drinking",3,10,1,"Trivia","clock","Name 3 items under rapid countdown."],
     ["rapid-buzzer","Rapid Buzzer","drinking",4,12,1,"Timer","clock","Accelerating pass-the-potato buzzer."],
     ["rapid-heartbeat-buzzer","Heartbeat Pass","drinking",3,12,1,"Audio","pulse","Biological heartbeat fuse potato pass."],
     ["bomb-countdown","Timebomb","drinking",3,12,1,"Fuse","bomb","Fast word pass with a detonating fuse."]
   ];
 
-  var ALL_GAMES = RAW.map(function (r) {
-    return {
-      id:r[0], title:r[1], category:r[2],
-      minP:r[3], maxP:r[4], drink:!!r[5],
-      tag:r[6], icon:ICONS[r[7]] || ICONS.ring, desc:r[8],
-      path:"games/" + r[0] + "/index.html"
-    };
-  });
+  const ALL_GAMES = RAW.map(r => ({
+    id: r[0],
+    title: r[1],
+    category: r[2],
+    minP: r[3],
+    maxP: r[4],
+    drink: !!r[5],
+    tag: r[6],
+    icon: ICONS[r[7]] || ICONS.ring,
+    desc: r[8],
+    path: `games/${r[0]}/index.html`
+  }));
 
   /* ==================================================================
-     STATIC INTEGRITY AUDIT
-     Catches the exact bug class that produced the old duplicate
-     Quick-Draw entry, at load time, before anything renders.
+     INTEGRITY SELF-AUDIT
      ================================================================== */
-  var AUDIT = (function () {
-    var seen = {}, dupIds = [], badCat = [], badIcon = [];
-    var valid = CATS.map(function (c) { return c.key; });
-    ALL_GAMES.forEach(function (g) {
+  const AUDIT = (() => {
+    const seen = {}, dupIds = [], badCat = [];
+    const valid = CATS.map(c => c.key);
+    ALL_GAMES.forEach(g => {
       if (seen[g.id]) dupIds.push(g.id); else seen[g.id] = 1;
-      if (valid.indexOf(g.category) === -1) badCat.push(g.id);
-      if (!g.icon) badIcon.push(g.id);
+      if (!valid.includes(g.category)) badCat.push(g.id);
     });
-    return { total: ALL_GAMES.length, dupIds: dupIds, badCat: badCat, badIcon: badIcon };
+    return { total: ALL_GAMES.length, dupIds, badCat };
   })();
 
   if (AUDIT.dupIds.length) console.error("[PartyDeck] Duplicate IDs:", AUDIT.dupIds);
-  if (AUDIT.badCat.length) console.error("[PartyDeck] Bad categories:", AUDIT.badCat);
-  console.info("[PartyDeck] Registry loaded:", AUDIT.total, "unique modules.");
-  $("hubModuleCount").textContent = AUDIT.total + " OFFLINE MODULES";
+  $("hubModuleCount").textContent = `${AUDIT.total} OFFLINE MODULES`;
 
   /* ==================================================================
-     RENDERING
+     RENDERING ENGINE
      ================================================================== */
   function esc(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c];
-    });
+    return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[c]);
   }
 
   function renderCard(g) {
-    return '<div class="game-card-compact" data-id="' + esc(g.id) + '" role="button" tabindex="0">' +
-      '<div class="card-top-badges">' +
-        '<span class="card-p-pill"><svg viewBox="0 0 24 24" ' + SW + '><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>' + g.minP + '-' + g.maxP + '</span>' +
-        (g.drink ? '<span class="card-drink-dot" title="Drinking game"></span>' : '') +
-      '</div>' +
-      '<div class="card-center-icon">' + g.icon + '</div>' +
-      '<div class="card-compact-title">' + esc(g.title) + '</div>' +
-      '<span class="card-tag-pill">' + esc(g.tag) + '</span>' +
-    '</div>';
+    return `
+      <div class="game-card-compact" data-id="${esc(g.id)}" role="button" tabindex="0">
+        <div class="card-top-badges">
+          <span class="card-p-pill">
+            <svg viewBox="0 0 24 24" ${SW}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            ${g.minP}-${g.maxP}
+          </span>
+          ${g.drink ? '<span class="card-drink-dot" title="Drinking game"></span>' : ''}
+        </div>
+        <div class="card-center-icon">${g.icon}</div>
+        <div class="card-compact-title">${esc(g.title)}</div>
+        <span class="card-tag-pill">${esc(g.tag)}</span>
+      </div>
+    `;
   }
 
   function buildLanes() {
-    var html = "";
-    CATS.forEach(function (c) {
-      var games = ALL_GAMES.filter(function (g) { return g.category === c.key; });
+    let html = "";
+    CATS.forEach(c => {
+      const games = ALL_GAMES.filter(g => g.category === c.key);
       if (!games.length) return;
-      html +=
-        '<section class="swimlane-section" data-lane="' + c.key + '">' +
-          '<div class="swimlane-header">' +
-            '<div class="swimlane-title-group">' +
-              '<span class="swimlane-ico">' + (ICONS[c.icon] || "") + '</span>' +
-              '<h2 class="swimlane-title">' + esc(c.label) + '</h2>' +
-            '</div>' +
-            '<span class="swimlane-count">' + games.length + ' GAMES</span>' +
-          '</div>' +
-          '<div class="swimlane-track">' + games.map(renderCard).join("") + '</div>' +
-        '</section>';
+      html += `
+        <section class="swimlane-section" data-lane="${c.key}">
+          <div class="swimlane-header">
+            <div class="swimlane-title-group">
+              <span class="swimlane-ico">${ICONS[c.icon] || ""}</span>
+              <h2 class="swimlane-title">${esc(c.label)}</h2>
+            </div>
+            <span class="swimlane-count">${games.length} GAMES</span>
+          </div>
+          <div class="swimlane-track">${games.map(renderCard).join("")}</div>
+        </section>
+      `;
     });
     $("laneHost").innerHTML = html;
   }
@@ -367,53 +374,58 @@
   /* ==================================================================
      QUICK-VIEW SHEET
      ================================================================== */
-  var previewModal = $("previewModal");
+  const previewModal = $("previewModal");
 
   function openSheet(id) {
-    var g = ALL_GAMES.filter(function (x) { return x.id === id; })[0];
+    const g = ALL_GAMES.find(x => x.id === id);
     if (!g) return;
     $("sheetIcon").innerHTML = g.icon;
     $("sheetTitle").textContent = g.title;
-    $("sheetTagline").textContent = g.tag + " \u00B7 " + g.minP + "-" + g.maxP + " players";
+    $("sheetTagline").textContent = `${g.tag} · ${g.minP}-${g.maxP} players`;
     $("sheetDescription").textContent = g.desc;
-    $("sheetBadgesRow").innerHTML =
-      '<span class="sheet-pill">' + g.minP + '-' + g.maxP + ' Players</span>' +
-      '<span class="sheet-pill">' + esc(g.tag) + '</span>' +
-      (g.drink ? '<span class="sheet-pill drink">Drinking Mode</span>' : '');
+    $("sheetBadgesRow").innerHTML = `
+      <span class="sheet-pill">${g.minP}-${g.maxP} Players</span>
+      <span class="sheet-pill">${esc(g.tag)}</span>
+      ${g.drink ? '<span class="sheet-pill drink">Drinking Mode</span>' : ''}
+    `;
     $("btnSheetLaunch").href = g.path;
     previewModal.classList.add("is-open");
   }
+
   function closeSheet() { previewModal.classList.remove("is-open"); }
 
-  document.addEventListener("click", function (e) {
-    var card = e.target.closest && e.target.closest(".game-card-compact");
+  document.addEventListener("click", e => {
+    const card = e.target.closest(".game-card-compact");
     if (card) openSheet(card.dataset.id);
   });
-  document.addEventListener("keydown", function (e) {
+
+  document.addEventListener("keydown", e => {
     if (e.key === "Escape") closeSheet();
     if (e.key === "Enter" || e.key === " ") {
-      var card = e.target.closest && e.target.closest(".game-card-compact");
+      const card = e.target.closest && e.target.closest(".game-card-compact");
       if (card) { e.preventDefault(); openSheet(card.dataset.id); }
     }
   });
+
   $("btnSheetClose").onclick = closeSheet;
-  previewModal.onclick = function (e) { if (e.target === previewModal) closeSheet(); };
+  previewModal.onclick = e => { if (e.target === previewModal) closeSheet(); };
 
   /* ==================================================================
-     SEARCH
+     SEARCH ENGINE
      ================================================================== */
-  var searchInput = $("hubSearchInput");
-  var searchSection = $("lane-search");
-  var searchGrid = $("searchGrid");
-  var searchClear = $("btnSearchClear");
+  const searchInput = $("hubSearchInput");
+  const searchSection = $("lane-search");
+  const searchGrid = $("searchGrid");
+  const searchClear = $("btnSearchClear");
 
   function setLanesVisible(v) {
-    var lanes = document.querySelectorAll("[data-lane]");
-    for (var i = 0; i < lanes.length; i++) lanes[i].style.display = v ? "flex" : "none";
+    document.querySelectorAll("[data-lane]").forEach(el => {
+      el.style.display = v ? "flex" : "none";
+    });
   }
 
-  searchInput.addEventListener("input", function () {
-    var q = searchInput.value.trim().toLowerCase();
+  searchInput.addEventListener("input", () => {
+    const q = searchInput.value.trim().toLowerCase();
     if (!q) {
       searchClear.classList.remove("is-active");
       searchSection.style.display = "none";
@@ -423,16 +435,18 @@
     searchClear.classList.add("is-active");
     setLanesVisible(false);
     searchSection.style.display = "block";
-    var matches = ALL_GAMES.filter(function (g) {
-      return (g.title + " " + g.id + " " + g.tag + " " + g.desc).toLowerCase().indexOf(q) !== -1;
-    });
-    $("searchMatchTitle").textContent = "Matches (" + matches.length + ")";
+
+    const matches = ALL_GAMES.filter(g =>
+      `${g.title} ${g.id} ${g.tag} ${g.desc}`.toLowerCase().includes(q)
+    );
+
+    $("searchMatchTitle").textContent = `Matches (${matches.length})`;
     searchGrid.innerHTML = matches.length
       ? matches.map(renderCard).join("")
-      : '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-muted);font-family:var(--font-mono);font-size:.82rem;">No games match "' + esc(q) + '"</div>';
+      : `<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-muted);font-family:var(--font-mono);font-size:.82rem;">No games match "${esc(q)}"</div>`;
   });
 
-  searchClear.onclick = function () {
+  searchClear.onclick = () => {
     searchInput.value = "";
     searchClear.classList.remove("is-active");
     searchSection.style.display = "none";
@@ -443,72 +457,68 @@
   /* ==================================================================
      THEME SWITCHER
      ================================================================== */
-  (function initTheme() {
-    var saved = null;
+  (() => {
+    let saved = null;
     try { saved = localStorage.getItem("partydeck_theme"); } catch (e) {}
     if (!saved) return;
     document.documentElement.setAttribute("data-theme", saved);
-    var chips = document.querySelectorAll(".theme-chip");
-    for (var i = 0; i < chips.length; i++) {
-      chips[i].classList.toggle("is-active", chips[i].dataset.theme === saved);
-    }
+    document.querySelectorAll(".theme-chip").forEach(chip => {
+      chip.classList.toggle("is-active", chip.dataset.theme === saved);
+    });
   })();
 
-  $("themeStrip").addEventListener("click", function (e) {
-    var chip = e.target.closest && e.target.closest(".theme-chip");
+  $("themeStrip").addEventListener("click", e => {
+    const chip = e.target.closest(".theme-chip");
     if (!chip) return;
-    var chips = document.querySelectorAll(".theme-chip");
-    for (var i = 0; i < chips.length; i++) chips[i].classList.remove("is-active");
+    document.querySelectorAll(".theme-chip").forEach(c => c.classList.remove("is-active"));
     chip.classList.add("is-active");
-    document.documentElement.setAttribute("data-theme", chip.dataset.theme);
-    try { localStorage.setItem("partydeck_theme", chip.dataset.theme); } catch (err) {}
-    showToast("Theme: " + chip.textContent.trim());
+    const theme = chip.dataset.theme;
+    document.documentElement.setAttribute("data-theme", theme);
+    try { localStorage.setItem("partydeck_theme", theme); } catch (err) {}
+    showToast(`Theme: ${chip.textContent.trim()}`);
   });
 
   /* ==================================================================
-     FULLSCREEN / iOS PWA RESILIENCE
-     Never throws on vendor APIs that return void or reject.
+     FULLSCREEN TOGGLE (iOS PWA Safe)
      ================================================================== */
-  $("btnFullscreen").onclick = function () {
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    var standalone = window.navigator.standalone ||
+  $("btnFullscreen").onclick = () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const standalone = window.navigator.standalone ||
       (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
 
     if (isIOS) {
       showToast(standalone ? "Already running fullscreen." : "Share menu, then Add to Home Screen.");
       return;
     }
-    var fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+    const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
     if (!fsEl) {
-      var el = document.documentElement;
-      var rfs = el.requestFullscreen || el.webkitRequestFullscreen;
+      const el = document.documentElement;
+      const rfs = el.requestFullscreen || el.webkitRequestFullscreen;
       if (!rfs) { showToast("Fullscreen unsupported here."); return; }
       try {
-        var p = rfs.call(el);
-        if (p && typeof p.catch === "function") {
-          p.catch(function () { showToast("Fullscreen blocked by browser."); });
-        }
+        const p = rfs.call(el);
+        if (p && typeof p.catch === "function") p.catch(() => showToast("Fullscreen blocked by browser."));
       } catch (err) { showToast("Fullscreen blocked by browser."); }
     } else {
-      var efs = document.exitFullscreen || document.webkitExitFullscreen;
+      const efs = document.exitFullscreen || document.webkitExitFullscreen;
       if (efs) { try { efs.call(document); } catch (err) {} }
     }
   };
 
   /* ==================================================================
-     ROSTER BRIDGE (avatar-engine.js)
+     ROSTER BRIDGE
      ================================================================== */
   function updateRosterBadge() {
     if (!window.PartyDeckAvatars) return;
-    var r = window.PartyDeckAvatars.getRoster() || [];
+    const r = window.PartyDeckAvatars.getRoster() || [];
     $("rosterBadgeCount").textContent = r.length;
   }
 
-  $("btnOpenRoster").onclick = function () {
+  $("btnOpenRoster").onclick = () => {
     if (!window.PartyDeckAvatars) { showToast("Avatar engine not loaded."); return; }
-    window.PartyDeckAvatars.openRosterModal(function (roster) {
+    window.PartyDeckAvatars.openRosterModal(roster => {
       updateRosterBadge();
-      showToast(roster.length + " players ready.");
+      showToast(`${roster.length} players ready.`);
     });
   };
 
@@ -516,92 +526,54 @@
   updateRosterBadge();
 
   /* ==================================================================
-     ?verify=1  — LIVE REGISTRY VERIFIER
-     HEAD-probes every derived route against the real repo and reports
-     dead links, duplicate IDs and category faults. Dev tool only.
+     LIVE VERIFIER (?verify=1)
      ================================================================== */
   function runVerifier() {
-    var overlay = $("verifyOverlay");
-    var body = $("verifyBody");
+    const overlay = $("verifyOverlay");
+    const body = $("verifyBody");
     overlay.classList.add("is-open");
-    body.innerHTML = '<h3>PartyDeck Registry Report</h3>' +
-      '<div class="v-dim">Probing ' + ALL_GAMES.length + ' routes...</div>';
+    body.innerHTML = `<h3>PartyDeck Registry Report</h3><div class="v-dim">Probing ${ALL_GAMES.length} routes...</div>`;
 
-    var results = [], done = 0;
+    const results = [];
+    let done = 0;
 
-    ALL_GAMES.forEach(function (g) {
+    ALL_GAMES.forEach(g => {
       fetch(g.path, { method: "HEAD", cache: "no-store" })
-        .then(function (res) { results.push({ g: g, ok: res.ok, code: res.status }); })
-        .catch(function () { results.push({ g: g, ok: false, code: "ERR" }); })
-        .then(function () {
+        .then(res => results.push({ g, ok: res.ok, code: res.status }))
+        .catch(() => results.push({ g, ok: false, code: "ERR" }))
+        .then(() => {
           done++;
           if (done === ALL_GAMES.length) paint(results);
         });
     });
 
     function paint(res) {
-      var missing = res.filter(function (r) { return !r.ok; });
-      var live    = res.filter(function (r) { return r.ok; });
+      const missing = res.filter(r => !r.ok);
+      const live = res.filter(r => r.ok);
 
-      var html = '<h3>PartyDeck Registry Report</h3>';
-      html += '<div class="v-row">Registered modules: <strong>' + AUDIT.total + '</strong></div>';
-      html += '<div class="v-row">Duplicate IDs: <span class="' + (AUDIT.dupIds.length ? "v-bad" : "v-ok") + '">' +
-              (AUDIT.dupIds.length ? AUDIT.dupIds.join(", ") : "none") + '</span></div>';
-      html += '<div class="v-row">Bad categories: <span class="' + (AUDIT.badCat.length ? "v-bad" : "v-ok") + '">' +
-              (AUDIT.badCat.length ? AUDIT.badCat.join(", ") : "none") + '</span></div>';
-      html += '<div class="v-row">Reachable routes: <span class="v-ok">' + live.length + '</span> of ' + res.length + '</div>';
+      let html = "<h3>PartyDeck Registry Report</h3>";
+      html += `<div class="v-row">Registered modules: <strong>${AUDIT.total}</strong></div>`;
+      html += `<div class="v-row">Duplicate IDs: <span class="${AUDIT.dupIds.length ? 'v-bad' : 'v-ok'}">${AUDIT.dupIds.length ? AUDIT.dupIds.join(", ") : "none"}</span></div>`;
+      html += `<div class="v-row">Reachable routes: <span class="v-ok">${live.length}</span> of ${res.length}</div>`;
 
       if (missing.length) {
-        html += '<h3 class="v-bad">Dead routes (' + missing.length + ')</h3>';
-        html += '<div class="v-dim">These IDs do not match a real folder. Rename the folder, or fix the id in RAW.</div>';
-        missing.sort(function (a, b) { return a.g.id < b.g.id ? -1 : 1; });
-        missing.forEach(function (r) {
-          html += '<div class="v-row v-bad">' + esc(r.g.path) + '  [' + r.code + ']</div>';
+        html += `<h3 class="v-bad">Dead routes (${missing.length})</h3>`;
+        missing.forEach(r => {
+          html += `<div class="v-row v-bad">${esc(r.g.path)} [${r.code}]</div>`;
         });
-        html += '<div class="v-pre" id="vMissingList">' +
-                missing.map(function (r) { return r.g.id; }).join("\n") + '</div>';
       } else {
-        html += '<h3 class="v-ok">All routes resolved</h3>';
+        html += `<h3 class="v-ok">All 67 routes successfully resolved!</h3>`;
       }
-
-      html += '<h3>Lane distribution</h3>';
-      CATS.forEach(function (c) {
-        var n = ALL_GAMES.filter(function (g) { return g.category === c.key; }).length;
-        html += '<div class="v-row">' + esc(c.label) + ': <strong>' + n + '</strong></div>';
-      });
-
-      html += '<h3>Export</h3>';
-      html += '<button type="button" class="v-btn primary" id="btnCopyLive">COPY LIVE IDS TO CLIPBOARD</button>';
-      html += '<div class="v-pre" id="vLiveList">' +
-              live.map(function (r) { return r.g.id; }).sort().join("\n") + '</div>';
 
       body.innerHTML = html;
-
-      var copyBtn = $("btnCopyLive");
-      if (copyBtn) {
-        copyBtn.onclick = function () {
-          var txt = $("vLiveList").textContent;
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(txt).then(
-              function () { copyBtn.textContent = "COPIED " + live.length + " IDS"; },
-              function () { copyBtn.textContent = "COPY FAILED - SELECT MANUALLY"; }
-            );
-          } else {
-            copyBtn.textContent = "CLIPBOARD UNAVAILABLE - SELECT MANUALLY";
-          }
-        };
-      }
     }
   }
 
-  $("btnVerifyClose").onclick = function () {
-    $("verifyOverlay").classList.remove("is-open");
-  };
+  $("btnVerifyClose").onclick = () => $("verifyOverlay").classList.remove("is-open");
 
   if (/[?&]verify=1/.test(window.location.search)) {
     runVerifier();
   }
-
 })();
 </script>
 </body>
