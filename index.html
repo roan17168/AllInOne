@@ -1,8 +1,66 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="nordic-slate">
 <head>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f172a' stroke='%23ff0055' stroke-width='2'/%3E%3Cpath d='M10 8h8a6 6 0 0 1 0 12h-8V8zm4 4v4h4a2 2 0 0 0 0-4h-4z' fill='%2300f0ff'/%3E%3Cpath d='M14 20h4l4 6h-4l-4-6z' fill='%23ff0055'/%3E%3Ccircle cx='23' cy='9' r='2' fill='%2300ffaa'/%3E%3C/svg%3E">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230b0f19'/%3E%3Crect x='10' y='10' width='160' height='160' rx='32' fill='none' stroke='%23ff0055' stroke-width='6'/%3E%3Cpath d='M50 45h45a35 35 0 0 1 0 70H50V45zm22 22v26h23a13 13 0 0 0 0-26H72z' fill='%2300f0ff'/%3E%3Cpath d='M75 115h25l25 35h-25l-25-35z' fill='%23ff0055'/%3E%3Ccircle cx='130' cy='55' r='10' fill='%2300ffaa'/%3E%3C/svg%3E">
+  <!-- ================= PARTYDECK BRAND FAVICON & IOS TOUCH ICON ================= -->
+<!-- 1. Desktop & Android Vector Favicon (Header 3-Tier Stack Logo) -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e1117'/%3E%3Cg fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='16 4 3 10.5 16 17 29 10.5 16 4' fill='%231f2633'/%3E%3Cpolyline points='3 17 16 23.5 29 17' stroke='%23ff0055'/%3E%3Cpolyline points='3 23.5 16 30 29 23.5' stroke='%2300ffaa'/%3E%3C/g%3E%3C/svg%3E">
+
+<!-- 2. iOS Home Screen Touch Icon Generator (Auto-converts Stack SVG to PNG for iOS Safari) -->
+<link id="pd-apple-touch-icon" rel="apple-touch-icon" href="" />
+<meta name="apple-mobile-web-app-title" content="PartyDeck" />
+
+<script>
+(function() {
+  // Synthesize 180x180 PNG touch icon dynamically so iOS renders a crisp home screen icon
+  try {
+    const cvs = document.createElement('canvas');
+    cvs.width = 180;
+    cvs.height = 180;
+    const ctx = cvs.getContext('2d');
+
+    // Background squircle
+    ctx.fillStyle = '#0e1117';
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(0, 0, 180, 180, 40) : ctx.rect(0, 0, 180, 180);
+    ctx.fill();
+
+    // Subtle neon perimeter border
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // 3-Tier Isometric Card Stack
+    function drawLayer(pts, strokeColor, fillColor) {
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+      if (fillColor) {
+        ctx.closePath();
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+      }
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = 10;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+
+    // Top Card (Ice Blue)
+    drawLayer([[90, 32], [26, 68], [90, 104], [154, 68]], '#38bdf8', '#1a2230');
+
+    // Middle Card (Neon Pink)
+    drawLayer([[26, 102], [90, 138], [154, 102]], '#ff0055', null);
+
+    // Bottom Card (Neon Green)
+    drawLayer([[26, 136], [90, 172], [154, 136]], '#00ffaa', null);
+
+    // Attach base64 PNG data URL to apple-touch-icon tag
+    const iconLink = document.getElementById('pd-apple-touch-icon');
+    if (iconLink) iconLink.href = cvs.toDataURL('image/png');
+  } catch (e) {}
+})();
+</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0e1117" id="metaThemeColor" />
