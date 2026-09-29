@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald-lounge">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#071712" id="metaThemeColor" />
+<title>Endless Orbit Tap | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #071712; --bg-surface: #0e241d; --bg-elevated: #16362c;
+    --text-primary: #ffffff; --text-secondary: #a3cfbe; --text-muted: #5e9481;
+    --accent: #10b981; --accent-glow: rgba(16,185,129,0.38); --accent-contrast: #031c14;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(16,185,129,0.2); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    user-select: none; -webkit-user-select: none;
+  }
+  .gm-root {
+    display: flex; flex-direction: column; height: 100%; height: 100dvh; width: 100%; overflow: hidden;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .btn-icon-only {
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.is-active { display: flex; }
+  #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; }
+  .panel {
+    background: var(--bg-surface); border: 1px solid var(--border-ui);
+    border-radius: var(--r-md); padding: 1.1rem;
+  }
+  .panel-title {
+    font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--text-muted);
+    letter-spacing: .14em; text-transform: uppercase; margin-bottom: .6rem;
+  }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+
+  /* HUD */
+  .hud-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    flex-shrink: 0; z-index: 20;
+  }
+  .hud-stat {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); padding: .3rem .4rem;
+  }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .55rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 900; color: var(--accent); }
+
+  .canvas-stage-wrap {
+    flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
+  }
+  #orbitCanvas {
+    width: 100%; height: 100%; display: block; touch-action: none; cursor: pointer;
+  }
+  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
+  .ico svg { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<div class="gm-root">
+  <header class="gm-top">
+    <div class="gm-idblock">
+      <span class="gm-title">Endless Orbit Tap</span>
+      <span class="gm-sub">Gravity Inversion Stim</span>
+    </div>
+    <div class="gm-actions">
+      <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+      </a>
+    </div>
+  </header>
+
+  <div class="stage">
+    <!-- SETUP -->
+    <section class="screen is-active" id="scrSetup">
+      <div class="panel">
+        <div class="panel-title">Orbital Mechanics</div>
+        <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+          • Your ship orbits a pulsating reactor core.<br>
+          • <strong>Tap anywhere to invert gravity</strong> between the Inner and Outer orbital tracks.<br>
+          • Dodge incoming red radiation pulses and collect glowing green energy cores.<br>
+          • Infinite flow rhythm. Survive to build high-speed multipliers.
+        </p>
+      </div>
+
+      <button class="btn" id="btnStartOrbit" style="margin-top:auto;">
+        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M21.17 8a10 10 0 1 0-7.17 13.17"/></svg></span>
+        Enter Orbit Loop
+      </button>
+    </section>
+
+    <!-- GAMEPLAY VIEWPORT -->
+    <section class="screen" id="scrPlay">
+      <div class="hud-bar">
+        <div class="hud-stat">
+          <span class="hud-lbl">Score</span>
+          <span class="hud-val" id="hudScore">0</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Multiplier</span>
+          <span class="hud-val" id="hudMult">1x</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Track</span>
+          <span class="hud-val" id="hudTrack">INNER</span>
+        </div>
+      </div>
+
+      <div class="canvas-stage-wrap" id="orbitCanvasWrap">
+        <canvas id="orbitCanvas"></canvas>
+      </div>
+    </section>
+
+    <!-- VERDICT -->
+    <section class="screen" id="scrVerdict">
+      <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--danger);">ORBITAL COLLISION</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictScore">0 PTS</h2>
+        <div style="font-family:'Space Mono',monospace;font-size:1.1rem;color:var(--accent);font-weight:800;margin-bottom:1rem;" id="verdictLaps">Laps Completed: 0</div>
+      </div>
+
+      <button class="btn" id="btnRestartOrbit" style="margin-top:auto;">Re-Enter Orbit</button>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= WEB AUDIO SYNTH ================= */
+const AudioOrbit = {
+  ctx: null,
+  init(){
+    if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  },
+  flip(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(440, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.start(now); osc.stop(now + 0.08);
+    }catch(e){}
+  },
+  collect(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(659.25, now);
+      osc.frequency.setValueAtTime(1046.5, now + 0.06);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.start(now); osc.stop(now + 0.12);
+    }catch(e){}
+  },
+  crash(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(180, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
+      gain.gain.setValueAtTime(0.24, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc.start(now); osc.stop(now + 0.3);
+    }catch(e){}
+  }
+};
+
+/* ================= SIMULATION CORE ================= */
+const cvs = document.getElementById("orbitCanvas");
+const ctx = cvs.getContext("2d");
+const wrap = document.getElementById("orbitCanvasWrap");
+
+let W = 360, H = 550, DPR = 1;
+
+const S = {
+  running: false,
+  score: 0,
+  laps: 0,
+  shipAngle: 0,       // Radian angle around core
+  speed: 2.2,         // Angular speed
+  track: "inner",     // "inner" or "outer"
+  currentR: 70,       // Smooth animated radius
+  obstacles: [],      // { angle, track, width, speed }
+  collectibles: [],   // { angle, track }
+  nextObstacleT: 0,
+  nextCoreT: 0
+};
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+function resizeCanvas(){
+  const rect = wrap.getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+  W = rect.width;
+  H = rect.height;
+  cvs.width = Math.round(W * DPR);
+  cvs.height = Math.round(H * DPR);
+  cvs.style.width = W + "px";
+  cvs.style.height = H + "px";
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+
+function updateHUD(){
+  $("hudScore").textContent = S.score.toLocaleString();
+  const mult = 1 + Math.floor(S.laps / 5);
+  $("hudMult").textContent = `${mult}x`;
+  $("hudTrack").textContent = S.track.toUpperCase();
+}
+
+function flipTrack(){
+  if(!S.running) return;
+  S.track = S.track === "inner" ? "outer" : "inner";
+  AudioOrbit.flip();
+  if("vibrate" in navigator) navigator.vibrate(10);
+  updateHUD();
+}
+
+/* ================= 60FPS GRAPHICS LOOP ================= */
+let lastT = performance.now();
+function loop(t){
+  if(!S.running) return;
+  const now = performance.now();
+  const dt = Math.min((t - lastT) / 1000, 0.033);
+  lastT = t;
+
+  const cx = W / 2;
+  const cy = H / 2;
+  const R_INNER = Math.min(W, H) * 0.24;
+  const R_OUTER = Math.min(W, H) * 0.40;
+
+  // Smooth Radius Lerp
+  const targetR = S.track === "inner" ? R_INNER : R_OUTER;
+  S.currentR += (targetR - S.currentR) * 16 * dt;
+
+  // Move Ship along Orbit
+  const prevAngle = S.shipAngle;
+  S.shipAngle = (S.shipAngle + S.speed * dt) % (Math.PI * 2);
+
+  if(prevAngle > S.shipAngle){
+    S.laps++;
+    S.speed = Math.min(4.2, S.speed + 0.05);
+    const mult = 1 + Math.floor(S.laps / 5);
+    S.score += 250 * mult;
+    updateHUD();
+  }
+
+  // Spawning Hazards & Energy Cores
+  if(now >= S.nextObstacleT){
+    const tr = Math.random() < 0.5 ? "inner" : "outer";
+    S.obstacles.push({
+      angle: (S.shipAngle + Math.PI + (Math.random() - 0.5)) % (Math.PI * 2),
+      track: tr,
+      r: tr === "inner" ? R_INNER : R_OUTER
+    });
+    S.nextObstacleT = now + Math.max(900, 2200 - S.laps * 80);
+  }
+
+  if(now >= S.nextCoreT){
+    const tr = Math.random() < 0.5 ? "inner" : "outer";
+    S.collectibles.push({
+      angle: (S.shipAngle + Math.PI * 0.7) % (Math.PI * 2),
+      track: tr,
+      r: tr === "inner" ? R_INNER : R_OUTER
+    });
+    S.nextCoreT = now + 1800 + Math.random() * 1200;
+  }
+
+  // Clear Arena
+  ctx.fillStyle = "#05110d";
+  ctx.fillRect(0, 0, W, H);
+
+  // 1. Draw Reactor Core
+  ctx.save();
+  ctx.shadowColor = "#10b981";
+  ctx.shadowBlur = 24;
+  ctx.beginPath();
+  ctx.arc(cx, cy, 26, 0, Math.PI * 2);
+  ctx.fillStyle = "#10b981";
+  ctx.fill();
+  ctx.restore();
+
+  // 2. Draw Orbital Tracks
+  ctx.beginPath();
+  ctx.arc(cx, cy, R_INNER, 0, Math.PI * 2);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = S.track === "inner" ? "rgba(16, 185, 129, 0.6)" : "rgba(148, 163, 184, 0.18)";
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, R_OUTER, 0, Math.PI * 2);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = S.track === "outer" ? "rgba(16, 185, 129, 0.6)" : "rgba(148, 163, 184, 0.18)";
+  ctx.stroke();
+
+  // 3. Draw Collectibles
+  for(let i = S.collectibles.length - 1; i >= 0; i--){
+    const c = S.collectibles[i];
+    const px = cx + Math.cos(c.angle) * c.r;
+    const py = cy + Math.sin(c.angle) * c.r;
+
+    ctx.beginPath();
+    ctx.arc(px, py, 7, 0, Math.PI * 2);
+    ctx.fillStyle = "#00ffaa";
+    ctx.shadowColor = "#00ffaa";
+    ctx.shadowBlur = 10;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Check Player Pickup
+    const shipX = cx + Math.cos(S.shipAngle) * S.currentR;
+    const shipY = cy + Math.sin(S.shipAngle) * S.currentR;
+    if(Math.hypot(shipX - px, shipY - py) < 18 && S.track === c.track){
+      S.collectibles.splice(i, 1);
+      const mult = 1 + Math.floor(S.laps / 5);
+      S.score += 500 * mult;
+      AudioOrbit.collect();
+      if("vibrate" in navigator) navigator.vibrate(12);
+      updateHUD();
+    }
+  }
+
+  // 4. Draw Radiation Hazards
+  for(let i = S.obstacles.length - 1; i >= 0; i--){
+    const ob = S.obstacles[i];
+    const px = cx + Math.cos(ob.angle) * ob.r;
+    const py = cy + Math.sin(ob.angle) * ob.r;
+
+    ctx.beginPath();
+    ctx.arc(px, py, 11, 0, Math.PI * 2);
+    ctx.fillStyle = "#ff0055";
+    ctx.shadowColor = "#ff0055";
+    ctx.shadowBlur = 14;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Check Collision with Ship
+    const shipX = cx + Math.cos(S.shipAngle) * S.currentR;
+    const shipY = cy + Math.sin(S.shipAngle) * S.currentR;
+    if(Math.hypot(shipX - px, shipY - py) < 20 && S.track === ob.track){
+      AudioOrbit.crash();
+      if("vibrate" in navigator) navigator.vibrate([60, 60]);
+      endGame();
+      return;
+    }
+  }
+
+  // 5. Draw Orbiting Ship
+  const shipX = cx + Math.cos(S.shipAngle) * S.currentR;
+  const shipY = cy + Math.sin(S.shipAngle) * S.currentR;
+
+  ctx.save();
+  ctx.translate(shipX, shipY);
+  ctx.rotate(S.shipAngle + Math.PI / 2);
+
+  ctx.beginPath();
+  ctx.moveTo(0, -10);
+  ctx.lineTo(8, 8);
+  ctx.lineTo(0, 4);
+  ctx.lineTo(-8, 8);
+  ctx.closePath();
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "#10b981";
+  ctx.shadowBlur = 12;
+  ctx.fill();
+  ctx.restore();
+
+  requestAnimationFrame(loop);
+}
+
+function endGame(){
+  S.running = false;
+  $("verdictScore").textContent = `${S.score.toLocaleString()} PTS`;
+  $("verdictLaps").textContent = `Laps Completed: ${S.laps}`;
+  showScreen("scrVerdict");
+}
+
+/* ================= INPUT & CONTROLS ================= */
+cvs.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  flipTrack();
+});
+
+$("btnStartOrbit").onclick = () => {
+  S.running = true;
+  S.score = 0;
+  S.laps = 0;
+  S.speed = 2.2;
+  S.shipAngle = 0;
+  S.track = "inner";
+  S.obstacles = [];
+  S.collectibles = [];
+  S.nextObstacleT = performance.now() + 1200;
+  S.nextCoreT = performance.now() + 800;
+  showScreen("scrPlay");
+  resizeCanvas();
+  updateHUD();
+  requestAnimationFrame(loop);
+};
+
+$("btnRestartOrbit").onclick = () => {
+  showScreen("scrSetup");
+};
+
+window.addEventListener("resize", () => { if(S.running) resizeCanvas(); });
+window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
+
+})();
+</script>
+</body>
+</html>

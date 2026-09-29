@@ -1,0 +1,118 @@
+PartyDeck audit change inventory
+Generated: 2026-09-28
+
+Hub and shared files
+- index.html — Corrected stale game routes, registered all 62 game folders exactly once, fixed the duplicate Quick-Draw entry, repaired the interrupted header markup, and made fullscreen handling safe for iOS/iPadOS and vendor APIs that return void or throw.
+- css/base.css — Removed the fixed 100vh fallback in favor of dynamic viewport sizing.
+- games/stim-liquid-sand/index.html — Renamed the user's index.hatml to index.html and defined the missing DOM lookup helper used by the game controls.
+- games/tele-sketch/canvas-engine.js — Capped canvas DPR at 2.5.
+- games/tele-sketch/style.css — Replaced its 100vh minimum-height rule with percentage sizing.
+- games/wits-wagers-felt/index.html — Added safe-area-aware bottom scroll space so the setup action remains reachable on short screens.
+
+Game page changes
+The following game pages had their legacy 100vh declaration removed. They now use their existing 100dvh layout rule:
+- games/brick-breaker-blitz/index.html
+- games/cheat-bullshit/index.html
+- games/cyber-mole-smash/index.html
+- games/cyber-stacker/index.html
+- games/finger-guillotine/index.html
+- games/five-second-blitz/index.html
+- games/forehead-charades/index.html
+- games/gravity-lander/index.html
+- games/gyro-tilt-maze/index.html
+- games/higher-lower-death/index.html
+- games/irish-gauge-poker/index.html
+- games/kings-chalice-deluxe/index.html
+- games/laser-bullet-hell/index.html
+- games/liars-dice-3d/index.html
+- games/medusa-360-gaze/index.html
+- games/neon-shuffleboard/index.html
+- games/neon-snake-survival/index.html
+- games/never-have-i-ever-arcade/index.html
+- games/pachinko-drop/index.html
+- games/pinball-plunger/index.html
+- games/president-scum/index.html
+- games/radio-morse-intercept/index.html
+- games/rapid-heartbeat-buzzer/index.html
+- games/retro-lane-racer/index.html
+- games/rhythm-beat-smasher/index.html
+- games/ride-the-bus/index.html
+- games/space-team-relay/index.html
+- games/truth-or-drink-vault/index.html
+- games/wheel-of-forfeits/index.html
+- games/wits-wagers-felt/index.html
+
+The following canvas pages now cap DPR at 2.5 and resize on orientation changes:
+- games/brick-breaker-blitz/index.html
+- games/cyber-stacker/index.html
+- games/finger-guillotine/index.html
+- games/gravity-lander/index.html
+- games/gyro-tilt-maze/index.html
+- games/laser-bullet-hell/index.html
+- games/neon-shuffleboard/index.html
+- games/neon-snake-survival/index.html
+- games/pachinko-drop/index.html
+- games/pinball-plunger/index.html
+- games/retro-lane-racer/index.html
+- games/rhythm-beat-smasher/index.html
+- games/wheel-of-forfeits/index.html
+- games/fake-artist/index.html
+- games/finger-roulette/index.html
+- games/flappy-penalty/index.html
+- games/tele-sketch/index.html
+
+Hold-cancel callbacks now call preventDefault for pointerup, pointercancel, and pointerleave events while remaining callable without an event:
+- games/brick-breaker-blitz/index.html
+- games/chameleon-word/index.html
+- games/cheat-bullshit/index.html
+- games/coup-pocket/index.html
+- games/cyber-mole-smash/index.html
+- games/cyber-stacker/index.html
+- games/dual-tale-relay/index.html
+- games/fake-artist/index.html
+- games/five-second-blitz/index.html
+- games/flappy-penalty/index.html
+- games/gravity-lander/index.html
+- games/gyro-tilt-maze/index.html
+- games/higher-lower-death/index.html
+- games/irish-gauge-poker/index.html
+- games/laser-bullet-hell/index.html
+- games/liars-dice-3d/index.html
+- games/most-likely-to/index.html
+- games/neon-shuffleboard/index.html
+- games/neon-snake-survival/index.html
+- games/pachinko-drop/index.html
+- games/pinball-plunger/index.html
+- games/president-scum/index.html
+- games/retro-lane-racer/index.html
+- games/rhythm-beat-smasher/index.html
+- games/ride-the-bus/index.html
+- games/skull-digital/index.html
+- games/tele-sketch/index.html
+- games/truth-or-drink-vault/index.html
+- games/two-rooms-spy/index.html
+- games/wave-length-pocket/index.html
+- games/wheel-of-forfeits/index.html
+- games/wits-wagers-felt/index.html
+
+Fullscreen request/exit calls were guarded in these standalone games:
+- games/coup-pocket/index.html
+- games/fake-artist/index.html
+- games/finger-roulette/index.html
+- games/flappy-penalty/index.html
+- games/skull-digital/index.html
+- games/tele-sketch/index.html
+
+Finger Guillotine pointer capture is now best-effort and held state clears on cancel, leave, and lost pointer capture:
+- games/finger-guillotine/index.html
+
+Validation summary
+- 62 game directories and 62 unique working hub routes.
+- At 320x568, every game's final enabled setup action could be scrolled into view.
+- All 22 canvas games were checked through setup and a portrait-to-landscape viewport change; no backing canvas was smaller than its CSS display size, and no runtime errors were reported.
+- Truth or Drink curtain cancellation and Finger Guillotine pointer cancellation were exercised.
+- Fullscreen iOS guidance and void-returning fullscreen behavior were exercised in the browser.
+- 79 source files parsed without syntax errors; no broken local assets, native alert/prompt/confirm calls, emoji-presentation characters, or literal 100vh sizing remain.
+- VS Code diagnostics reported no errors in the checked files.
+
+The five stim game files and the newer hub assets were user-added; this inventory lists only files changed or renamed by the audit work.

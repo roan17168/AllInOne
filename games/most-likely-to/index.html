@@ -294,7 +294,7 @@
 
     let holdStart = 0, raf = null;
     const btn = $("holdBtn");
-    const cancel = () => { if (raf) cancelAnimationFrame(raf); raf = null; $("holdFill").style.width = "0%"; btn.classList.remove("armed"); };
+    const cancel = e => { if(e) e.preventDefault(); if (raf) cancelAnimationFrame(raf); raf = null; $("holdFill").style.width = "0%"; btn.classList.remove("armed"); };
 
     btn.onpointerdown = e => {
       e.preventDefault();

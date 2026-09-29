@@ -59,7 +59,7 @@ class SketchCanvas {
       return false;
     }
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
     this.cssW = rect.width;
     this.cssH = rect.height;
     this.canvas.width = Math.round(rect.width * dpr);

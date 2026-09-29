@@ -449,7 +449,7 @@ function openCurtain(name,note,cb,kick){
   $("holdFill").style.width="0%";$("holdBtn").classList.remove("armed");
   $("curtain").classList.add("is-open");SFX.open();
 }
-function cancelHold(){if(holdRAF)cancelAnimationFrame(holdRAF);holdRAF=null;$("holdFill").style.width="0%";$("holdBtn").classList.remove("armed");}
+function cancelHold(e){if(e)e.preventDefault();if(holdRAF)cancelAnimationFrame(holdRAF);holdRAF=null;$("holdFill").style.width="0%";$("holdBtn").classList.remove("armed");}
 function beginHold(e){
   e.preventDefault();SFX.unlock();holdStart=performance.now();$("holdBtn").classList.add("armed");
   const step=()=>{
@@ -888,12 +888,15 @@ function checkWin(){
 
 /* ---------- FULLSCREEN ---------- */
 function toggleFullscreen(){
+  const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)&&!window.MSStream||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  const isStandalone=Boolean(navigator.standalone)||(typeof matchMedia==="function"&&matchMedia("(display-mode: standalone)").matches);
+  if(isIOS){toast(isStandalone?"Already in Fullscreen Web App mode!":"Use Share, then Add to Home Screen, for fullscreen.");return;}
   const el=document.documentElement;
   if(!document.fullscreenElement&&!document.webkitFullscreenElement){
     const req=el.requestFullscreen||el.webkitRequestFullscreen;
-    if(req){ req.call(el).catch(()=>toast("Add to Home Screen for fullscreen on iOS")); }
-    else toast("Add to Home Screen for fullscreen on iOS");
-  }else{ (document.exitFullscreen||document.webkitExitFullscreen).call(document); }
+    if(req){ try { Promise.resolve(req.call(el)).catch(()=>toast("Fullscreen mode blocked")); } catch(e) { toast("Fullscreen mode blocked"); } }
+    else toast("Fullscreen mode is not available in this browser.");
+  }else{ const exit=document.exitFullscreen||document.webkitExitFullscreen; if(exit){try{Promise.resolve(exit.call(document)).catch(()=>{});}catch(e){}} }
 }
 
 /* ==========================================================================

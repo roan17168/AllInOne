@@ -26,7 +26,7 @@
   body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    min-height: 100dvh; display: flex; flex-direction: column;
     overflow-x: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
@@ -355,7 +355,8 @@ function openCurtain(playerName, task, onUnlock){
   $("curtain").classList.add("is-open");
 
   const btn = $("btnCurtainHold");
-  const cancel = () => {
+  const cancel = e => {
+    if(e) e.preventDefault();
     if(holdTimer) cancelAnimationFrame(holdTimer);
     holdTimer = null;
     $("holdFill").style.width = "0%";

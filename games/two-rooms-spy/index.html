@@ -194,7 +194,8 @@
     $("roleHoldFill").style.width = "0%";
     $("privacyCurtain").hidden = false;
   }
-  function cancelRoleHold(){
+  function cancelRoleHold(event){
+    if(event) event.preventDefault();
     if(roleHoldFrame) cancelAnimationFrame(roleHoldFrame);
     roleHoldFrame = null;
     roleHoldStart = 0;

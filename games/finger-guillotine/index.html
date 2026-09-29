@@ -26,7 +26,7 @@
   body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    min-height: 100dvh; display: flex; flex-direction: column;
     overflow: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
@@ -347,7 +347,7 @@ let W = 360, H = 540, DPR = 1;
 
 function resizeCanvas(){
   const wrap = cvs.parentElement;
-  DPR = Math.min(window.devicePixelRatio || 1, 3);
+  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
   W = wrap.clientWidth;
   H = wrap.clientHeight;
   cvs.width = W * DPR;
@@ -355,6 +355,7 @@ function resizeCanvas(){
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
 window.addEventListener("resize", resizeCanvas);
+window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
 
 function startMatch(){
   S.scoreP1 = 0;
@@ -571,11 +572,11 @@ stockP1.addEventListener("pointerdown", e => {
   if(S.state === "dropped" || S.state === "resolved") return;
   S.p1Held = true;
   stockP1.classList.add("held");
-  stockP1.setPointerCapture(e.pointerId);
+  try { stockP1.setPointerCapture(e.pointerId); } catch(error) {}
   checkBothArmed();
 });
 
-stockP1.addEventListener("pointerup", e => {
+const releaseP1 = e => {
   e.preventDefault();
   if(!S.p1Held) return;
   S.p1Held = false;
@@ -586,7 +587,11 @@ stockP1.addEventListener("pointerup", e => {
   } else if(S.state === "dropped" && S.p1PullTime === null){
     S.p1PullTime = performance.now() - S.dropStartTime;
   }
-});
+};
+stockP1.addEventListener("pointerup", releaseP1);
+stockP1.addEventListener("pointercancel", releaseP1);
+stockP1.addEventListener("pointerleave", releaseP1);
+stockP1.addEventListener("lostpointercapture", releaseP1);
 
 // Player 2 Touch
 stockP2.addEventListener("pointerdown", e => {
@@ -594,11 +599,11 @@ stockP2.addEventListener("pointerdown", e => {
   if(S.state === "dropped" || S.state === "resolved") return;
   S.p2Held = true;
   stockP2.classList.add("held");
-  stockP2.setPointerCapture(e.pointerId);
+  try { stockP2.setPointerCapture(e.pointerId); } catch(error) {}
   checkBothArmed();
 });
 
-stockP2.addEventListener("pointerup", e => {
+const releaseP2 = e => {
   e.preventDefault();
   if(!S.p2Held) return;
   S.p2Held = false;
@@ -609,7 +614,11 @@ stockP2.addEventListener("pointerup", e => {
   } else if(S.state === "dropped" && S.p2PullTime === null){
     S.p2PullTime = performance.now() - S.dropStartTime;
   }
-});
+};
+stockP2.addEventListener("pointerup", releaseP2);
+stockP2.addEventListener("pointercancel", releaseP2);
+stockP2.addEventListener("pointerleave", releaseP2);
+stockP2.addEventListener("lostpointercapture", releaseP2);
 
 /* ================= SETUP & ROSTER ================= */
 function renderPlayerSelect(){
