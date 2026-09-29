@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald-lounge">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#071712" id="metaThemeColor" />
+<title>Prism Reflex: Light Router | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #071712; --bg-surface: #0e241d; --bg-elevated: #16362c;
+    --text-primary: #ffffff; --text-secondary: #a3cfbe; --text-muted: #5e9481;
+    --accent: #00ffaa; --accent-glow: rgba(0,255,170,0.4); --accent-contrast: #031c14;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(0,255,170,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    min-height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    user-select: none; -webkit-user-select: none;
+  }
+  .gm-root {
+    display: flex; flex-direction: column; min-height: 100%; height: 100dvh; width: 100%; overflow: hidden;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .btn-icon-only {
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.is-active { display: flex; }
+  #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; }
+
+  .hud-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    flex-shrink: 0; z-index: 20;
+  }
+  .hud-stat {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); padding: .3rem .4rem;
+  }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .52rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 900; color: var(--accent); }
+
+  .canvas-stage-wrap {
+    flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
+  }
+  #prismCanvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: pointer; }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+</style>
+</head>
+<body>
+<div class="gm-root">
+  <header class="gm-top">
+    <div class="gm-idblock">
+      <span class="gm-title">Prism Reflex</span>
+      <span class="gm-sub">Optic Beam Stim</span>
+    </div>
+    <div class="gm-actions">
+      <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <div class="stage">
+    <!-- SETUP -->
+    <section class="screen is-active" id="scrSetup">
+      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Optic Network Guide</div>
+        <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+          • A continuous photon laser beam bounces through dynamic mirrors.<br>
+          • <strong>Tap prism nodes to rotate them 45°</strong> in real-time.<br>
+          • Route the laser through <strong>Quantum Crystals</strong> to charge harmonic synths.<br>
+          • Maintain laser saturation to build infinite resonance loops!
+        </p>
+      </div>
+
+      <button class="btn" id="btnStartPrism" style="margin-top:auto;">
+        Engage Prism Grid
+      </button>
+    </section>
+
+    <!-- PLAY -->
+    <section class="screen" id="scrPlay">
+      <div class="hud-bar">
+        <div class="hud-stat">
+          <span class="hud-lbl">Energy</span>
+          <span class="hud-val" id="hudEnergy">0</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Resonance</span>
+          <span class="hud-val" id="hudResonance">0%</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Crystals Lit</span>
+          <span class="hud-val" id="hudCrystals">0 / 4</span>
+        </div>
+      </div>
+      <div class="canvas-stage-wrap" id="canvasWrap">
+        <canvas id="prismCanvas"></canvas>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+/* ================= WEB AUDIO SYNTH ================= */
+const AudioPrism = {
+  ctx: null,
+  init(){
+    if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  },
+  prismClick(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(800, now);
+      osc.frequency.exponentialRampToValueAtTime(1400, now + 0.04);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.04);
+    }catch(e){}
+  },
+  crystalCharge(idx){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const freqs = [440, 554.37, 659.25, 880];
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freqs[idx % freqs.length], now);
+      gain.gain.setValueAtTime(0.06, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    }catch(e){}
+  }
+};
+
+/* ================= SIMULATION CORE ================= */
+const cvs = $("prismCanvas");
+const ctx = cvs.getContext("2d");
+const wrap = $("canvasWrap");
+
+let W = 360, H = 550, DPR = 1;
+
+const S = {
+  running: false,
+  energy: 0,
+  prisms: [],
+  crystals: [],
+  beamPath: []
+};
+
+function resizeCanvas(){
+  const rect = wrap.getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+  W = rect.width;
+  H = rect.height;
+  cvs.width = Math.round(W * DPR);
+  cvs.height = Math.round(H * DPR);
+  cvs.style.width = W + "px";
+  cvs.style.height = H + "px";
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  initGrid();
+}
+
+function initGrid(){
+  S.prisms = [
+    { x: W * 0.25, y: H * 0.25, angle: 45, r: 24 },
+    { x: W * 0.75, y: H * 0.25, angle: 135, r: 24 },
+    { x: W * 0.75, y: H * 0.70, angle: 225, r: 24 },
+    { x: W * 0.25, y: H * 0.70, angle: 315, r: 24 }
+  ];
+
+  S.crystals = [
+    { x: W * 0.5, y: H * 0.25, r: 16, charged: false, glow: 0 },
+    { x: W * 0.75, y: H * 0.47, r: 16, charged: false, glow: 0 },
+    { x: W * 0.5, y: H * 0.70, r: 16, charged: false, glow: 0 },
+    { x: W * 0.25, y: H * 0.47, r: 16, charged: false, glow: 0 }
+  ];
+}
+
+function calculateLaser(){
+  S.beamPath = [{ x: 20, y: H * 0.25 }];
+  let curX = 20, curY = H * 0.25;
+  let vx = 1, vy = 0; // Moving right
+
+  for(let step = 0; step < 8; step++){
+    let hit = null;
+    let hitDist = 9999;
+
+    // Check prism mirrors
+    S.prisms.forEach(p => {
+      const dx = p.x - curX, dy = p.y - curY;
+      const dot = dx * vx + dy * vy;
+      if(dot > 5){
+        const perp = Math.abs(dx * (-vy) + dy * vx);
+        if(perp < p.r && dot < hitDist){
+          hitDist = dot;
+          hit = { type: "prism", obj: p, x: p.x, y: p.y };
+        }
+      }
+    });
+
+    if(hit && hit.type === "prism"){
+      curX = hit.x;
+      curY = hit.y;
+      S.beamPath.push({ x: curX, y: curY });
+
+      // Calculate reflection normal
+      const rad = (hit.obj.angle * Math.PI) / 180;
+      const nx = Math.cos(rad);
+      const ny = Math.sin(rad);
+      const dotN = vx * nx + vy * ny;
+      vx = vx - 2 * dotN * nx;
+      vy = vy - 2 * dotN * ny;
+    } else {
+      // Beam exits screen bounds
+      curX += vx * 800;
+      curY += vy * 800;
+      S.beamPath.push({ x: curX, y: curY });
+      break;
+    }
+  }
+
+  // Check which crystals intersect the beam path
+  let litCount = 0;
+  S.crystals.forEach((c, idx) => {
+    let illuminated = false;
+    for(let k = 0; k < S.beamPath.length - 1; k++){
+      const p1 = S.beamPath[k], p2 = S.beamPath[k+1];
+      const dist = distToSegment({ x: c.x, y: c.y }, p1, p2);
+      if(dist < c.r + 6){
+        illuminated = true;
+        break;
+      }
+    }
+    c.charged = illuminated;
+    if(illuminated){
+      litCount++;
+      c.glow = Math.min(1.0, c.glow + 0.08);
+      S.energy += 5;
+      if(Math.random() < 0.1) AudioPrism.crystalCharge(idx);
+    } else {
+      c.glow = Math.max(0, c.glow - 0.04);
+    }
+  });
+
+  $("hudEnergy").textContent = S.energy.toLocaleString();
+  $("hudResonance").textContent = `${Math.round((litCount / S.crystals.length) * 100)}%`;
+  $("hudCrystals").textContent = `${litCount} / ${S.crystals.length}`;
+}
+
+function distToSegment(p, v, w) {
+  const l2 = (w.x - v.x)**2 + (w.y - v.y)**2;
+  if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+  let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+}
+
+function loop(){
+  if(!S.running) return;
+
+  calculateLaser();
+
+  // Clear Canvas
+  ctx.fillStyle = "#071712";
+  ctx.fillRect(0, 0, W, H);
+
+  // 1. Draw Laser Beam with Core & Glow
+  if(S.beamPath.length > 1){
+    ctx.save();
+    ctx.strokeStyle = "#00ffaa";
+    ctx.shadowColor = "#00ffaa";
+    ctx.shadowBlur = 18;
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.moveTo(S.beamPath[0].x, S.beamPath[0].y);
+    for(let i = 1; i < S.beamPath.length; i++){
+      ctx.lineTo(S.beamPath[i].x, S.beamPath[i].y);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 2. Draw Crystals
+  S.crystals.forEach(c => {
+    ctx.save();
+    ctx.translate(c.x, c.y);
+    ctx.beginPath();
+    ctx.arc(0, 0, c.r, 0, Math.PI * 2);
+    ctx.fillStyle = c.charged ? "rgba(0, 255, 170, 0.4)" : "rgba(22, 54, 44, 0.8)";
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = c.charged ? "#00ffaa" : "#5e9481";
+    ctx.shadowColor = "#00ffaa";
+    ctx.shadowBlur = c.glow * 20;
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  // 3. Draw Prism Nodes
+  S.prisms.forEach(p => {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.beginPath();
+    ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#16362c";
+    ctx.fill();
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = "#00ffaa";
+    ctx.stroke();
+
+    // Mirror Line
+    const rad = (p.angle * Math.PI) / 180;
+    ctx.rotate(rad);
+    ctx.beginPath();
+    ctx.moveTo(0, -p.r + 4);
+    ctx.lineTo(0, p.r - 4);
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "#ffffff";
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  requestAnimationFrame(loop);
+}
+
+/* ================= INTERACTION ================= */
+cvs.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  if(!S.running) return;
+  const rect = cvs.getBoundingClientRect();
+  const px = e.clientX - rect.left;
+  const py = e.clientY - rect.top;
+
+  S.prisms.forEach(p => {
+    if(Math.hypot(px - p.x, py - p.y) < p.r + 14){
+      p.angle = (p.angle + 45) % 360;
+      AudioPrism.prismClick();
+      if("vibrate" in navigator) navigator.vibrate(15);
+    }
+  });
+});
+
+$("btnStartPrism").onclick = () => {
+  S.running = true;
+  S.energy = 0;
+  showScreen("scrPlay");
+  resizeCanvas();
+  requestAnimationFrame(loop);
+};
+
+window.addEventListener("resize", () => { if(S.running) resizeCanvas(); });
+window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
+
+})();
+</script>
+</body>
+</html>

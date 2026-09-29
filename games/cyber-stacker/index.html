@@ -1,32 +1,35 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="emerald-lounge">
+<html lang="en" data-theme="nordic-slate">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#071712" id="metaThemeColor" />
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
 <title>Arcade Tower Stacker | PartyDeck</title>
 <script>
 (function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/themes.css" />
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
   :root {
-    --bg-primary: #071712; --bg-surface: #0e241d; --bg-elevated: #16362c;
-    --text-primary: #ffffff; --text-secondary: #a3cfbe; --text-muted: #5e9481;
-    --accent: #00ffaa; --accent-glow: rgba(0,255,170,0.38); --accent-contrast: #031c14;
+    --bg-primary: #0e1117; --bg-surface: #161b24; --bg-elevated: #1f2633;
+    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #627288;
+    --accent: #00ffaa; --accent-glow: rgba(0,255,170,0.4); --accent-contrast: #031c14;
     --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
-    --border-ui: rgba(0,255,170,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+    --border-ui: rgba(0,255,170,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body {
+  html, body {
+    min-height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    min-height: 100dvh; display: flex; flex-direction: column;
-    overflow: hidden; user-select: none; -webkit-user-select: none;
+    user-select: none; -webkit-user-select: none;
+  }
+  .gm-root {
+    display: flex; flex-direction: column; min-height: 100%; height: 100dvh; width: 100%; overflow: hidden;
   }
   .gm-top {
     position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
@@ -36,9 +39,8 @@
   .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
   .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
   .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
-  .gm-actions { display: flex; gap: .4rem; }
   .btn-icon-only {
-    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
     color: var(--text-primary); display: flex; align-items: center; justify-content: center;
     cursor: pointer; text-decoration: none;
@@ -50,201 +52,103 @@
     overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
   .screen.is-active { display: flex; }
+  #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; }
 
-  /* HUD */
-  .hud-strip {
+  .hud-bar {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
     padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    flex-shrink: 0; z-index: 20;
   }
   .hud-stat {
     display: flex; flex-direction: column; align-items: center;
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
     border-radius: var(--r-sm); padding: .3rem .4rem;
   }
-  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .55rem; color: var(--text-muted); text-transform: uppercase; }
-  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 900; color: var(--accent); }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .52rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 900; color: var(--accent); }
 
-  /* Stacker Tower Viewport */
-  .stacker-stage {
-    flex: 1; position: relative; width: 100%; height: 100%;
-    background: #020906; touch-action: none;
+  .canvas-stage-wrap {
+    flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
   }
-  #stackerCanvas { width: 100%; height: 100%; display: block; }
+  #stackCanvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: pointer; }
 
-  /* Big Tap Trigger Button */
-  .stack-trigger-zone {
-    position: absolute; inset: 0; z-index: 10;
-    display: flex; align-items: flex-end; justify-content: center;
-    padding-bottom: max(1.2rem, env(safe-area-inset-bottom)); pointer-events: auto;
+  .stack-dock {
+    display: flex; padding: .6rem .9rem; background: var(--bg-surface); border-top: 1px solid var(--border-ui);
+    padding-bottom: max(.7rem, calc(env(safe-area-inset-bottom) + .5rem)); flex-shrink: 0; z-index: 30;
   }
-  .btn-stack-tap {
-    width: 90%; max-width: 380px; min-height: 58px; background: var(--accent);
-    color: var(--accent-contrast); border: none; border-radius: var(--r-md);
-    font-family: 'Space Mono', monospace; font-size: 1rem; font-weight: 900;
-    text-transform: uppercase; letter-spacing: .08em; box-shadow: 0 0 24px var(--accent-glow);
-    cursor: pointer;
+  .btn-tap-stack {
+    width: 100%; min-height: 52px; background: var(--accent); color: var(--accent-contrast); border: none;
+    border-radius: var(--r-sm); font-family: 'Space Mono', monospace; font-size: .95rem; font-weight: 900;
+    text-transform: uppercase; cursor: pointer; box-shadow: 0 0 16px var(--accent-glow);
   }
-  .btn-stack-tap:active { transform: scale(0.97); }
-
-  /* Panels */
-  .panel {
-    background: var(--bg-surface); border: 1px solid var(--border-ui);
-    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
-  }
-  .panel-title {
-    font-family: 'Space Mono', monospace; font-size: .62rem;
-    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
-  }
-  .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
-  .opt-btn {
-    min-height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
-    font-size: .78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-  .opt-btn.is-active {
-    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
-    box-shadow: 0 0 14px var(--accent-glow);
-  }
-  .btn {
-    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
-    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
-    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
-    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
-  }
-  .btn:active { transform: scale(.98); }
-
-  /* Privacy Curtain */
-  .curtain {
-    position: fixed; inset: 0; z-index: 100; background: rgba(7, 23, 18, 0.96);
-    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
-  }
-  .curtain.is-open { display: flex; }
-  .cur-card {
-    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
-    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
-  }
-  .hold-btn {
-    position: relative; overflow: hidden; width: 100%; min-height: 60px;
-    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
-    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
-    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
-  }
-  .hold-fill {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
-    background: var(--accent); opacity: .85; transition: width .04s linear;
-  }
-  .hold-label { position: relative; z-index: 2; pointer-events: none; }
-  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
-
-  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
-  .ico svg { width: 100%; height: 100%; }
+  .btn-tap-stack:active { transform: scale(0.98); }
 </style>
-<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
-
-<header class="gm-top">
-  <div class="gm-idblock">
-    <span class="gm-title">Arcade Tower Stacker</span>
-    <span class="gm-sub" id="topSub">15-Tier Gauntlet</span>
-  </div>
-  <div class="gm-actions">
-    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-    </a>
-  </div>
-</header>
-
-<div class="stage">
-  <!-- SETUP -->
-  <section class="screen is-active" id="scrSetup">
-    <div class="panel">
-      <div class="panel-title">Target Tier Quota</div>
-      <div class="opt-grid" id="quotaGrid">
-        <button class="opt-btn" data-q="7">Tier 7 (Rookie)</button>
-        <button class="opt-btn is-active" data-q="10">Tier 10 (Minor)</button>
-        <button class="opt-btn" data-q="15">Tier 15 (Major)</button>
-      </div>
+<div class="gm-root">
+  <header class="gm-top">
+    <div class="gm-idblock">
+      <span class="gm-title">Arcade Tower Stacker</span>
+      <span class="gm-sub">15-Tier Precision Stacker</span>
     </div>
-    <div class="panel">
-      <div class="panel-title">Prize Stacker Rules</div>
-      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
-        • Tap anywhere to lock the oscillating block row in place.<br>
-        • Any block not aligned with the tier below is sliced off.<br>
-        • Reach <strong>Tier 10 (Minor Prize)</strong> to secure safety.<br>
-        • Reach <strong>Tier 15 (Major Prize)</strong> to become Stacker God!<br>
-        • Missing your quota = Drink forfeit penalty scaled to height missed!
-      </p>
+    <div class="gm-actions">
+      <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
     </div>
-    <div class="panel">
-      <div class="panel-title">Active Stackers</div>
-      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
-    </div>
-    <button class="btn" id="btnStartGauntlet" style="margin-top:auto;">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
-      Start Tower Challenge
-    </button>
-  </section>
+  </header>
 
-  <!-- GAMEPLAY CANVAS -->
-  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
-    <div class="hud-strip">
-      <div class="hud-stat">
-        <span class="hud-lbl">Striker</span>
-        <span class="hud-val" id="hudPlayer" style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">Current Tier</span>
-        <span class="hud-val" id="hudTier">0 / 15</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">Quota</span>
-        <span class="hud-val" id="hudQuota" style="color:var(--warning);">Tier 10</span>
-      </div>
-    </div>
-
-    <div class="stacker-stage">
-      <canvas id="stackerCanvas"></canvas>
-      <div class="stack-trigger-zone">
-        <button class="btn-stack-tap" id="btnTapStack">LOCK ROW [TAP]</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- VERDICT -->
-  <section class="screen" id="scrVerdict">
-    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
-      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">STACK RECORD</div>
-      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="verdictPlayer">Player</h2>
-      <div style="font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:900;color:var(--accent);margin-bottom:.4rem;" id="verdictTier">TIER 0</div>
-
-      <div id="forfeitBox" style="background:rgba(255,0,85,.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
-        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--danger);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">MISSED TIER QUOTA</span>
-        <p style="font-size:1.05rem;font-weight:800;color:#fff;margin-top:.4rem;" id="forfeitText">Take 3 sips!</p>
+  <div class="stage">
+    <!-- SETUP -->
+    <section class="screen is-active" id="scrSetup">
+      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Stacker Rules</div>
+        <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+          • 15 vertical tiers of accelerating horizontal blocks.<br>
+          • <strong>Tap LOCK TIER</strong> to stack precisely over the previous level.<br>
+          • Overhanging blocks get sliced off cleanly.<br>
+          • Tier 10 unlocks <strong>Minor Prize</strong>; Tier 15 claims <strong>Major Jackpot</strong>!
+        </p>
       </div>
 
-      <div id="passBox" style="background:rgba(0,255,170,.1);border:2px solid var(--success);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
-        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--success);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">STACK MASTER</span>
-        <p style="font-size:1rem;font-weight:800;color:#fff;margin-top:.4rem;">Tower conquered! Assign 3 penalty sips across the room.</p>
-      </div>
-    </div>
-    <button class="btn" id="btnNextRunner" style="margin-top:auto;">Next Tower Striker</button>
-  </section>
-</div>
+      <button class="btn-tap-stack" id="btnStartStack" style="margin-top:auto;">
+        Insert Token &amp; Stack
+      </button>
+    </section>
 
-<!-- 4. PRIVACY CURTAIN -->
-<div class="curtain" id="curtain">
-  <div class="cur-card">
-    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
-    </div>
-    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT STACKER</div>
-    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
-    <p style="font-size:.82rem;color:var(--text-secondary);">Target: <strong id="curQuota" style="color:var(--accent);">Tier 10</strong></p>
-    <button class="hold-btn" id="btnCurtainHold">
-      <span class="hold-fill" id="holdFill"></span>
-      <span class="hold-label">HOLD 700MS TO UNLOCK</span>
-    </button>
+    <!-- GAMEPLAY VIEWPORT -->
+    <section class="screen" id="scrPlay">
+      <div class="hud-bar">
+        <div class="hud-stat">
+          <span class="hud-lbl">Current Tier</span>
+          <span class="hud-val" id="hudTier">0 / 15</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Block Width</span>
+          <span class="hud-val" id="hudWidth">3</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Speed</span>
+          <span class="hud-val" id="hudSpeed">1.0x</span>
+        </div>
+      </div>
+      <div class="canvas-stage-wrap" id="canvasWrap">
+        <canvas id="stackCanvas"></canvas>
+      </div>
+      <footer class="stack-dock">
+        <button type="button" class="btn-tap-stack" id="btnLockTier">Lock Tier</button>
+      </footer>
+    </section>
+
+    <!-- VERDICT -->
+    <section class="screen" id="scrVerdict">
+      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);" id="verdictKicker">TOWER FINALE</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:900;margin:.3rem 0;" id="verdictTier">TIER 0 REACHED</h2>
+        <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:1rem;" id="verdictDesc">Missed alignment on Tier 1</p>
+      </div>
+      <button class="btn-tap-stack" id="btnRestartStack" style="margin-top:auto;">Stack Again</button>
+    </section>
   </div>
 </div>
 
@@ -252,367 +156,271 @@
 (function(){
 "use strict";
 
-/* ================= WEB AUDIO SYNTH ================= */
-const AudioStack = {
-  ctx: null,
-  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-  stackLock(tier){
-    try {
-      this.init();
-      const freq = 300 + tier * 55;
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "square"; o.frequency.setValueAtTime(freq, this.ctx.currentTime);
-      g.gain.setValueAtTime(0.12, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.08);
-    }catch(e){}
-  },
-  blockSlice(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sawtooth"; o.frequency.setValueAtTime(180, this.ctx.currentTime);
-      g.gain.setValueAtTime(0.15, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.1);
-    }catch(e){}
-  },
-  majorPrize(){
-    try {
-      this.init();
-      [523, 659, 784, 1046, 1318].forEach((f, i) => {
-        setTimeout(() => {
-          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
-          g.gain.setValueAtTime(0.2, this.ctx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
-          o.connect(g); g.connect(this.ctx.destination);
-          o.start(); o.stop(this.ctx.currentTime + 0.2);
-        }, i * 70);
-      });
-    }catch(e){}
-  },
-  stackFail(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sawtooth"; o.frequency.setValueAtTime(140, this.ctx.currentTime);
-      o.frequency.exponentialRampToValueAtTime(35, this.ctx.currentTime + 0.45);
-      g.gain.setValueAtTime(0.3, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.45);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.45);
-    }catch(e){}
-  }
-};
-
-/* ================= STATE & ROSTER ================= */
-let roster = [];
-try {
-  const raw = localStorage.getItem("partydeck_players");
-  roster = raw ? JSON.parse(raw) : [];
-} catch(e){}
-if(!Array.isArray(roster) || roster.length < 2) roster = ["Stacker 1", "Stacker 2"];
-
-const TOTAL_TIERS = 15;
-const GRID_COLS = 7;
-
-const S = {
-  quota: 10,
-  playerIdx: 0,
-  currentTier: 0,
-  blockWidth: 3, // Initial blocks count (3 -> 2 -> 1)
-  barCol: 0,
-  barDir: 1,
-  speed: 9, // Blocks per second
-  lockedGrid: [], // 15 rows of 7 booleans
-  running: false
-};
-
 const $ = id => document.getElementById(id);
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
 }
 
-/* ================= PRIVACY CURTAIN ================= */
-let holdTimer = null, holdStart = 0;
-const HOLD_MS = 700;
+/* ================= WEB AUDIO SYNTH ================= */
+const AudioStacker = {
+  ctx: null,
+  init(){
+    if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  },
+  tierLock(tier){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(300 + tier * 45, now);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    }catch(e){}
+  },
+  sliceClang(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(600, now);
+      osc.frequency.exponentialRampToValueAtTime(150, now + 0.1);
+      gain.gain.setValueAtTime(0.14, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    }catch(e){}
+  },
+  gameOver(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(35, now + 0.35);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.35);
+    }catch(e){}
+  }
+};
 
-function openCurtain(pName, onUnlock){
-  $("curName").textContent = pName;
-  $("curQuota").textContent = `Tier ${S.quota}`;
-  $("holdFill").style.width = "0%";
-  $("btnCurtainHold").classList.remove("armed");
-  $("curtain").classList.add("is-open");
-
-  const btn = $("btnCurtainHold");
-  const cancel = e => {
-    if(e) e.preventDefault();
-    if(holdTimer) cancelAnimationFrame(holdTimer);
-    holdTimer = null;
-    $("holdFill").style.width = "0%";
-    btn.classList.remove("armed");
-  };
-  const start = e => {
-    e.preventDefault();
-    btn.classList.add("armed");
-    holdStart = performance.now();
-    const tick = now => {
-      const el = now - holdStart;
-      const pct = Math.min(100, (el / HOLD_MS) * 100);
-      $("holdFill").style.width = pct + "%";
-      if(el >= HOLD_MS){
-        cancel();
-        $("curtain").classList.remove("is-open");
-        onUnlock();
-      } else {
-        holdTimer = requestAnimationFrame(tick);
-      }
-    };
-    holdTimer = requestAnimationFrame(tick);
-  };
-
-  btn.onpointerdown = start;
-  btn.onpointerup = cancel;
-  btn.onpointercancel = cancel;
-  btn.onpointerleave = cancel;
-}
-
-/* ================= CANVAS RENDER ENGINE ================= */
-const cvs = $("stackerCanvas");
+/* ================= RESPONSIVE CANVAS & SIMULATION ================= */
+const cvs = $("stackCanvas");
 const ctx = cvs.getContext("2d");
-let W = 360, H = 540, DPR = 1;
 
-function resizeCanvas(){
-  const wrap = cvs.parentElement;
-  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-  W = wrap.clientWidth;
-  H = wrap.clientHeight;
-  cvs.width = W * DPR;
-  cvs.height = H * DPR;
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+let W = 360, H = 550, DPR = 1;
+
+function initResponsiveCanvas(canvas, context, onResizeCallback) {
+  const parent = canvas.parentElement;
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    const rect = parent.getBoundingClientRect();
+    W = rect.width;
+    H = rect.height;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    context.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (onResizeCallback) onResizeCallback(W, H, DPR);
+  }
+  window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", () => setTimeout(resize, 200));
+  resize();
 }
-window.addEventListener("resize", resizeCanvas);
-window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
 
-function resetGameForPlayer(){
-  S.currentTier = 0;
-  S.blockWidth = 3;
+const TOTAL_TIERS = 15;
+const COLS = 7;
+
+const S = {
+  running: false,
+  tier: 0,
+  blockWidth: 3,
+  barCol: 0,
+  barDir: 1,
+  speed: 1.0,
+  lockedGrid: Array.from({ length: TOTAL_TIERS }, () => Array(COLS).fill(false)),
+  lastMoveT: 0
+};
+
+initResponsiveCanvas(cvs, ctx, (w, h) => {});
+
+function triggerLock(){
+  if(!S.running) return;
+
+  let newWidth = 0;
+  if(S.tier === 0){
+    for(let c = 0; c < S.blockWidth; c++){
+      S.lockedGrid[0][S.barCol + c] = true;
+    }
+    newWidth = S.blockWidth;
+  } else {
+    const prevRow = S.lockedGrid[S.tier - 1];
+    for(let c = 0; c < S.blockWidth; c++){
+      const colIdx = S.barCol + c;
+      if(prevRow[colIdx]){
+        S.lockedGrid[S.tier][colIdx] = true;
+        newWidth++;
+      }
+    }
+  }
+
+  if(newWidth === 0){
+    // Missed completely -> Game Over
+    S.running = false;
+    AudioStacker.gameOver();
+    if("vibrate" in navigator) navigator.vibrate([60, 60]);
+    $("verdictTier").textContent = `TIER ${S.tier} REACHED`;
+    $("verdictDesc").textContent = S.tier >= 10 ? "Won Minor Prize!" : "Fell short of prize line!";
+    showScreen("scrVerdict");
+    return;
+  }
+
+  if(newWidth < S.blockWidth){
+    AudioStacker.sliceClang();
+    if("vibrate" in navigator) navigator.vibrate(25);
+  } else {
+    AudioStacker.tierLock(S.tier);
+    if("vibrate" in navigator) navigator.vibrate(15);
+  }
+
+  S.blockWidth = newWidth;
+  S.tier++;
+
+  if(S.tier >= TOTAL_TIERS){
+    // Major Jackpot Cleared
+    S.running = false;
+    $("verdictTier").textContent = "MAJOR JACKPOT!";
+    $("verdictDesc").textContent = "Perfect 15-tier tower built!";
+    showScreen("scrVerdict");
+    return;
+  }
+
   S.barCol = 0;
   S.barDir = 1;
-  S.speed = 8;
-  S.lockedGrid = Array.from({ length: TOTAL_TIERS }, () => Array(GRID_COLS).fill(false));
+  S.speed = 1.0 + S.tier * 0.12;
   updateHUD();
-  S.running = true;
-}
-
-function updateHUD(){
-  $("hudTier").textContent = `${S.currentTier} / 15`;
-  $("hudQuota").textContent = `Tier ${S.quota}`;
 }
 
 let lastT = performance.now();
-let stepAccumulator = 0;
-
 function loop(t){
   if(!S.running) return;
-  const dt = Math.min((t - lastT) / 1000, 0.033);
-  lastT = t;
+  const now = performance.now();
+  const stepInterval = Math.max(70, 200 - S.speed * 12);
 
-  // Bar Stepper Logic
-  stepAccumulator += dt * S.speed;
-  if(stepAccumulator >= 1){
-    stepAccumulator -= 1;
+  if(now - S.lastMoveT >= stepInterval){
     S.barCol += S.barDir;
-    if(S.barCol + S.blockWidth >= GRID_COLS){
-      S.barCol = GRID_COLS - S.blockWidth;
+    if(S.barCol + S.blockWidth > COLS){
+      S.barCol = COLS - S.blockWidth;
       S.barDir = -1;
-    } else if(S.barCol <= 0){
+    } else if(S.barCol < 0){
       S.barCol = 0;
       S.barDir = 1;
     }
+    S.lastMoveT = now;
   }
 
-  // Clear Surface
-  ctx.fillStyle = "#020906";
+  // Clear Canvas
+  ctx.fillStyle = "#0e1117";
   ctx.fillRect(0, 0, W, H);
 
-  // Tower Metrics
-  const cellMargin = 4;
-  const cellW = (W - 32) / GRID_COLS;
-  const cellH = (H - 120) / TOTAL_TIERS;
-  const startX = 16, startY = H - 95;
+  const cellMargin = 3;
+  const cellW = (W - 32) / COLS;
+  const cellH = (H - 20) / TOTAL_TIERS;
+  const startX = 16;
+  const startY = H - 10;
 
-  // Draw Grid Matrix & Prize Threshold Indicators
+  // Draw Grid Lines & Prize Lines
   for(let r = 0; r < TOTAL_TIERS; r++){
     const y = startY - (r + 1) * cellH;
-    
-    // Draw Prize Lines
-    if(r === 9){ // Minor Prize (Tier 10)
-      ctx.strokeStyle = "rgba(255, 208, 0, 0.6)";
+
+    if(r === 9){
+      ctx.strokeStyle = "rgba(255, 208, 0, 0.4)";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(startX, y, cellW * COLS, cellH);
+    } else if(r === 14){
+      ctx.strokeStyle = "rgba(0, 255, 170, 0.6)";
       ctx.lineWidth = 2;
-      ctx.strokeRect(startX - 2, y, (cellW * GRID_COLS) + 4, cellH);
-    } else if(r === 14){ // Major Prize (Tier 15)
-      ctx.strokeStyle = "rgba(0, 255, 170, 0.8)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(startX - 2, y, (cellW * GRID_COLS) + 4, cellH);
+      ctx.strokeRect(startX, y, cellW * COLS, cellH);
     }
 
-    for(let c = 0; c < GRID_COLS; c++){
+    for(let c = 0; c < COLS; c++){
       const x = startX + c * cellW;
-      
-      // Draw Inactive LED Cells
-      ctx.fillStyle = "rgba(0, 255, 170, 0.04)";
-      ctx.fillRect(x + cellMargin/2, y + cellMargin/2, cellW - cellMargin, cellH - cellMargin);
+      const isLocked = S.lockedGrid[r][c];
 
-      // Draw Locked Solid Blocks
-      if(S.lockedGrid[r][c]){
-        ctx.fillStyle = (r >= 14) ? "#ffd000" : ((r >= 9) ? "#00e5ff" : "#00ffaa");
-        ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 8;
-        ctx.fillRect(x + cellMargin/2, y + cellMargin/2, cellW - cellMargin, cellH - cellMargin);
+      if(isLocked){
+        ctx.fillStyle = r >= 14 ? "#00ffaa" : (r >= 9 ? "#ffd000" : "#38bdf8");
+        ctx.shadowColor = ctx.fillStyle;
+        ctx.shadowBlur = 10;
+        ctx.fillRect(x + cellMargin, y + cellMargin, cellW - cellMargin * 2, cellH - cellMargin * 2);
         ctx.shadowBlur = 0;
+      } else {
+        ctx.fillStyle = "rgba(31, 38, 51, 0.4)";
+        ctx.fillRect(x + cellMargin, y + cellMargin, cellW - cellMargin * 2, cellH - cellMargin * 2);
       }
     }
   }
 
-  // Draw Current Moving Active Row
-  if(S.currentTier < TOTAL_TIERS){
-    const activeY = startY - (S.currentTier + 1) * cellH;
-    for(let c = 0; c < S.blockWidth; c++){
-      const blockX = startX + (S.barCol + c) * cellW;
-      ctx.fillStyle = "#ffffff";
-      ctx.shadowColor = "#00ffaa"; ctx.shadowBlur = 12;
-      ctx.fillRect(blockX + cellMargin/2, activeY + cellMargin/2, cellW - cellMargin, cellH - cellMargin);
-      ctx.shadowBlur = 0;
-    }
+  // Draw Active Moving Bar
+  const curY = startY - (S.tier + 1) * cellH;
+  for(let b = 0; b < S.blockWidth; b++){
+    const bx = startX + (S.barCol + b) * cellW;
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "#00ffaa";
+    ctx.shadowBlur = 12;
+    ctx.fillRect(bx + cellMargin, curY + cellMargin, cellW - cellMargin * 2, cellH - cellMargin * 2);
+    ctx.shadowBlur = 0;
   }
 
   requestAnimationFrame(loop);
 }
 
-function handleStackTap(){
-  if(!S.running || S.currentTier >= TOTAL_TIERS) return;
-
-  const currentR = S.currentTier;
-  let newBlocks = 0;
-
-  if(currentR === 0){
-    // Base tier locks all current active blocks
-    for(let c = 0; c < S.blockWidth; c++){
-      S.lockedGrid[0][S.barCol + c] = true;
-    }
-    newBlocks = S.blockWidth;
-  } else {
-    // Slicing logic: match with row below
-    const belowRow = S.lockedGrid[currentR - 1];
-    for(let c = 0; c < S.blockWidth; c++){
-      const colIdx = S.barCol + c;
-      if(belowRow[colIdx]){
-        S.lockedGrid[currentR][colIdx] = true;
-        newBlocks++;
-      }
-    }
-  }
-
-  if(newBlocks === 0){
-    // Total Miss -> Game Over
-    AudioStack.stackFail();
-    endGauntlet(false);
-    return;
-  }
-
-  if(newBlocks < S.blockWidth){
-    AudioStack.blockSlice();
-  } else {
-    AudioStack.stackLock(currentR);
-  }
-
-  S.blockWidth = newBlocks;
-  S.currentTier++;
-  S.speed += 0.85; // Speed increases as you climb
-  updateHUD();
-
-  // Tier 15 Victory
-  if(S.currentTier >= TOTAL_TIERS){
-    AudioStack.majorPrize();
-    endGauntlet(true);
-  }
+function updateHUD(){
+  $("hudTier").textContent = `${S.tier} / 15`;
+  $("hudWidth").textContent = S.blockWidth;
+  $("hudSpeed").textContent = `${S.speed.toFixed(1)}x`;
 }
 
-function endGauntlet(wonMajor){
-  S.running = false;
-  const pName = roster[S.playerIdx];
-  const passed = S.currentTier >= S.quota;
-
-  $("verdictPlayer").textContent = pName;
-  $("verdictTier").textContent = `TIER ${S.currentTier}`;
-
-  if(passed){
-    $("passBox").style.display = "block";
-    $("forfeitBox").style.display = "none";
-  } else {
-    $("passBox").style.display = "none";
-    $("forfeitBox").style.display = "block";
-    const sips = Math.max(2, S.quota - S.currentTier);
-    $("forfeitText").textContent = `Fell ${S.quota - S.currentTier} tiers short of quota. Take ${sips} penalty sips!`;
-  }
-  showScreen("scrVerdict");
-}
-
-/* ================= CONTROLS ================= */
-$("btnTapStack").addEventListener("pointerdown", e => {
+$("btnLockTier").onclick = triggerLock;
+cvs.addEventListener("pointerdown", e => {
   e.preventDefault();
-  handleStackTap();
+  triggerLock();
 });
 
-// Quota Options
-$("quotaGrid").onclick = e => {
-  const b = e.target.closest(".opt-btn"); if(!b) return;
-  document.querySelectorAll("#quotaGrid .opt-btn").forEach(x => x.classList.remove("is-active"));
-  b.classList.add("is-active");
-  S.quota = parseInt(b.dataset.q, 10);
+$("btnStartStack").onclick = () => {
+  S.running = true;
+  S.tier = 0;
+  S.blockWidth = 3;
+  S.barCol = 0;
+  S.barDir = 1;
+  S.speed = 1.0;
+  S.lockedGrid = Array.from({ length: TOTAL_TIERS }, () => Array(COLS).fill(false));
+  S.lastMoveT = performance.now();
+  showScreen("scrPlay");
+  updateHUD();
+  requestAnimationFrame(loop);
 };
 
-// Roster
-function renderRoster(){
-  $("rosterList").innerHTML = roster.map((p, i) => `
-    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
-      <span>#${i+1} ${p}</span>
-      <span style="color:var(--accent);">STACKER</span>
-    </li>
-  `).join("");
-}
-
-$("btnStartGauntlet").onclick = () => {
-  S.playerIdx = 0;
-  startTurn();
+$("btnRestartStack").onclick = () => {
+  showScreen("scrSetup");
 };
 
-function startTurn(){
-  const player = roster[S.playerIdx];
-  $("topSub").textContent = `${player}'s Turn`;
-  $("hudPlayer").textContent = player;
-  openCurtain(player, () => {
-    showScreen("scrPlay");
-    resizeCanvas();
-    resetGameForPlayer();
-    lastT = performance.now();
-    requestAnimationFrame(loop);
-  });
-}
-
-$("btnNextRunner").onclick = () => {
-  S.playerIdx = (S.playerIdx + 1) % roster.length;
-  startTurn();
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-  renderRoster();
-});
 })();
 </script>
-<script src="../../js/theme-sync.js"></script>
 </body>
 </html>

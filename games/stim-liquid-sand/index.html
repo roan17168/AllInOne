@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="nordic-slate">
+<html lang="en" data-theme="tokyo-sunset">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
-<title>Kinetic Neon Sand | PartyDeck</title>
+<meta name="theme-color" content="#120e24" id="metaThemeColor" />
+<title>Kinetic Neon Sand Matrix | PartyDeck</title>
 <script>
 (function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
@@ -15,21 +15,21 @@
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
   :root {
-    --bg-primary: #0e1117; --bg-surface: #161b24; --bg-elevated: #1f2633;
-    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #627288;
-    --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.35); --accent-contrast: #031525;
-    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
-    --border-ui: rgba(148,163,184,0.16); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+    --bg-primary: #120e24; --bg-surface: #1a1433; --bg-elevated: #261e47;
+    --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+    --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-contrast: #ffffff;
+    --danger: #ff0044; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(255,0,127,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body {
-    height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
+    min-height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     user-select: none; -webkit-user-select: none;
   }
   .gm-root {
-    display: flex; flex-direction: column; height: 100%; height: 100dvh; width: 100%; overflow: hidden;
+    display: flex; flex-direction: column; min-height: 100%; height: 100dvh; width: 100%; overflow: hidden;
   }
   .gm-top {
     position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
@@ -45,36 +45,33 @@
     color: var(--text-primary); display: flex; align-items: center; justify-content: center;
     cursor: pointer; text-decoration: none;
   }
-  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-  
-  /* Bottom Palette Toolbar */
-  .sand-controls {
-    flex-shrink: 0; background: var(--bg-surface); border-top: 1px solid var(--border-ui);
-    padding: .5rem .8rem; padding-bottom: max(.5rem, env(safe-area-inset-bottom));
-    display: flex; align-items: center; justify-content: space-between; gap: .5rem; z-index: 30;
-  }
-  .palette-swatches { display: flex; gap: .4rem; }
-  .color-swatch {
-    width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border-ui);
-    cursor: pointer; transition: transform .15s ease;
-  }
-  .color-swatch.is-active { transform: scale(1.18); border-color: #fff; box-shadow: 0 0 10px currentColor; }
-  .tool-btn {
-    height: 34px; padding: 0 .65rem; border-radius: var(--r-sm);
-    background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .68rem; font-weight: 700;
-    display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
-  }
-  .tool-btn.accent { border-color: var(--accent); color: var(--accent); }
-  
+
   .canvas-stage-wrap {
     flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
   }
   #sandCanvas {
-    width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair;
+    width: 100%; height: 100%; display: block; touch-action: none;
   }
-  .ico { display: inline-flex; width: 16px; height: 16px; flex-shrink: 0; }
-  .ico svg { width: 100%; height: 100%; }
+
+  /* Control Dock */
+  .sand-dock {
+    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    padding: .5rem .8rem; background: var(--bg-surface); border-top: 1px solid var(--border-ui);
+    padding-bottom: max(.6rem, calc(env(safe-area-inset-bottom) + .4rem)); flex-shrink: 0; z-index: 30;
+  }
+  .swatch-group { display: flex; gap: .35rem; }
+  .swatch-btn {
+    width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--border-ui);
+    cursor: pointer; transition: transform .15s ease;
+  }
+  .swatch-btn.is-active { transform: scale(1.15); border-color: #fff; box-shadow: 0 0 10px currentColor; }
+  .tool-btn {
+    background: var(--bg-elevated); border: 1px solid var(--border-ui); color: var(--text-secondary);
+    padding: .35rem .65rem; border-radius: var(--r-sm); font-family: 'Space Mono', monospace;
+    font-size: .68rem; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;
+  }
+  .tool-btn.is-active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .tool-btn svg { width: 14px; height: 14px; }
 </style>
 </head>
 <body>
@@ -82,304 +79,244 @@
   <header class="gm-top">
     <div class="gm-idblock">
       <span class="gm-title">Kinetic Neon Sand</span>
-      <span class="gm-sub">Tilt &amp; Multi-Touch Fidget</span>
+      <span class="gm-sub" id="modeSubtitle">Zen Matrix Sandbox</span>
     </div>
-    <div class="gm-actions">
+    <div class="gm-actions" style="display:flex;gap:.4rem;">
+      <button type="button" class="btn-icon-only" id="btnReqTilt" title="Enable Tilt Sensors">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+      </button>
       <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-        <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </a>
     </div>
   </header>
 
-  <div class="stage">
-    <div class="canvas-stage-wrap" id="sandWrap">
-      <canvas id="sandCanvas"></canvas>
-    </div>
-
-    <div class="sand-controls">
-      <div class="palette-swatches" id="swatchList">
-        <button type="button" class="color-swatch is-active" data-color="#00ffcc" style="background:#00ffcc;color:#00ffcc;"></button>
-        <button type="button" class="color-swatch" data-color="#ff007f" style="background:#ff007f;color:#ff007f;"></button>
-        <button type="button" class="color-swatch" data-color="#ffd000" style="background:#ffd000;color:#ffd000;"></button>
-        <button type="button" class="color-swatch" data-color="#38bdf8" style="background:#38bdf8;color:#38bdf8;"></button>
-      </div>
-
-      <div style="display:flex;gap:.4rem;">
-        <button type="button" class="tool-btn" id="btnBarrierMode">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
-          <span>BARRIER</span>
-        </button>
-        <button type="button" class="tool-btn accent" id="btnClearSand">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></span>
-          <span>CLEAR</span>
-        </button>
-      </div>
-    </div>
+  <div class="canvas-stage-wrap" id="sandWrap">
+    <canvas id="sandCanvas"></canvas>
   </div>
+
+  <footer class="sand-dock">
+    <div class="swatch-group" id="swatchGroup">
+      <button type="button" class="swatch-btn is-active" data-col="1" style="background:#ff007f;color:#ff007f;"></button>
+      <button type="button" class="swatch-btn" data-col="2" style="background:#00ffaa;color:#00ffaa;"></button>
+      <button type="button" class="swatch-btn" data-col="3" style="background:#38bdf8;color:#38bdf8;"></button>
+      <button type="button" class="swatch-btn" data-col="4" style="background:#ffd000;color:#ffd000;"></button>
+    </div>
+    <div style="display:flex;gap:.4rem;">
+      <button type="button" class="tool-btn" id="btnBarrier">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Barrier
+      </button>
+      <button type="button" class="tool-btn" id="btnClearSand">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+        Clear
+      </button>
+    </div>
+  </footer>
 </div>
 
 <script>
 (function(){
 "use strict";
 
-/* ================= WEB AUDIO AMBIENT SYNTH ================= */
+const $ = id => document.getElementById(id);
+
+/* ================= WEB AUDIO SYNTH ================= */
 const AudioSand = {
   ctx: null,
   init(){
     if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
   },
-  pourChime(colorHex){
+  pourChime(colIdx){
     try {
       this.init();
       const now = this.ctx.currentTime;
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      
-      const freqs = [523, 659, 783, 1046, 1318];
-      const freq = freqs[Math.floor(Math.random() * freqs.length)];
+      const freqs = [523.25, 659.25, 783.99, 1046.50];
       osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, now);
+      osc.frequency.setValueAtTime(freqs[(colIdx - 1) % freqs.length] || 440, now);
       gain.gain.setValueAtTime(0.04, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-      osc.start(now); osc.stop(now + 0.05);
-    }catch(e){}
-  },
-  shatterPop(){
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
       osc.connect(gain);
       gain.connect(this.ctx.destination);
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(880, now);
-      osc.frequency.exponentialRampToValueAtTime(220, now + 0.12);
-      gain.gain.setValueAtTime(0.18, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-      osc.start(now); osc.stop(now + 0.12);
+      osc.start(now);
+      osc.stop(now + 0.06);
     }catch(e){}
   }
 };
 
-/* ================= SIMULATION CORE ================= */
-const $ = id => document.getElementById(id);
-const cvs = document.getElementById("sandCanvas");
+/* ================= CELLULAR AUTOMATA GRID ================= */
+const cvs = $("sandCanvas");
 const ctx = cvs.getContext("2d");
-const wrap = document.getElementById("sandWrap");
+const wrap = $("sandWrap");
 
-let W = 360, H = 600, DPR = 1;
-const MAX_GRAINS = 1600;
+const COLS = 120;
+const ROWS = 200;
+let grid = new Uint8Array(COLS * ROWS); // 0: empty, 1-4: sand colors, 5: wall barrier
 
-let currentColor = "#00ffcc";
+const COLOR_MAP = {
+  0: null,
+  1: "#ff007f",
+  2: "#00ffaa",
+  3: "#38bdf8",
+  4: "#ffd000",
+  5: "#8b62b8"
+};
+
+let activeColor = 1;
 let barrierMode = false;
-let gravity = { x: 0, y: 9.8 };
+let gx = 0, gy = 1; // Gravity vectors
+let pointers = new Map();
 
-const grains = []; // { x, y, vx, vy, color, r }
-const barriers = []; // { x1, y1, x2, y2 }
-const activePointers = new Map();
-
-function resizeCanvas(){
+function resize(){
   const rect = wrap.getBoundingClientRect();
-  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-  W = rect.width;
-  H = rect.height;
-  cvs.width = Math.round(W * DPR);
-  cvs.height = Math.round(H * DPR);
-  cvs.style.width = W + "px";
-  cvs.style.height = H + "px";
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+  cvs.width = Math.round(rect.width * dpr);
+  cvs.height = Math.round(rect.height * dpr);
+  cvs.style.width = rect.width + "px";
+  cvs.style.height = rect.height + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
-function spawnGrains(x, y, col){
-  for(let k = 0; k < 4; k++){
-    if(grains.length >= MAX_GRAINS) grains.shift();
-    grains.push({
-      x: x + (Math.random() - 0.5) * 14,
-      y: y + (Math.random() - 0.5) * 14,
-      vx: (Math.random() - 0.5) * 2,
-      vy: Math.random() * 2,
-      color: col,
-      r: 2.2 + Math.random() * 1.2
-    });
-  }
-  if(Math.random() < 0.2) AudioSand.pourChime(col);
-}
+function updatePhysics(){
+  const dirX = gx > 0.3 ? 1 : (gx < -0.3 ? -1 : 0);
 
-// Distance from point to line segment
-function distToSegment(px, py, x1, y1, x2, y2) {
-  const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
-  if(l2 === 0) return Math.hypot(px - x1, py - y1);
-  let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
-  t = Math.max(0, Math.min(1, t));
-  return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
-}
+  for(let y = ROWS - 2; y >= 0; y--){
+    for(let x = 0; x < COLS; x++){
+      const idx = y * COLS + x;
+      const val = grid[idx];
 
-/* ================= 60FPS PHYSICS LOOP ================= */
-let lastT = performance.now();
-function loop(t){
-  const dt = Math.min((t - lastT) / 1000, 0.033);
-  lastT = t;
+      if(val >= 1 && val <= 4){
+        const below = (y + 1) * COLS + x;
+        const belowLeft = (y + 1) * COLS + (x - 1);
+        const belowRight = (y + 1) * COLS + (x + 1);
 
-  // Emit sand from active multi-touch pointers
-  if(!barrierMode){
-    activePointers.forEach(p => {
-      spawnGrains(p.x, p.y, currentColor);
-    });
-  }
-
-  // Clear Frame with Dark Glass
-  ctx.fillStyle = "#090d14";
-  ctx.fillRect(0, 0, W, H);
-
-  // Draw Barriers
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.85)";
-  ctx.lineWidth = 4;
-  ctx.lineCap = "round";
-  barriers.forEach(b => {
-    ctx.beginPath();
-    ctx.moveTo(b.x1, b.y1);
-    ctx.lineTo(b.x2, b.y2);
-    ctx.stroke();
-  });
-
-  // Update & Draw Grains
-  for(let i = 0; i < grains.length; i++){
-    const g = grains[i];
-    g.vx += gravity.x * 0.45;
-    g.vy += gravity.y * 0.45;
-
-    // Air drag & damping
-    g.vx *= 0.98;
-    g.vy *= 0.98;
-
-    g.x += g.vx;
-    g.y += g.vy;
-
-    // Boundary Collisions
-    if(g.x < g.r){ g.x = g.r; g.vx = -g.vx * 0.3; }
-    if(g.x > W - g.r){ g.x = W - g.r; g.vx = -g.vx * 0.3; }
-    if(g.y > H - g.r){
-      g.y = H - g.r;
-      g.vy = -g.vy * 0.2;
-      g.vx += (Math.random() - 0.5) * 1.5; // Natural slope sloshing
-    }
-    if(g.y < g.r){ g.y = g.r; g.vy = -g.vy * 0.3; }
-
-    // Barrier Collisions
-    for(let bIdx = 0; bIdx < barriers.length; bIdx++){
-      const b = barriers[bIdx];
-      const d = distToSegment(g.x, g.y, b.x1, b.y1, b.x2, b.y2);
-      if(d < g.r + 4){
-        g.vy = -g.vy * 0.4;
-        g.vx += (Math.random() - 0.5) * 2;
-        g.y -= 2;
+        if(grid[below] === 0){
+          grid[below] = val;
+          grid[idx] = 0;
+        } else if(dirX === -1 && x > 0 && grid[belowLeft] === 0){
+          grid[belowLeft] = val;
+          grid[idx] = 0;
+        } else if(dirX === 1 && x < COLS - 1 && grid[belowRight] === 0){
+          grid[belowRight] = val;
+          grid[idx] = 0;
+        } else if(Math.random() < 0.5 && x > 0 && grid[belowLeft] === 0){
+          grid[belowLeft] = val;
+          grid[idx] = 0;
+        } else if(x < COLS - 1 && grid[belowRight] === 0){
+          grid[belowRight] = val;
+          grid[idx] = 0;
+        }
       }
     }
-
-    // Render Glowing Sand Grain
-    ctx.fillStyle = g.color;
-    ctx.beginPath();
-    ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
-    ctx.fill();
   }
-
-  requestAnimationFrame(loop);
 }
 
-/* ================= MULTI-TOUCH & GYROSCOPE ================= */
-let barrierStart = null;
+function render(){
+  const rect = wrap.getBoundingClientRect();
+  const cellW = rect.width / COLS;
+  const cellH = rect.height / ROWS;
+
+  ctx.fillStyle = "#120e24";
+  ctx.fillRect(0, 0, rect.width, rect.height);
+
+  for(let y = 0; y < ROWS; y++){
+    for(let x = 0; x < COLS; x++){
+      const val = grid[y * COLS + x];
+      if(val !== 0){
+        ctx.fillStyle = COLOR_MAP[val];
+        ctx.fillRect(x * cellW, y * cellH, cellW + 0.5, cellH + 0.5);
+      }
+    }
+  }
+
+  // Handle active touch sand streaming
+  pointers.forEach(p => {
+    const gxPos = Math.floor((p.x / rect.width) * COLS);
+    const gyPos = Math.floor((p.y / rect.height) * ROWS);
+
+    for(let dy = -2; dy <= 2; dy++){
+      for(let dx = -2; dx <= 2; dx++){
+        const nx = gxPos + dx;
+        const ny = gyPos + dy;
+        if(nx >= 0 && nx < COLS && ny >= 0 && ny < ROWS){
+          grid[ny * COLS + nx] = barrierMode ? 5 : activeColor;
+        }
+      }
+    }
+    if(!barrierMode && Math.random() < 0.25) AudioSand.pourChime(activeColor);
+  });
+
+  updatePhysics();
+  requestAnimationFrame(render);
+}
+
+/* ================= ACCELEROMETER / GYROSCOPE ================= */
+function handleOrientation(e){
+  if(e.gamma !== null && e.beta !== null){
+    gx = Math.max(-1, Math.min(1, e.gamma / 35));
+    gy = Math.max(0.2, Math.min(1, e.beta / 45));
+  }
+}
+
+$("btnReqTilt").onclick = async () => {
+  if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
+    try {
+      const res = await DeviceOrientationEvent.requestPermission();
+      if(res === "granted"){
+        window.addEventListener("deviceorientation", handleOrientation);
+        $("modeSubtitle").textContent = "Gyro Tilt Active";
+      }
+    }catch(e){}
+  } else {
+    window.addEventListener("deviceorientation", handleOrientation);
+    $("modeSubtitle").textContent = "Gyro Tilt Active";
+  }
+};
+
+/* ================= CONTROLS ================= */
+$("swatchGroup").onclick = e => {
+  const b = e.target.closest("[data-col]");
+  if(!b) return;
+  document.querySelectorAll("#swatchGroup .swatch-btn").forEach(x => x.classList.remove("is-active"));
+  b.classList.add("is-active");
+  activeColor = parseInt(b.dataset.col, 10);
+  barrierMode = false;
+  $("btnBarrier").classList.remove("is-active");
+};
+
+$("btnBarrier").onclick = () => {
+  barrierMode = !barrierMode;
+  $("btnBarrier").classList.toggle("is-active", barrierMode);
+};
+
+$("btnClearSand").onclick = () => {
+  grid.fill(0);
+};
 
 cvs.addEventListener("pointerdown", e => {
   e.preventDefault();
   const rect = cvs.getBoundingClientRect();
-  const px = e.clientX - rect.left;
-  const py = e.clientY - rect.top;
-
-  // Check if tap hit an existing barrier to shatter it
-  for(let i = 0; i < barriers.length; i++){
-    const b = barriers[i];
-    if(distToSegment(px, py, b.x1, b.y1, b.x2, b.y2) < 18){
-      barriers.splice(i, 1);
-      AudioSand.shatterPop();
-      if("vibrate" in navigator) navigator.vibrate(25);
-      return;
-    }
-  }
-
-  if(barrierMode){
-    barrierStart = { x: px, y: py };
-  } else {
-    activePointers.set(e.pointerId, { x: px, y: py });
-  }
+  pointers.set(e.pointerId, { x: e.clientX - rect.left, y: e.clientY - rect.top });
 });
 
 cvs.addEventListener("pointermove", e => {
-  e.preventDefault();
-  const rect = cvs.getBoundingClientRect();
-  const px = e.clientX - rect.left;
-  const py = e.clientY - rect.top;
-
-  if(!barrierMode && activePointers.has(e.pointerId)){
-    activePointers.set(e.pointerId, { x: px, y: py });
+  if(pointers.has(e.pointerId)){
+    const rect = cvs.getBoundingClientRect();
+    pointers.set(e.pointerId, { x: e.clientX - rect.left, y: e.clientY - rect.top });
   }
 });
 
-const endPointer = e => {
-  e.preventDefault();
-  if(barrierMode && barrierStart){
-    const rect = cvs.getBoundingClientRect();
-    const px = e.clientX - rect.left;
-    const py = e.clientY - rect.top;
-    if(Math.hypot(px - barrierStart.x, py - barrierStart.y) > 15){
-      barriers.push({ x1: barrierStart.x, y1: barrierStart.y, x2: px, y2: py });
-      AudioSand.shatterPop();
-    }
-    barrierStart = null;
-  }
-  activePointers.delete(e.pointerId);
-};
-
+const endPointer = e => { pointers.delete(e.pointerId); };
 cvs.addEventListener("pointerup", endPointer);
 cvs.addEventListener("pointercancel", endPointer);
-cvs.addEventListener("pointerleave", endPointer);
 
-// Device Orientation (Gyroscope Gravity Slosh)
-window.addEventListener("deviceorientation", e => {
-  if(e.gamma !== null && e.beta !== null){
-    gravity.x = Math.max(-12, Math.min(12, e.gamma * 0.35));
-    gravity.y = Math.max(-12, Math.min(12, e.beta * 0.35));
-  }
-});
+window.addEventListener("resize", resize);
+window.addEventListener("orientationchange", () => setTimeout(resize, 200));
 
-/* ================= CONTROLS ================= */
-$("swatchList").onclick = e => {
-  const b = e.target.closest(".color-swatch"); if(!b) return;
-  document.querySelectorAll(".color-swatch").forEach(x => x.classList.remove("is-active"));
-  b.classList.add("is-active");
-  currentColor = b.dataset.color;
-};
-
-$("btnBarrierMode").onclick = () => {
-  barrierMode = !barrierMode;
-  $("btnBarrierMode").classList.toggle("accent", barrierMode);
-};
-
-$("btnClearSand").onclick = () => {
-  grains.length = 0;
-  barriers.length = 0;
-  AudioSand.shatterPop();
-};
-
-window.addEventListener("resize", resizeCanvas);
-window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
-
-document.addEventListener("DOMContentLoaded", () => {
-  resizeCanvas();
-  requestAnimationFrame(loop);
-});
+resize();
+requestAnimationFrame(render);
 
 })();
 </script>

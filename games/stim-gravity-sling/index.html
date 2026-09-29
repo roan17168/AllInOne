@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="emerald-lounge">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#071712" id="metaThemeColor" />
+<title>Gravity Sling: Orbital Slingshot | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #071712; --bg-surface: #0e241d; --bg-elevated: #16362c;
+    --text-primary: #ffffff; --text-secondary: #a3cfbe; --text-muted: #5e9481;
+    --accent: #10b981; --accent-glow: rgba(16,185,129,0.38); --accent-contrast: #031c14;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(16,185,129,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    min-height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    user-select: none; -webkit-user-select: none;
+  }
+  .gm-root {
+    display: flex; flex-direction: column; min-height: 100%; height: 100dvh; width: 100%; overflow: hidden;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .btn-icon-only {
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.is-active { display: flex; }
+  #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; }
+
+  .hud-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    flex-shrink: 0; z-index: 20;
+  }
+  .hud-stat {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); padding: .3rem .4rem;
+  }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .52rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 900; color: var(--accent); }
+
+  .canvas-stage-wrap {
+    flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
+  }
+  #slingCanvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: pointer; }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+</style>
+</head>
+<body>
+<div class="gm-root">
+  <header class="gm-top">
+    <div class="gm-idblock">
+      <span class="gm-title">Gravity Sling</span>
+      <span class="gm-sub">Orbital Momentum Fidget</span>
+    </div>
+    <div class="gm-actions">
+      <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <div class="stage">
+    <!-- SETUP -->
+    <section class="screen is-active" id="scrSetup">
+      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Celestial Flight Brief</div>
+        <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+          • Ship glides through planetary fields.<br>
+          • <strong>Tap &amp; Hold to tether</strong> to the nearest planetary core.<br>
+          • Build angular velocity around the gravitational field.<br>
+          • <strong>Release at the perfect tangent angle</strong> to slingshot forward!
+        </p>
+      </div>
+
+      <button class="btn" id="btnStartSling" style="margin-top:auto;">
+        Launch Flight Slingshot
+      </button>
+    </section>
+
+    <!-- PLAY -->
+    <section class="screen" id="scrPlay">
+      <div class="hud-bar">
+        <div class="hud-stat">
+          <span class="hud-lbl">Score</span>
+          <span class="hud-val" id="hudScore">0</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Slingshots</span>
+          <span class="hud-val" id="hudSlings">0</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Velocity</span>
+          <span class="hud-val" id="hudVelocity">1.0x</span>
+        </div>
+      </div>
+      <div class="canvas-stage-wrap" id="canvasWrap">
+        <canvas id="slingCanvas"></canvas>
+      </div>
+    </section>
+
+    <!-- VERDICT -->
+    <section class="screen" id="scrVerdict">
+      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">ORBITAL RUN LOG</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictScore">0 PTS</h2>
+        <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:1rem;" id="verdictSlings">Chained Slings: 0</p>
+      </div>
+      <button class="btn" id="btnRestartSling" style="margin-top:auto;">Launch Again</button>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+/* ================= WEB AUDIO SYNTH ================= */
+const AudioSling = {
+  ctx: null,
+  tetherOsc: null,
+  tetherGain: null,
+  init(){
+    if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  },
+  tetherEngage(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      this.tetherOsc = this.ctx.createOscillator();
+      this.tetherGain = this.ctx.createGain();
+      this.tetherOsc.type = "sine";
+      this.tetherOsc.frequency.setValueAtTime(220, now);
+      this.tetherOsc.frequency.exponentialRampToValueAtTime(660, now + 0.4);
+      this.tetherGain.gain.setValueAtTime(0.08, now);
+      this.tetherOsc.connect(this.tetherGain);
+      this.tetherGain.connect(this.ctx.destination);
+      this.tetherOsc.start(now);
+    }catch(e){}
+  },
+  tetherRelease(){
+    try {
+      if(this.tetherOsc && this.tetherGain){
+        const now = this.ctx.currentTime;
+        this.tetherGain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        this.tetherOsc.stop(now + 0.08);
+        this.tetherOsc = null;
+      }
+      // Slingshot Release Chime
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(880, now);
+      osc.frequency.exponentialRampToValueAtTime(1760, now + 0.12);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.12);
+    }catch(e){}
+  },
+  crash(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.25);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    }catch(e){}
+  }
+};
+
+/* ================= SIMULATION CORE ================= */
+const cvs = $("slingCanvas");
+const ctx = cvs.getContext("2d");
+const wrap = $("canvasWrap");
+
+let W = 360, H = 550, DPR = 1;
+
+const S = {
+  running: false,
+  shipX: 180,
+  shipY: 450,
+  shipVx: 0,
+  shipVy: -280,
+  tethered: false,
+  activePlanet: null,
+  orbitAngle: 0,
+  orbitRadius: 0,
+  orbitSpeed: 3.5,
+  score: 0,
+  slings: 0,
+  planets: [],
+  trail: []
+};
+
+function resizeCanvas(){
+  const rect = wrap.getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+  W = rect.width;
+  H = rect.height;
+  cvs.width = Math.round(W * DPR);
+  cvs.height = Math.round(H * DPR);
+  cvs.style.width = W + "px";
+  cvs.style.height = H + "px";
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  initPlanets();
+}
+
+function initPlanets(){
+  S.planets = [
+    { x: W * 0.5, y: H * 0.65, r: 24, glow: "#10b981" },
+    { x: W * 0.25, y: H * 0.35, r: 28, glow: "#38bdf8" },
+    { x: W * 0.75, y: H * 0.35, r: 26, glow: "#ff007f" },
+    { x: W * 0.5, y: H * 0.08, r: 30, glow: "#ffd000" }
+  ];
+}
+
+let lastT = performance.now();
+function loop(t){
+  if(!S.running) return;
+  const dt = Math.min((t - lastT) / 1000, 0.033);
+  lastT = t;
+
+  // Clear Canvas
+  ctx.fillStyle = "#071712";
+  ctx.fillRect(0, 0, W, H);
+
+  // 1. Draw Planets
+  S.planets.forEach(p => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#0e241d";
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = p.glow;
+    ctx.shadowColor = p.glow;
+    ctx.shadowBlur = 16;
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  // 2. Physics & Orbit Slingshot
+  if(S.tethered && S.activePlanet){
+    const p = S.activePlanet;
+    S.orbitAngle += S.orbitSpeed * dt;
+    S.shipX = p.x + Math.cos(S.orbitAngle) * S.orbitRadius;
+    S.shipY = p.y + Math.sin(S.orbitAngle) * S.orbitRadius;
+
+    // Draw Tractor Beam
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(S.shipX, S.shipY);
+    ctx.strokeStyle = "rgba(0, 255, 170, 0.75)";
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.restore();
+  } else {
+    S.shipX += S.shipVx * dt;
+    S.shipY += S.shipVy * dt;
+
+    // Wrap-around vertical bounds
+    if(S.shipY < -30){
+      S.shipY = H + 30;
+      S.score += 1000;
+      initPlanets();
+    }
+  }
+
+  // Record Trail
+  S.trail.push({ x: S.shipX, y: S.shipY, alpha: 1.0 });
+  if(S.trail.length > 18) S.trail.shift();
+
+  // Draw Trail
+  ctx.strokeStyle = "#00ffaa";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  for(let i = 0; i < S.trail.length; i++){
+    const tr = S.trail[i];
+    i === 0 ? ctx.moveTo(tr.x, tr.y) : ctx.lineTo(tr.x, tr.y);
+  }
+  ctx.stroke();
+
+  // Draw Ship
+  ctx.save();
+  ctx.translate(S.shipX, S.shipY);
+  const heading = S.tethered && S.activePlanet ? S.orbitAngle + Math.PI / 2 : Math.atan2(S.shipVy, S.shipVx);
+  ctx.rotate(heading);
+
+  ctx.beginPath();
+  ctx.moveTo(14, 0);
+  ctx.lineTo(-10, -8);
+  ctx.lineTo(-4, 0);
+  ctx.lineTo(-10, 8);
+  ctx.closePath();
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "#00ffaa";
+  ctx.shadowBlur = 14;
+  ctx.fill();
+  ctx.restore();
+
+  $("hudScore").textContent = S.score.toLocaleString();
+  $("hudSlings").textContent = S.slings;
+  $("hudVelocity").textContent = `${(Math.hypot(S.shipVx, S.shipVy) / 280).toFixed(1)}x`;
+
+  requestAnimationFrame(loop);
+}
+
+/* ================= TETHER CONTROLS ================= */
+cvs.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  if(!S.running) return;
+
+  // Find nearest planet
+  let nearest = null;
+  let minDist = 9999;
+  S.planets.forEach(p => {
+    const d = Math.hypot(S.shipX - p.x, S.shipY - p.y);
+    if(d < minDist){ minDist = d; nearest = p; }
+  });
+
+  if(nearest && minDist < 160){
+    S.tethered = true;
+    S.activePlanet = nearest;
+    S.orbitRadius = minDist;
+    S.orbitAngle = Math.atan2(S.shipY - nearest.y, S.shipX - nearest.x);
+    AudioSling.tetherEngage();
+    if("vibrate" in navigator) navigator.vibrate(12);
+  }
+});
+
+const endTether = () => {
+  if(S.tethered && S.activePlanet){
+    S.tethered = false;
+    // Release Tangent Vector
+    const tangentAngle = S.orbitAngle + Math.PI / 2;
+    const speed = 360;
+    S.shipVx = Math.cos(tangentAngle) * speed;
+    S.shipVy = Math.sin(tangentAngle) * speed;
+    S.slings++;
+    S.score += 250 * S.slings;
+    AudioSling.tetherRelease();
+    if("vibrate" in navigator) navigator.vibrate(18);
+  }
+};
+
+cvs.addEventListener("pointerup", endTether);
+cvs.addEventListener("pointercancel", endTether);
+
+$("btnStartSling").onclick = () => {
+  S.running = true;
+  S.score = 0;
+  S.slings = 0;
+  S.shipX = W / 2;
+  S.shipY = H - 60;
+  S.shipVx = 0;
+  S.shipVy = -280;
+  S.tethered = false;
+  S.trail = [];
+  showScreen("scrPlay");
+  resizeCanvas();
+  lastT = performance.now();
+  requestAnimationFrame(loop);
+};
+
+$("btnRestartSling").onclick = () => {
+  showScreen("scrSetup");
+};
+
+window.addEventListener("resize", () => { if(S.running) resizeCanvas(); });
+window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
+
+})();
+</script>
+</body>
+</html>

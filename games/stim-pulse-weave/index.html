@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="nordic-slate">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<title>Pulse Weave: Sine Wave Dodger | PartyDeck</title>
+<script>
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/themes.css" />
+<link rel="stylesheet" href="../../css/base.css" />
+<style>
+  :root {
+    --bg-primary: #0e1117; --bg-surface: #161b24; --bg-elevated: #1f2633;
+    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #627288;
+    --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.35); --accent-contrast: #031525;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(148,163,184,0.16); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    min-height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    user-select: none; -webkit-user-select: none;
+  }
+  .gm-root {
+    display: flex; flex-direction: column; min-height: 100%; height: 100dvh; width: 100%; overflow: hidden;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
+  .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .btn-icon-only {
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .screen.is-active { display: flex; }
+  #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; }
+
+  .hud-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    flex-shrink: 0; z-index: 20;
+  }
+  .hud-stat {
+    display: flex; flex-direction: column; align-items: center;
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    border-radius: var(--r-sm); padding: .3rem .4rem;
+  }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .52rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 900; color: var(--accent); }
+
+  .canvas-stage-wrap {
+    flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
+  }
+  #pulseCanvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: pointer; }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); }
+</style>
+</head>
+<body>
+<div class="gm-root">
+  <header class="gm-top">
+    <div class="gm-idblock">
+      <span class="gm-title">Pulse Weave</span>
+      <span class="gm-sub">Dual-Helix Wave Fidget</span>
+    </div>
+    <div class="gm-actions">
+      <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
+    </div>
+  </header>
+
+  <div class="stage">
+    <!-- SETUP -->
+    <section class="screen is-active" id="scrSetup">
+      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Frequency Weave</div>
+        <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+          • Control an intertwined dual-helix sine wave runner.<br>
+          • <strong>Hold down to contract waves</strong> into a tight central thread.<br>
+          • <strong>Release to expand waves</strong> into wide resonance loops.<br>
+          • Thread through corridors and collect frequency pips in rhythm!
+        </p>
+      </div>
+
+      <button class="btn" id="btnStartPulse" style="margin-top:auto;">
+        Enter Wave Weave
+      </button>
+    </section>
+
+    <!-- PLAY -->
+    <section class="screen" id="scrPlay">
+      <div class="hud-bar">
+        <div class="hud-stat">
+          <span class="hud-lbl">Score</span>
+          <span class="hud-val" id="hudScore">0</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Multiplier</span>
+          <span class="hud-val" id="hudMult">1x</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Frequency</span>
+          <span class="hud-val" id="hudFreq">440 Hz</span>
+        </div>
+      </div>
+      <div class="canvas-stage-wrap" id="canvasWrap">
+        <canvas id="pulseCanvas"></canvas>
+      </div>
+    </section>
+
+    <!-- VERDICT -->
+    <section class="screen" id="scrVerdict">
+      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">WAVE HARMONIC LOG</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictScore">0 PTS</h2>
+      </div>
+      <button class="btn" id="btnRestartPulse" style="margin-top:auto;">Weave Again</button>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const $ = id => document.getElementById(id);
+function showScreen(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+}
+
+/* ================= WEB AUDIO SYNTH ================= */
+const AudioPulse = {
+  ctx: null,
+  scale: [261.63, 293.66, 329.63, 392.00, 440.00, 523.25],
+  scaleIdx: 0,
+  init(){
+    if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  },
+  pipHit(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const freq = this.scale[this.scaleIdx % this.scale.length];
+      this.scaleIdx++;
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.1);
+    }catch(e){}
+  },
+  crash(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.exponentialRampToValueAtTime(30, now + 0.25);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    }catch(e){}
+  }
+};
+
+/* ================= SIMULATION CORE ================= */
+const cvs = $("pulseCanvas");
+const ctx = cvs.getContext("2d");
+const wrap = $("canvasWrap");
+
+let W = 360, H = 550, DPR = 1;
+
+const S = {
+  running: false,
+  holding: false,
+  amplitude: 60,
+  targetAmplitude: 60,
+  wavePhase: 0,
+  score: 0,
+  pips: [],
+  obstacles: [],
+  nextObstacleT: 0
+};
+
+function resizeCanvas(){
+  const rect = wrap.getBoundingClientRect();
+  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+  W = rect.width;
+  H = rect.height;
+  cvs.width = Math.round(W * DPR);
+  cvs.height = Math.round(H * DPR);
+  cvs.style.width = W + "px";
+  cvs.style.height = H + "px";
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+
+function spawnObstaclePattern(){
+  const isNarrow = Math.random() < 0.5;
+  if(isNarrow){
+    // Wide blockades requiring tight weave
+    S.obstacles.push({ y: -30, type: "left", x: 0, w: W * 0.38, h: 20 });
+    S.obstacles.push({ y: -30, type: "right", x: W * 0.62, w: W * 0.38, h: 20 });
+  } else {
+    // Center island requiring wide wave expansion
+    S.obstacles.push({ y: -30, type: "center", x: W * 0.42, w: W * 0.16, h: 24 });
+  }
+
+  // Spawn Frequency Pip
+  S.pips.push({
+    x: W / 2 + (Math.random() - 0.5) * 80,
+    y: -50,
+    r: 10,
+    collected: false
+  });
+}
+
+let lastT = performance.now();
+function loop(t){
+  if(!S.running) return;
+  const dt = Math.min((t - lastT) / 1000, 0.033);
+  lastT = t;
+
+  const now = performance.now();
+  if(now >= S.nextObstacleT){
+    spawnObstaclePattern();
+    S.nextObstacleT = now + 1100;
+  }
+
+  // Amplitude Lerp
+  S.targetAmplitude = S.holding ? 14 : 70;
+  S.amplitude += (S.targetAmplitude - S.amplitude) * 12 * dt;
+  S.wavePhase += 6 * dt;
+
+  const cx = W / 2;
+  const runnerY = H - 100;
+
+  // Clear Canvas
+  ctx.fillStyle = "#0e1117";
+  ctx.fillRect(0, 0, W, H);
+
+  // 1. Draw Obstacles
+  for(let i = S.obstacles.length - 1; i >= 0; i--){
+    const ob = S.obstacles[i];
+    ob.y += 240 * dt;
+
+    ctx.fillStyle = "rgba(255, 0, 85, 0.35)";
+    ctx.strokeStyle = "#ff0055";
+    ctx.lineWidth = 2;
+    ctx.fillRect(ob.x, ob.y, ob.w, ob.h);
+    ctx.strokeRect(ob.x, ob.y, ob.w, ob.h);
+
+    // Collision against the two helix runner nodes
+    const x1 = cx + Math.sin(S.wavePhase) * S.amplitude;
+    const x2 = cx - Math.sin(S.wavePhase) * S.amplitude;
+
+    if(Math.abs(ob.y - runnerY) < ob.h / 2 + 8){
+      if((x1 > ob.x && x1 < ob.x + ob.w) || (x2 > ob.x && x2 < ob.x + ob.w)){
+        AudioPulse.crash();
+        if("vibrate" in navigator) navigator.vibrate([60, 60]);
+        S.running = false;
+        $("verdictScore").textContent = `${S.score.toLocaleString()} PTS`;
+        showScreen("scrVerdict");
+        return;
+      }
+    }
+
+    if(ob.y > H + 40) S.obstacles.splice(i, 1);
+  }
+
+  // 2. Draw Frequency Pips
+  for(let j = S.pips.length - 1; j >= 0; j--){
+    const p = S.pips[j];
+    p.y += 240 * dt;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#00ffaa";
+    ctx.shadowColor = "#00ffaa";
+    ctx.shadowBlur = 12;
+    ctx.fill();
+    ctx.restore();
+
+    const x1 = cx + Math.sin(S.wavePhase) * S.amplitude;
+    const x2 = cx - Math.sin(S.wavePhase) * S.amplitude;
+
+    if(Math.hypot(x1 - p.x, runnerY - p.y) < p.r + 12 || Math.hypot(x2 - p.x, runnerY - p.y) < p.r + 12){
+      AudioPulse.pipHit();
+      if("vibrate" in navigator) navigator.vibrate(12);
+      S.score += 500;
+      S.pips.splice(j, 1);
+      continue;
+    }
+
+    if(p.y > H + 40) S.pips.splice(j, 1);
+  }
+
+  // 3. Draw Continuous Dual Helix Stream
+  ctx.save();
+  ctx.lineWidth = 3;
+  ctx.shadowBlur = 14;
+
+  // Helix 1 (Cyan)
+  ctx.strokeStyle = "#38bdf8";
+  ctx.shadowColor = "#38bdf8";
+  ctx.beginPath();
+  for(let y = 0; y < H; y += 8){
+    const waveY = (y - (H - runnerY)) * 0.03 + S.wavePhase;
+    const wx = cx + Math.sin(waveY) * S.amplitude;
+    y === 0 ? ctx.moveTo(wx, y) : ctx.lineTo(wx, y);
+  }
+  ctx.stroke();
+
+  // Helix 2 (Magenta)
+  ctx.strokeStyle = "#ff007f";
+  ctx.shadowColor = "#ff007f";
+  ctx.beginPath();
+  for(let y = 0; y < H; y += 8){
+    const waveY = (y - (H - runnerY)) * 0.03 + S.wavePhase;
+    const wx = cx - Math.sin(waveY) * S.amplitude;
+    y === 0 ? ctx.moveTo(wx, y) : ctx.lineTo(wx, y);
+  }
+  ctx.stroke();
+  ctx.restore();
+
+  // Runner Nodes
+  const rX1 = cx + Math.sin(S.wavePhase) * S.amplitude;
+  const rX2 = cx - Math.sin(S.wavePhase) * S.amplitude;
+
+  [rX1, rX2].forEach((rx, idx) => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(rx, runnerY, 8, 0, Math.PI * 2);
+    ctx.fillStyle = idx === 0 ? "#38bdf8" : "#ff007f";
+    ctx.shadowColor = idx === 0 ? "#38bdf8" : "#ff007f";
+    ctx.shadowBlur = 18;
+    ctx.fill();
+    ctx.restore();
+  });
+
+  S.score += Math.round(100 * dt);
+  $("hudScore").textContent = S.score.toLocaleString();
+  $("hudFreq").textContent = `${Math.round(300 + (70 - S.amplitude) * 6)} Hz`;
+
+  requestAnimationFrame(loop);
+}
+
+/* ================= INPUTS ================= */
+cvs.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  S.holding = true;
+});
+const endHold = () => { S.holding = false; };
+cvs.addEventListener("pointerup", endHold);
+cvs.addEventListener("pointercancel", endHold);
+
+$("btnStartPulse").onclick = () => {
+  S.running = true;
+  S.score = 0;
+  S.amplitude = 60;
+  S.obstacles = [];
+  S.pips = [];
+  S.nextObstacleT = performance.now() + 600;
+  showScreen("scrPlay");
+  resizeCanvas();
+  lastT = performance.now();
+  requestAnimationFrame(loop);
+};
+
+$("btnRestartPulse").onclick = () => {
+  showScreen("scrSetup");
+};
+
+window.addEventListener("resize", () => { if(S.running) resizeCanvas(); });
+window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
+
+})();
+</script>
+</body>
+</html>

@@ -4,29 +4,32 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#0e1117" id="metaThemeColor" />
-<title>Cyber Plinko | PartyDeck</title>
+<title>Neon Pachinko Drop | PartyDeck</title>
 <script>
 (function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/themes.css" />
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
   :root {
-    --bg-primary: #090a0f; --bg-surface: #121520; --bg-elevated: #1a1f2e;
-    --text-primary: #ffffff; --text-secondary: #9aa5b8; --text-muted: #5d677a;
-    --accent: #ffd000; --accent-glow: rgba(255,208,0,0.38); --accent-contrast: #1c1400;
-    --danger: #ff0055; --success: #00ff66; --neon-cyan: #00f0ff;
-    --border-ui: rgba(255,208,0,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+    --bg-primary: #0e1117; --bg-surface: #161b24; --bg-elevated: #1f2633;
+    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #627288;
+    --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.35); --accent-contrast: #031525;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(148,163,184,0.16); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body {
+  html, body {
+    min-height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    min-height: 100dvh; display: flex; flex-direction: column;
-    overflow: hidden; user-select: none; -webkit-user-select: none;
+    user-select: none; -webkit-user-select: none;
+  }
+  .gm-root {
+    display: flex; flex-direction: column; min-height: 100%; height: 100dvh; width: 100%; overflow: hidden;
   }
   .gm-top {
     position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
@@ -36,9 +39,8 @@
   .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
   .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
   .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
-  .gm-actions { display: flex; gap: .4rem; }
   .btn-icon-only {
-    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
     color: var(--text-primary); display: flex; align-items: center; justify-content: center;
     cursor: pointer; text-decoration: none;
@@ -50,69 +52,25 @@
     overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
   .screen.is-active { display: flex; }
+  #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; }
 
-  /* HUD Strip */
   .hud-bar {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
     padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    flex-shrink: 0; z-index: 20;
   }
   .hud-stat {
     display: flex; flex-direction: column; align-items: center;
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
     border-radius: var(--r-sm); padding: .3rem .4rem;
   }
-  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .55rem; color: var(--text-muted); text-transform: uppercase; }
-  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 800; color: var(--accent); }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .52rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 900; color: var(--accent); }
 
-  /* Cabinet Viewport */
-  .pachinko-stage { flex: 1; position: relative; width: 100%; height: 100%; background: #050608; overflow: hidden; }
-  #pachinkoCanvas { width: 100%; height: 100%; display: block; }
-
-  /* Plunger Control Strip */
-  .plunger-bar {
-    position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
-    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
-    padding: .65rem .9rem; padding-bottom: max(.65rem, env(safe-area-inset-bottom));
-    background: linear-gradient(to top, rgba(9,10,15,0.95), rgba(9,10,15,0.4));
+  .canvas-stage-wrap {
+    flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
   }
-  .plunger-meter {
-    flex: 1; height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    border-radius: var(--r-sm); position: relative; overflow: hidden; display: flex; align-items: center;
-  }
-  .plunger-fill {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
-    background: linear-gradient(90deg, #00f0ff, #ffd000, #ff0055);
-    box-shadow: 0 0 12px var(--accent-glow); transition: width 0.05s linear;
-  }
-  .meter-label { position: relative; z-index: 2; margin-left: 12px; font-family: 'Space Mono', monospace; font-size: .75rem; font-weight: 700; color: #fff; text-shadow: 0 1px 4px #000; }
-  
-  .btn-drop {
-    min-width: 120px; min-height: 48px; background: var(--accent); color: var(--accent-contrast);
-    border: none; border-radius: var(--r-sm); font-family: 'Space Mono', monospace; font-size: .84rem;
-    font-weight: 800; text-transform: uppercase; cursor: pointer; box-shadow: 0 0 14px var(--accent-glow);
-    touch-action: none;
-  }
-  .btn-drop:active { transform: scale(0.96); }
-
-  /* Setup & Verdict Cards */
-  .panel {
-    background: var(--bg-surface); border: 1px solid var(--border-ui);
-    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
-  }
-  .panel-title {
-    font-family: 'Space Mono', monospace; font-size: .62rem;
-    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
-  }
-  .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
-  .opt-btn {
-    min-height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
-    font-size: .78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-  .opt-btn.is-active {
-    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
-    box-shadow: 0 0 14px var(--accent-glow);
-  }
+  #pachinkoCanvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
   .btn {
     width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
     background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
@@ -120,143 +78,70 @@
     box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
   }
   .btn:active { transform: scale(.98); }
-
-  /* Privacy Curtain */
-  .curtain {
-    position: fixed; inset: 0; z-index: 100; background: rgba(9, 10, 15, 0.96);
-    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
-  }
-  .curtain.is-open { display: flex; }
-  .cur-card {
-    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
-    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
-  }
-  .hold-btn {
-    position: relative; overflow: hidden; width: 100%; min-height: 60px;
-    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
-    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
-    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
-  }
-  .hold-fill {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
-    background: var(--accent); opacity: .85; transition: width .04s linear;
-  }
-  .hold-label { position: relative; z-index: 2; pointer-events: none; }
-  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
-
-  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
-  .ico svg { width: 100%; height: 100%; }
 </style>
-<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
-
-<header class="gm-top">
-  <div class="gm-idblock">
-    <span class="gm-title">Cyber Plinko</span>
-    <span class="gm-sub" id="topSub">Tournament Setup</span>
-  </div>
-  <div class="gm-actions">
-    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-    </a>
-  </div>
-</header>
-
-<div class="stage">
-  <!-- SETUP -->
-  <section class="screen is-active" id="scrSetup">
-    <div class="panel">
-      <div class="panel-title">Target Point Quota</div>
-      <div class="opt-grid" id="quotaGrid">
-        <button class="opt-btn" data-q="4000">4,000 Pts</button>
-        <button class="opt-btn is-active" data-q="7500">7,500 Pts</button>
-        <button class="opt-btn" data-q="12000">12,000 Pts</button>
-      </div>
+<div class="gm-root">
+  <header class="gm-top">
+    <div class="gm-idblock">
+      <span class="gm-title">Neon Pachinko Drop</span>
+      <span class="gm-sub">Arcade Physics Pinboard</span>
     </div>
-    <div class="panel">
-      <div class="panel-title">Cabinet Mechanics</div>
-      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
-        • <strong>5 Chrome Spheres</strong> per player turn.<br>
-        • Hold the <strong>LAUNCH</strong> trigger to charge plunger impulse & angle.<br>
-        • Deflect off brass pins and hit spinning multiplier wheels.<br>
-        • Center cup = <strong>JACKPOT (3,000 PTS)</strong> &middot; Outer cups = 500 PTS.<br>
-        • Score below quota = Randomized drinking penalty!
-      </p>
+    <div class="gm-actions">
+      <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
     </div>
-    <div class="panel">
-      <div class="panel-title">Active Roster</div>
-      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
-    </div>
-    <button class="btn" id="btnStartTourney" style="margin-top:auto;">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
-      Start Drop Tournament
-    </button>
-  </section>
+  </header>
 
-  <!-- GAMEPLAY CANVAS -->
-  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
-    <div class="hud-bar">
-      <div class="hud-stat">
-        <span class="hud-lbl">Player</span>
-        <span class="hud-val" id="hudPlayer" style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
+  <div class="stage">
+    <!-- SETUP -->
+    <section class="screen is-active" id="scrSetup">
+      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Arcade Pinboard Protocol</div>
+        <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+          • <strong>5 Ball Drops</strong> per player run.<br>
+          • Drag and release at the top rail to set horizontal drop velocity.<br>
+          • Cascade through physics pegs and spinning kinetic bumpers.<br>
+          • Land inside high-multiplier bins at the base to build massive scores!
+        </p>
       </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">Score</span>
-        <span class="hud-val" id="hudScore">0</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">Balls Remaining</span>
-        <span class="hud-val" id="hudBalls">5 / 5</span>
-      </div>
-    </div>
 
-    <div class="pachinko-stage">
-      <canvas id="pachinkoCanvas"></canvas>
-      <div class="plunger-bar">
-        <div class="plunger-meter">
-          <div class="plunger-fill" id="pMeterFill"></div>
-          <span class="meter-label" id="meterTxt">HOLD TO CHARGE</span>
+      <button class="btn" id="btnStartPachinko" style="margin-top:auto;">
+        Start Pachinko Drop
+      </button>
+    </section>
+
+    <!-- GAMEPLAY VIEWPORT -->
+    <section class="screen" id="scrPlay">
+      <div class="hud-bar">
+        <div class="hud-stat">
+          <span class="hud-lbl">Score</span>
+          <span class="hud-val" id="hudScore">0</span>
         </div>
-        <button class="btn-drop" id="btnLaunch">CHARGE</button>
+        <div class="hud-stat">
+          <span class="hud-lbl">Balls Remaining</span>
+          <span class="hud-val" id="hudBalls">5 / 5</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Multiplier</span>
+          <span class="hud-val" id="hudMult">1x</span>
+        </div>
       </div>
-    </div>
-  </section>
-
-  <!-- VERDICT -->
-  <section class="screen" id="scrVerdict">
-    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
-      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">PLINKO TOTAL TALLY</div>
-      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="verdictPlayer">Player</h2>
-      <div style="font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:900;color:var(--accent);margin-bottom:.4rem;" id="verdictScore">0 PTS</div>
-
-      <div id="forfeitBox" style="background:rgba(255,0,85,.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
-        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--danger);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">MISSED QUOTA PENALTY</span>
-        <p style="font-size:1.05rem;font-weight:800;color:#fff;margin-top:.4rem;" id="forfeitText">Take 3 sips!</p>
+      <div class="canvas-stage-wrap" id="canvasWrap">
+        <canvas id="pachinkoCanvas"></canvas>
       </div>
+    </section>
 
-      <div id="passBox" style="background:rgba(0,255,102,.1);border:2px solid var(--success);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
-        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--success);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">JACKPOT MASTER</span>
-        <p style="font-size:1rem;font-weight:800;color:#fff;margin-top:.4rem;">Quota crushed! Assign 3 penalty sips across the table.</p>
+    <!-- VERDICT -->
+    <section class="screen" id="scrVerdict">
+      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">DROP SESSION FINALE</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:900;margin:.3rem 0;" id="verdictScore">0 PTS</h2>
+        <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:1rem;" id="verdictSub">Multiplier Peak: 10x</p>
       </div>
-    </div>
-    <button class="btn" id="btnNextPlayer" style="margin-top:auto;">Next Plinko Striker</button>
-  </section>
-</div>
-
-<!-- 4. PRIVACY CURTAIN -->
-<div class="curtain" id="curtain">
-  <div class="cur-card">
-    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-    </div>
-    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT STRIKER</div>
-    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
-    <p style="font-size:.82rem;color:var(--text-secondary);">Target: <strong id="curQuota" style="color:var(--accent);">7,500</strong> PTS</p>
-    <button class="hold-btn" id="btnCurtainHold">
-      <span class="hold-fill" id="holdFill"></span>
-      <span class="hold-label">HOLD 700MS TO UNLOCK</span>
-    </button>
+      <button class="btn" id="btnRestartPachinko" style="margin-top:auto;">Drop Again</button>
+    </section>
   </div>
 </div>
 
@@ -264,212 +149,169 @@
 (function(){
 "use strict";
 
-/* ================= WEB AUDIO SYNTH ================= */
-const AudioPachinko = {
-  ctx: null,
-  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-  pinClack(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "triangle"; o.frequency.setValueAtTime(1200 + Math.random()*800, this.ctx.currentTime);
-      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.03);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.03);
-    }catch(e){}
-  },
-  spinnerHit(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sine"; o.frequency.setValueAtTime(600, this.ctx.currentTime);
-      o.frequency.exponentialRampToValueAtTime(950, this.ctx.currentTime + 0.08);
-      g.gain.setValueAtTime(0.12, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.08);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.08);
-    }catch(e){}
-  },
-  cupScore(jackpot){
-    try {
-      this.init();
-      const notes = jackpot ? [523, 659, 784, 1046, 1318] : [440, 554, 659];
-      notes.forEach((f, i) => {
-        setTimeout(() => {
-          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
-          g.gain.setValueAtTime(0.15, this.ctx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
-          o.connect(g); g.connect(this.ctx.destination);
-          o.start(); o.stop(this.ctx.currentTime + 0.15);
-        }, i * 65);
-      });
-    }catch(e){}
-  },
-  launch(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sawtooth"; o.frequency.setValueAtTime(220, this.ctx.currentTime);
-      o.frequency.exponentialRampToValueAtTime(600, this.ctx.currentTime + 0.12);
-      g.gain.setValueAtTime(0.2, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.12);
-    }catch(e){}
-  }
-};
-
-/* ================= STATE & FORFEITS ================= */
-const FORFEITS = [
-  "Take 3 sips of your drink.",
-  "Take 1 sip for every 1,500 points you missed below quota.",
-  "Do 8 quick lunges right now.",
-  "Let the player with the highest score nominate a rule for you.",
-  "Drink 2 sips with both elbows touching the table."
-];
-
-let roster = [];
-try {
-  const raw = localStorage.getItem("partydeck_players");
-  roster = raw ? JSON.parse(raw) : [];
-} catch(e){}
-if(!Array.isArray(roster) || roster.length < 2) roster = ["Striker 1", "Striker 2"];
-
-const S = {
-  quota: 7500,
-  playerIdx: 0,
-  score: 0,
-  ballsLeft: 5,
-  balls: [],
-  pegs: [],
-  spinners: [],
-  cups: [],
-  running: false
-};
-
 const $ = id => document.getElementById(id);
 function showScreen(id){
   document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
 }
 
-/* ================= PRIVACY CURTAIN ================= */
-let holdTimer = null, holdStart = 0;
-const HOLD_MS = 700;
+/* ================= WEB AUDIO SYNTH ================= */
+const AudioPachinko = {
+  ctx: null,
+  init(){
+    if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  },
+  pegClack(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(1200 + Math.random() * 400, now);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.03);
+    }catch(e){}
+  },
+  bumperPop(){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      [440, 880].forEach((f, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, now + idx * 0.03);
+        gain.gain.setValueAtTime(0.12, now + idx * 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.03 + 0.08);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now + idx * 0.03);
+        osc.stop(now + idx * 0.03 + 0.08);
+      });
+    }catch(e){}
+  },
+  binScore(mult){
+    try {
+      this.init();
+      const now = this.ctx.currentTime;
+      [523.25, 659.25, 783.99, 1046.50].forEach((f, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(f, now + idx * 0.04);
+        gain.gain.setValueAtTime(0.1, now + idx * 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.1);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now + idx * 0.04);
+        osc.stop(now + idx * 0.04 + 0.1);
+      });
+    }catch(e){}
+  }
+};
 
-function openCurtain(pName, onUnlock){
-  $("curName").textContent = pName;
-  $("curQuota").textContent = S.quota.toLocaleString();
-  $("holdFill").style.width = "0%";
-  $("btnCurtainHold").classList.remove("armed");
-  $("curtain").classList.add("is-open");
-
-  const btn = $("btnCurtainHold");
-  const cancel = e => {
-    if(e) e.preventDefault();
-    if(holdTimer) cancelAnimationFrame(holdTimer);
-    holdTimer = null;
-    $("holdFill").style.width = "0%";
-    btn.classList.remove("armed");
-  };
-  const start = e => {
-    e.preventDefault();
-    btn.classList.add("armed");
-    holdStart = performance.now();
-    const tick = now => {
-      const el = now - holdStart;
-      const pct = Math.min(100, (el / HOLD_MS) * 100);
-      $("holdFill").style.width = pct + "%";
-      if(el >= HOLD_MS){
-        cancel();
-        $("curtain").classList.remove("is-open");
-        onUnlock();
-      } else {
-        holdTimer = requestAnimationFrame(tick);
-      }
-    };
-    holdTimer = requestAnimationFrame(tick);
-  };
-
-  btn.onpointerdown = start;
-  btn.onpointerup = cancel;
-  btn.onpointercancel = cancel;
-  btn.onpointerleave = cancel;
-}
-
-/* ================= CANVAS PHYSICS ENGINE ================= */
+/* ================= RESPONSIVE CANVAS & SIMULATION ================= */
 const cvs = $("pachinkoCanvas");
 const ctx = cvs.getContext("2d");
-let W = 360, H = 540, DPR = 1;
 
-function resizeCanvas(){
-  const wrap = cvs.parentElement;
-  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-  W = wrap.clientWidth;
-  H = wrap.clientHeight;
-  cvs.width = W * DPR;
-  cvs.height = H * DPR;
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  buildBoard();
+let W = 360, H = 600, DPR = 1;
+
+function initResponsiveCanvas(canvas, context, onResizeCallback) {
+  const parent = canvas.parentElement;
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    const rect = parent.getBoundingClientRect();
+    W = rect.width;
+    H = rect.height;
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    context.setTransform(DPR, 0, 0, DPR, 0, 0);
+    if (onResizeCallback) onResizeCallback(W, H, DPR);
+  }
+  window.addEventListener("resize", resize);
+  window.addEventListener("orientationchange", () => setTimeout(resize, 200));
+  resize();
 }
-window.addEventListener("resize", resizeCanvas);
-window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
 
-function buildBoard(){
+const S = {
+  running: false,
+  score: 0,
+  ballsLeft: 5,
+  activeBalls: [],
+  pegs: [],
+  bumpers: [],
+  bins: [],
+  sparks: [],
+  dropX: 180
+};
+
+function setupBoardLayout(w, h){
   S.pegs = [];
-  S.spinners = [];
-  S.cups = [];
+  S.bumpers = [];
+  S.bins = [];
 
-  const rows = 8, spacingY = (H * 0.52) / rows;
-  const startY = H * 0.16;
+  const rows = 9;
+  const startY = h * 0.18;
+  const endY = h * 0.72;
+  const rowSpacing = (endY - startY) / rows;
 
   for(let r = 0; r < rows; r++){
     const cols = (r % 2 === 0) ? 7 : 8;
-    const spacingX = (W - 36) / cols;
-    const offsetX = (r % 2 === 0) ? 18 + spacingX / 2 : 18;
+    const colSpacing = (w - 40) / cols;
+    const offsetX = (r % 2 === 0) ? 20 + colSpacing / 2 : 20;
+
     for(let c = 0; c < cols; c++){
       S.pegs.push({
-        x: offsetX + c * spacingX,
-        y: startY + r * spacingY,
+        x: offsetX + c * colSpacing,
+        y: startY + r * rowSpacing,
         r: 4.5
       });
     }
   }
 
-  // 2 Spinners
-  S.spinners.push({ x: W * 0.32, y: H * 0.44, angle: 0, r: 18, speed: 2 });
-  S.spinners.push({ x: W * 0.68, y: H * 0.44, angle: 0, r: 18, speed: -2 });
+  // 2 Kinetic Bumpers
+  S.bumpers.push({ x: w * 0.32, y: h * 0.45, r: 18, color: "#ff007f" });
+  S.bumpers.push({ x: w * 0.68, y: h * 0.45, r: 18, color: "#ff007f" });
 
-  // 5 Catch Cups at bottom
-  const cupWidth = (W - 20) / 5;
-  const cupY = H - 85;
-  const cupPts = [500, 1500, 3000, 1500, 500];
+  // 5 Collection Bins at Bottom
+  const binCount = 5;
+  const binWidth = w / binCount;
+  const multipliers = [10, 2, 1, 2, 10];
+  const colors = ["#ffd000", "#38bdf8", "#94a3b8", "#38bdf8", "#ffd000"];
 
-  for(let i = 0; i < 5; i++){
-    S.cups.push({
-      x1: 10 + i * cupWidth,
-      x2: 10 + (i + 1) * cupWidth,
-      y: cupY,
-      h: 30,
-      pts: cupPts[i],
-      isJackpot: i === 2
+  for(let b = 0; b < binCount; b++){
+    S.bins.push({
+      x: b * binWidth,
+      y: h - 55,
+      w: binWidth,
+      h: 55,
+      mult: multipliers[b],
+      color: colors[b]
     });
   }
 }
 
-function resetGameForPlayer(){
-  S.score = 0;
-  S.ballsLeft = 5;
-  S.balls = [];
-  updateHUD();
-  buildBoard();
-  S.running = true;
-}
+initResponsiveCanvas(cvs, ctx, (w, h) => {
+  setupBoardLayout(w, h);
+});
 
-function updateHUD(){
-  $("hudScore").textContent = S.score.toLocaleString();
-  $("hudBalls").textContent = `${S.ballsLeft} / 5`;
+function spawnBall(x){
+  if(S.ballsLeft <= 0) return;
+  S.ballsLeft--;
+  S.activeBalls.push({
+    x: x,
+    y: 20,
+    vx: (Math.random() - 0.5) * 2,
+    vy: 1.5,
+    r: 8
+  });
+  updateHUD();
 }
 
 let lastT = performance.now();
@@ -478,237 +320,167 @@ function loop(t){
   const dt = Math.min((t - lastT) / 1000, 0.033);
   lastT = t;
 
-  // Clear Surface
-  ctx.fillStyle = "#050608";
+  // Clear Canvas
+  ctx.fillStyle = "#0e1117";
   ctx.fillRect(0, 0, W, H);
 
-  // Draw Cabinet Border & Guide Rails
-  ctx.strokeStyle = "rgba(255, 208, 0, 0.2)";
-  ctx.lineWidth = 2;
-  ctx.strokeRect(8, 8, W - 16, H - 16);
-
-  // Update & Draw Spinners
-  S.spinners.forEach(sp => {
-    sp.angle += sp.speed * dt;
-    ctx.save();
-    ctx.translate(sp.x, sp.y);
-    ctx.rotate(sp.angle);
-    ctx.strokeStyle = "#00f0ff";
-    ctx.shadowColor = "#00f0ff"; ctx.shadowBlur = 8;
-    ctx.lineWidth = 3;
+  // 1. Draw Pegs
+  ctx.fillStyle = "#ffffff";
+  ctx.shadowColor = "#38bdf8";
+  ctx.shadowBlur = 8;
+  S.pegs.forEach(p => {
     ctx.beginPath();
-    ctx.moveTo(-sp.r, 0); ctx.lineTo(sp.r, 0);
-    ctx.moveTo(0, -sp.r); ctx.lineTo(0, sp.r);
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.shadowBlur = 0;
+
+  // 2. Draw Bumpers
+  S.bumpers.forEach(bm => {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(bm.x, bm.y, bm.r, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255, 0, 127, 0.25)";
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = bm.color;
+    ctx.shadowColor = bm.color;
+    ctx.shadowBlur = 14;
     ctx.stroke();
     ctx.restore();
-    ctx.shadowBlur = 0;
   });
 
-  // Draw Pegs (Brass Pins)
-  S.pegs.forEach(p => {
-    ctx.fillStyle = "#ffd000";
-    ctx.shadowColor = "#ffd000"; ctx.shadowBlur = 6;
-    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
-  });
-
-  // Draw Catch Cups
-  S.cups.forEach(cup => {
-    ctx.fillStyle = cup.isJackpot ? "rgba(255, 208, 0, 0.2)" : "rgba(0, 240, 255, 0.1)";
-    ctx.strokeStyle = cup.isJackpot ? "#ffd000" : "#00f0ff";
+  // 3. Draw Bins
+  S.bins.forEach(bin => {
+    ctx.save();
+    ctx.fillStyle = "rgba(31, 38, 51, 0.85)";
+    ctx.fillRect(bin.x + 2, bin.y, bin.w - 4, bin.h);
+    ctx.strokeStyle = bin.color;
     ctx.lineWidth = 2;
-    ctx.fillRect(cup.x1 + 2, cup.y, (cup.x2 - cup.x1) - 4, cup.h);
-    ctx.strokeRect(cup.x1 + 2, cup.y, (cup.x2 - cup.x1) - 4, cup.h);
+    ctx.strokeRect(bin.x + 2, bin.y, bin.w - 4, bin.h);
 
-    ctx.fillStyle = cup.isJackpot ? "#ffd000" : "#fff";
-    ctx.font = "800 11px 'Space Mono', monospace";
+    ctx.fillStyle = bin.color;
+    ctx.font = "800 13px 'Space Mono', monospace";
     ctx.textAlign = "center";
-    ctx.fillText(`${cup.pts}`, (cup.x1 + cup.x2)/2, cup.y + 19);
+    ctx.fillText(`${bin.mult}x`, bin.x + bin.w / 2, bin.y + 32);
+    ctx.restore();
   });
 
-  // Update & Draw Balls
-  for(let i = S.balls.length - 1; i >= 0; i--){
-    const b = S.balls[i];
-    b.vy += 480 * dt; // Gravity
-    b.vx *= 0.992;
-    b.x += b.vx * dt * 60;
-    b.y += b.vy * dt * 60;
+  // 4. Update & Draw Active Balls
+  for(let i = S.activeBalls.length - 1; i >= 0; i--){
+    const b = S.activeBalls[i];
+    b.vy += 980 * dt * 0.45; // Gravity
+    b.x += b.vx;
+    b.y += b.vy;
 
-    // Wall Bounces
-    if(b.x - b.r < 12){ b.x = 12 + b.r; b.vx = Math.abs(b.vx) * 0.65; AudioPachinko.pinClack(); }
-    if(b.x + b.r > W - 12){ b.x = W - 12 - b.r; b.vx = -Math.abs(b.vx) * 0.65; AudioPachinko.pinClack(); }
+    // Wall Bounce
+    if(b.x - b.r < 10){
+      b.x = 10 + b.r;
+      b.vx = -b.vx * 0.65;
+    } else if(b.x + b.r > W - 10){
+      b.x = W - 10 - b.r;
+      b.vx = -b.vx * 0.65;
+    }
 
     // Peg Collisions
-    S.pegs.forEach(peg => {
-      const dx = b.x - peg.x, dy = b.y - peg.y;
+    S.pegs.forEach(p => {
+      const dx = b.x - p.x;
+      const dy = b.y - p.y;
       const dist = Math.hypot(dx, dy);
-      if(dist < b.r + peg.r){
-        const nx = dx / dist, ny = dy / dist;
-        const dot = b.vx * nx + b.vy * ny;
-        b.vx = (b.vx - 2 * dot * nx) * 0.72 + (Math.random() - 0.5) * 1.5;
-        b.vy = (b.vy - 2 * dot * ny) * 0.72;
-        b.x = peg.x + nx * (b.r + peg.r + 0.5);
-        b.y = peg.y + ny * (b.r + peg.r + 0.5);
-        AudioPachinko.pinClack();
+      if(dist < b.r + p.r){
+        const nx = dx / dist;
+        const ny = dy / dist;
+        b.x = p.x + nx * (b.r + p.r);
+        b.y = p.y + ny * (b.r + p.r);
+        b.vx = nx * 3.5 + (Math.random() - 0.5) * 1.5;
+        b.vy = Math.abs(ny * 2.5);
+        AudioPachinko.pegClack();
       }
     });
 
-    // Spinner Collision
-    S.spinners.forEach(sp => {
-      const dist = Math.hypot(b.x - sp.x, b.y - sp.y);
-      if(dist < b.r + sp.r){
-        b.vx = (Math.random() - 0.5) * 8;
-        b.vy = -Math.abs(b.vy) * 0.8;
-        sp.speed = -sp.speed * 1.5;
+    // Bumper Collisions
+    S.bumpers.forEach(bm => {
+      const dx = b.x - bm.x;
+      const dy = b.y - bm.y;
+      const dist = Math.hypot(dx, dy);
+      if(dist < b.r + bm.r){
+        const nx = dx / dist;
+        const ny = dy / dist;
+        b.vx = nx * 8;
+        b.vy = ny * 8;
+        AudioPachinko.bumperPop();
         S.score += 250;
         updateHUD();
-        AudioPachinko.spinnerHit();
       }
     });
 
-    // Draw Chrome Ball
-    ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = "#ffd000"; ctx.shadowBlur = 8;
-    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Check Cup Landing
-    if(b.y >= H - 85){
-      let scored = false;
-      S.cups.forEach(cup => {
-        if(b.x >= cup.x1 && b.x <= cup.x2){
-          S.score += cup.pts;
-          AudioPachinko.cupScore(cup.isJackpot);
-          scored = true;
+    // Bin Collection
+    if(b.y >= H - 55){
+      S.bins.forEach(bin => {
+        if(b.x >= bin.x && b.x < bin.x + bin.w){
+          const pts = 500 * bin.mult;
+          S.score += pts;
+          AudioPachinko.binScore(bin.mult);
+          if("vibrate" in navigator) navigator.vibrate(20);
         }
       });
-      S.balls.splice(i, 1);
+      S.activeBalls.splice(i, 1);
       updateHUD();
-
-      if(S.ballsLeft === 0 && S.balls.length === 0){
-        setTimeout(endGauntlet, 500);
-      }
+      continue;
     }
+
+    // Draw Ball
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "#38bdf8";
+    ctx.shadowBlur = 14;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // Check Game Over
+  if(S.ballsLeft === 0 && S.activeBalls.length === 0){
+    S.running = false;
+    $("verdictScore").textContent = `${S.score.toLocaleString()} PTS`;
+    showScreen("scrVerdict");
+    return;
   }
 
   requestAnimationFrame(loop);
 }
 
-/* ================= CHARGE & PLUNGER CONTROLS ================= */
-let charging = false, chargeVal = 0, chargeDir = 1, chargeTimer = null;
+function updateHUD(){
+  $("hudScore").textContent = S.score.toLocaleString();
+  $("hudBalls").textContent = `${S.ballsLeft} / 5`;
+}
 
-const btnLaunch = $("btnLaunch");
-const startCharge = e => {
+/* ================= INPUTS ================= */
+cvs.addEventListener("pointerdown", e => {
   e.preventDefault();
-  if(S.ballsLeft <= 0) return;
-  charging = true;
-  chargeVal = 10;
-  chargeDir = 1;
-  $("meterTxt").textContent = "RELEASE TO DROP";
-
-  chargeTimer = setInterval(() => {
-    chargeVal += 4 * chargeDir;
-    if(chargeVal >= 100){ chargeVal = 100; chargeDir = -1; }
-    if(chargeVal <= 10){ chargeVal = 10; chargeDir = 1; }
-    $("pMeterFill").style.width = `${chargeVal}%`;
-  }, 20);
-};
-
-const releaseCharge = e => {
-  if(!charging) return;
-  charging = false;
-  clearInterval(chargeTimer);
-  $("meterTxt").textContent = "HOLD TO CHARGE";
-  $("pMeterFill").style.width = "0%";
-
-  if(S.ballsLeft > 0){
-    S.ballsLeft--;
-    updateHUD();
-    AudioPachinko.launch();
-    
-    // Spawn drop ball at top funnel
-    const power = chargeVal / 100;
-    const startX = W * 0.2 + power * (W * 0.6);
-    S.balls.push({
-      x: startX,
-      y: 35,
-      vx: (Math.random() - 0.5) * 3,
-      vy: 2.5 + power * 3,
-      r: 7
-    });
-  }
-};
-
-btnLaunch.addEventListener("pointerdown", startCharge);
-btnLaunch.addEventListener("pointerup", releaseCharge);
-btnLaunch.addEventListener("pointercancel", releaseCharge);
-btnLaunch.addEventListener("pointerleave", releaseCharge);
-
-function endGauntlet(){
-  S.running = false;
-  const pName = roster[S.playerIdx];
-  const passed = S.score >= S.quota;
-
-  $("verdictPlayer").textContent = pName;
-  $("verdictScore").textContent = `${S.score.toLocaleString()} PTS`;
-
-  if(passed){
-    $("passBox").style.display = "block";
-    $("forfeitBox").style.display = "none";
-  } else {
-    $("passBox").style.display = "none";
-    $("forfeitBox").style.display = "block";
-    const dare = FORFEITS[Math.floor(Math.random() * FORFEITS.length)];
-    $("forfeitText").textContent = dare;
-  }
-  showScreen("scrVerdict");
-}
-
-/* ================= ROSTER & QUOTA ================= */
-$("quotaGrid").onclick = e => {
-  const b = e.target.closest(".opt-btn"); if(!b) return;
-  document.querySelectorAll("#quotaGrid .opt-btn").forEach(x => x.classList.remove("is-active"));
-  b.classList.add("is-active");
-  S.quota = parseInt(b.dataset.q, 10);
-};
-
-function renderRoster(){
-  $("rosterList").innerHTML = roster.map((p, i) => `
-    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
-      <span>#${i+1} ${p}</span>
-      <span style="color:var(--accent);">5 BALLS</span>
-    </li>
-  `).join("");
-}
-
-$("btnStartTourney").onclick = () => {
-  S.playerIdx = 0;
-  startTurn();
-};
-
-function startTurn(){
-  const player = roster[S.playerIdx];
-  $("topSub").textContent = `${player}'s Session`;
-  $("hudPlayer").textContent = player;
-  openCurtain(player, () => {
-    showScreen("scrPlay");
-    resizeCanvas();
-    resetGameForPlayer();
-    lastT = performance.now();
-    requestAnimationFrame(loop);
-  });
-}
-
-$("btnNextPlayer").onclick = () => {
-  S.playerIdx = (S.playerIdx + 1) % roster.length;
-  startTurn();
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-  renderRoster();
+  if(!S.running) return;
+  const rect = cvs.getBoundingClientRect();
+  const px = e.clientX - rect.left;
+  spawnBall(px);
 });
+
+$("btnStartPachinko").onclick = () => {
+  S.running = true;
+  S.score = 0;
+  S.ballsLeft = 5;
+  S.activeBalls = [];
+  showScreen("scrPlay");
+  updateHUD();
+  lastT = performance.now();
+  requestAnimationFrame(loop);
+};
+
+$("btnRestartPachinko").onclick = () => {
+  showScreen("scrSetup");
+};
+
 })();
 </script>
-<script src="../../js/theme-sync.js"></script>
 </body>
 </html>
