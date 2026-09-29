@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="nordic-slate">
 <head>
-  <script src="js/qa-auditor.js" defer></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0e1117" id="metaThemeColor" />
@@ -575,6 +574,255 @@
   if (/[?&]verify=1/.test(window.location.search)) {
     runVerifier();
   }
+})();
+</script>
+<!-- ================= PARTYDECK CENTRAL QA RIG ================= -->
+<div id="pd-qa-fab" style="position:fixed;bottom:20px;right:20px;z-index:999999;background:#ff0055;color:#fff;padding:12px 18px;border-radius:999px;font-family:monospace;font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 0 25px rgba(255,0,85,0.8);border:2px solid #fff;display:flex;align-items:center;gap:8px;text-transform:uppercase;">
+  🐞 <span>QA Test Studio</span>
+  <span id="pd-qa-badge" style="background:rgba(0,0,0,0.35);padding:2px 8px;border-radius:10px;font-size:10px;">0 Flagged</span>
+</div>
+
+<!-- Modal QA Studio Overlay -->
+<div id="pd-qa-rig-modal" style="display:none;position:fixed;inset:0;z-index:1000000;background:rgba(5,7,10,0.96);backdrop-filter:blur(10px);flex-direction:column;font-family:system-ui,-apple-system,sans-serif;color:#fff;box-sizing:border-box;padding:12px;">
+  
+  <!-- Studio Top Bar -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#12161f;border-radius:10px;border:1px solid #1e293b;margin-bottom:10px;gap:10px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <strong style="color:#ff0055;font-family:monospace;font-size:14px;letter-spacing:1px;">PARTYDECK QA RIG</strong>
+      <select id="pd-rig-game-select" style="background:#090c12;color:#38bdf8;border:1px solid #334155;padding:6px 10px;border-radius:6px;font-family:monospace;font-size:12px;outline:none;max-width:240px;"></select>
+      <button type="button" id="pd-rig-btn-reload" style="background:#1e293b;color:#cbd5e1;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-family:monospace;font-size:11px;">🔄 Reload</button>
+    </div>
+    
+    <div style="display:flex;gap:8px;align-items:center;">
+      <button type="button" id="pd-rig-btn-save" style="background:#ff0055;color:#fff;border:none;padding:7px 14px;border-radius:6px;font-family:monospace;font-size:11px;font-weight:bold;cursor:pointer;">🚩 Flag Game</button>
+      <button type="button" id="pd-rig-btn-export" style="background:#38bdf8;color:#000;border:none;padding:7px 14px;border-radius:6px;font-family:monospace;font-size:11px;font-weight:bold;cursor:pointer;">📥 Export .MD</button>
+      <button type="button" id="pd-rig-btn-clear" style="background:#334155;color:#94a3b8;border:none;padding:7px 10px;border-radius:6px;font-family:monospace;font-size:11px;cursor:pointer;">Clear</button>
+      <button type="button" id="pd-rig-btn-close" style="background:transparent;border:none;color:#94a3b8;font-size:22px;cursor:pointer;margin-left:8px;">&times;</button>
+    </div>
+  </div>
+
+  <!-- Studio Main Layout -->
+  <div style="display:flex;flex:1;gap:12px;overflow:hidden;">
+    
+    <!-- Left: Mobile Viewport Container -->
+    <div style="flex:1;display:flex;justify-content:center;align-items:center;background:#090c12;border-radius:12px;border:1px solid #1e293b;position:relative;overflow:hidden;">
+      <div style="width:375px;height:700px;max-height:100%;max-width:100%;background:#000;border-radius:24px;border:4px solid #334155;overflow:hidden;box-shadow:0 0 40px rgba(0,0,0,0.8);display:flex;flex-direction:column;">
+        <div style="background:#1e293b;height:20px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:40px;height:4px;background:#475569;border-radius:2px;"></div>
+        </div>
+        <iframe id="pd-rig-frame" style="flex:1;border:none;width:100%;height:100%;background:#000;" src="about:blank"></iframe>
+      </div>
+    </div>
+
+    <!-- Right: QA Control & Bug Inspector Panel -->
+    <div style="width:340px;background:#12161f;border-radius:12px;border:1px solid #1e293b;padding:14px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;overflow-y:auto;">
+      <div style="font-family:monospace;font-size:11px;color:#94a3b8;text-transform:uppercase;">Flaw Checklist</div>
+      <div style="display:grid;grid-template-columns:1fr;gap:6px;font-size:12px;">
+        <label style="background:#1a2230;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;gap:8px;align-items:center;">
+          <input type="checkbox" value="Button/Layout Cut Off (100vh)" class="pd-rig-tag"> Layout / Button Cut Off
+        </label>
+        <label style="background:#1a2230;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;gap:8px;align-items:center;">
+          <input type="checkbox" value="Canvas Blurry/DPR Scale" class="pd-rig-tag"> Blurry / Small Canvas
+        </label>
+        <label style="background:#1a2230;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;gap:8px;align-items:center;">
+          <input type="checkbox" value="Silent / No Audio" class="pd-rig-tag"> Silent / Sound Dead
+        </label>
+        <label style="background:#1a2230;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;gap:8px;align-items:center;">
+          <input type="checkbox" value="Controls Dead / Frozen" class="pd-rig-tag"> Touch / Controls Frozen
+        </label>
+        <label style="background:#1a2230;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;gap:8px;align-items:center;">
+          <input type="checkbox" value="Loop / State Stuck" class="pd-rig-tag"> Game Stuck / Won't Start
+        </label>
+        <label style="background:#1a2230;padding:6px 10px;border-radius:6px;cursor:pointer;display:flex;gap:8px;align-items:center;">
+          <input type="checkbox" value="404 Page Missing" class="pd-rig-tag"> 404 / Page Missing
+        </label>
+      </div>
+
+      <div style="font-family:monospace;font-size:11px;color:#94a3b8;text-transform:uppercase;margin-top:4px;">Observation Notes</div>
+      <textarea id="pd-rig-notes" style="width:100%;height:85px;background:#090c12;border:1px solid #334155;border-radius:6px;color:#fff;font-size:12px;padding:8px;box-sizing:border-box;resize:none;outline:none;" placeholder="What broke? (e.g. When tapping roll dice, canvas goes blank)"></textarea>
+
+      <div style="font-family:monospace;font-size:11px;color:#ff557f;text-transform:uppercase;">Trapped Frame Errors (<span id="pd-rig-err-count">0</span>)</div>
+      <div id="pd-rig-errors" style="flex:1;min-height:90px;max-height:130px;background:#06080c;border:1px solid rgba(255,0,85,0.3);border-radius:6px;padding:8px;font-family:monospace;font-size:10px;color:#ff557f;overflow-y:auto;white-space:pre-wrap;word-break:break-all;">No JS runtime errors caught.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const STORAGE_KEY = "partydeck_qa_audit_log";
+  let frameErrors = [];
+
+  function getLogs() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); } catch(e) { return []; }
+  }
+  function saveLogs(logs) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); } catch(e) {}
+  }
+  function updateBadge() {
+    const badge = document.getElementById("pd-qa-badge");
+    if (badge) badge.textContent = `${getLogs().length} Flagged`;
+  }
+
+  // Populate Dropdown from window.GAMES / ALL_GAMES / Card links
+  function populateGames() {
+    const select = document.getElementById("pd-rig-game-select");
+    select.innerHTML = "";
+
+    let list = [];
+    if (window.ALL_GAMES && Array.isArray(window.ALL_GAMES)) {
+      list = window.ALL_GAMES.map(g => ({ id: g.id, title: g.title || g.name || g.id, path: g.path || `games/${g.id}/index.html` }));
+    } else if (window.GAMES && Array.isArray(window.GAMES)) {
+      list = window.GAMES.map(g => ({ id: g.id, title: g.title || g.name || g.id, path: g.path || `games/${g.id}/index.html` }));
+    } else {
+      // Scrape game cards directly from the DOM if arrays aren't global
+      const cards = document.querySelectorAll("[data-id], a[href*='games/']");
+      const seen = new Set();
+      cards.forEach(c => {
+        const id = c.dataset.id || (c.getAttribute("href") || "").replace(/games\/([^/]+)\/?.*/, "$1");
+        if (id && !seen.has(id) && id !== "#") {
+          seen.add(id);
+          list.push({ id: id, title: id, path: `games/${id}/index.html` });
+        }
+      });
+    }
+
+    if (!list.length) {
+      list = [{ id: "custom", title: "Select Game or Type Path...", path: "games/" }];
+    }
+
+    list.forEach(g => {
+      const opt = document.createElement("option");
+      opt.value = g.path;
+      opt.textContent = `${g.title} (${g.id})`;
+      select.appendChild(opt);
+    });
+  }
+
+  function loadSelectedGame() {
+    const select = document.getElementById("pd-rig-game-select");
+    const iframe = document.getElementById("pd-rig-frame");
+    const path = select.value;
+
+    frameErrors = [];
+    document.getElementById("pd-rig-err-count").textContent = "0";
+    document.getElementById("pd-rig-errors").textContent = "No JS runtime errors caught.";
+
+    // Load game into frame
+    iframe.src = path;
+
+    // Prefill if previously logged
+    const existing = getLogs().find(l => l.path === path || l.gameId === select.selectedOptions[0]?.textContent);
+    document.getElementById("pd-rig-notes").value = existing ? existing.notes : "";
+    document.querySelectorAll(".pd-rig-tag").forEach(cb => {
+      cb.checked = existing ? (existing.tags || []).includes(cb.value) : false;
+    });
+
+    // Intercept errors inside iframe
+    iframe.onload = function() {
+      try {
+        const frameWin = iframe.contentWindow;
+        frameWin.addEventListener("error", function(e) {
+          const err = `[Runtime Error] ${e.message} (${e.filename ? e.filename.split('/').pop() : 'script'}:${e.lineno})`;
+          frameErrors.push(err);
+          document.getElementById("pd-rig-err-count").textContent = frameErrors.length;
+          document.getElementById("pd-rig-errors").textContent = frameErrors.join("\n\n");
+        });
+        frameWin.addEventListener("unhandledrejection", function(e) {
+          const err = `[Promise Rejection] ${e.reason?.message || e.reason}`;
+          frameErrors.push(err);
+          document.getElementById("pd-rig-err-count").textContent = frameErrors.length;
+          document.getElementById("pd-rig-errors").textContent = frameErrors.join("\n\n");
+        });
+      } catch(err) {
+        // Cross-origin fallback
+      }
+    };
+  }
+
+  // Bind UI Events
+  document.getElementById("pd-qa-fab").onclick = () => {
+    populateGames();
+    document.getElementById("pd-qa-rig-modal").style.display = "flex";
+    loadSelectedGame();
+    updateBadge();
+  };
+
+  document.getElementById("pd-rig-btn-close").onclick = () => {
+    document.getElementById("pd-qa-rig-modal").style.display = "none";
+    document.getElementById("pd-rig-frame").src = "about:blank";
+  };
+
+  document.getElementById("pd-rig-game-select").onchange = loadSelectedGame;
+  document.getElementById("pd-rig-btn-reload").onclick = loadSelectedGame;
+
+  // Save Flagged Game
+  document.getElementById("pd-rig-btn-save").onclick = () => {
+    const select = document.getElementById("pd-rig-game-select");
+    const path = select.value;
+    const gameName = select.selectedOptions[0]?.textContent || path;
+    const tags = Array.from(document.querySelectorAll(".pd-rig-tag:checked")).map(cb => cb.value);
+    const notes = document.getElementById("pd-rig-notes").value.trim();
+
+    let logs = getLogs().filter(l => l.path !== path);
+    logs.push({
+      gameName: gameName,
+      path: path,
+      tags: tags,
+      notes: notes || "No manual notes entered.",
+      errors: [...frameErrors],
+      timestamp: new Date().toLocaleTimeString()
+    });
+    saveLogs(logs);
+    updateBadge();
+    alert(`✅ Flagged "${gameName}" saved! Total in report: ${logs.length}`);
+  };
+
+  // Export Markdown Report
+  document.getElementById("pd-rig-btn-export").onclick = () => {
+    const logs = getLogs();
+    if (!logs.length) return alert("No games flagged yet! Select broken games and click 'Flag Game'.");
+
+    let md = `# 🛠️ PARTYDECK COMPREHENSIVE QA AUDIT & FIX REPORT\n`;
+    md += `**Date:** ${new Date().toLocaleString()}\n`;
+    md += `**Total Flagged Games:** ${logs.length}\n\n`;
+    md += `## 📋 DIRECTIVES FOR LLM FIXES\n`;
+    md += `Please rewrite the following broken PartyDeck games in full single-file implementations.\n`;
+    md += `Ensure:\n`;
+    md += `1. Root mobile container uses \`min-height: 100%; height: 100dvh; overflow-y: auto\`.\n`;
+    md += `2. Canvas DPR scaling is active.\n`;
+    md += `3. Audio uses Web Audio API synth tones.\n\n---\n\n`;
+
+    logs.forEach((item, i) => {
+      md += `### ${i + 1}. \`${item.path}\` — ${item.gameName}\n`;
+      md += `- **Flaw Tags:** ${item.tags.join(", ") || "General Glitch"}\n`;
+      md += `- **Observed Behavior:**\n  > ${item.notes.replace(/\n/g, "\n  > ")}\n`;
+      if (item.errors.length) {
+        md += `- **Captured JS Console Errors:**\n\`\`\`text\n${item.errors.join("\n")}\n\`\`\`\n`;
+      } else {
+        md += `- **Console Errors:** None caught (Layout / interaction issue).\n`;
+      }
+      md += `\n---\n\n`;
+    });
+
+    const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `PARTYDECK_BUG_AUDIT_${Date.now()}.md`;
+    a.click();
+  };
+
+  // Clear Logs
+  document.getElementById("pd-rig-btn-clear").onclick = () => {
+    if (confirm("Clear all flagged game logs?")) {
+      localStorage.removeItem(STORAGE_KEY);
+      updateBadge();
+      document.getElementById("pd-rig-notes").value = "";
+      document.querySelectorAll(".pd-rig-tag").forEach(cb => cb.checked = false);
+      alert("Audit list reset.");
+    }
+  };
+
+  updateBadge();
 })();
 </script>
 </body>

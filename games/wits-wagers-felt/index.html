@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="emerald-lounge">
 <head>
-    <script src="../../js/qa-auditor.js" defer></script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#071712" id="metaThemeColor" />
@@ -27,7 +26,7 @@
   body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    min-height: 100dvh; display: flex; flex-direction: column;
+    min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
     overflow-x: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
@@ -328,8 +327,7 @@ function openCurtain(pName, onUnlock){
   $("curtain").classList.add("is-open");
 
   const btn = $("btnCurtainHold");
-  const cancel = e => {
-    if(e) e.preventDefault();
+  const cancel = () => {
     if(holdTimer) cancelAnimationFrame(holdTimer);
     holdTimer = null;
     $("holdFill").style.width = "0%";
