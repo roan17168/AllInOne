@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="nordic-slate">
+<html lang="en" data-theme="tokyo-sunset">
 <head>
-    
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
-<title>Neon Pinball Gauntlet | PartyDeck</title>
+<meta name="theme-color" content="#120e24" id="metaThemeColor" />
+<title>Neon Pinball | PartyDeck</title>
 <script>
 (function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
@@ -16,18 +15,17 @@
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
   :root {
-    --bg-primary: #08090c; --bg-surface: #10141b; --bg-elevated: #181e29;
-    --text-primary: #ffffff; --text-secondary: #9ba3b4; --text-muted: #5c6577;
-    --accent: #00ffcc; --accent-glow: rgba(0,255,204,0.35); --accent-contrast: #041215;
-    --danger: #ff0055; --success: #00ff66; --warning: #ffd000;
-    --border-ui: rgba(0,255,204,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
-    --ease-spring: cubic-bezier(.175, .885, .32, 1.275);
+    --bg-primary: #120e24; --bg-surface: #1a1433; --bg-elevated: #261e47;
+    --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+    --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-contrast: #ffffff;
+    --danger: #ff0044; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(255,0,127,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    min-height: 100dvh; display: flex; flex-direction: column;
+    min-height: 100%; height: 100dvh; display: flex; flex-direction: column;
     overflow: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
@@ -36,11 +34,10 @@
     padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
   }
   .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
-  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; letter-spacing: -.01em; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
   .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
-  .gm-actions { display: flex; gap: .4rem; }
   .btn-icon-only {
-    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
     color: var(--text-primary); display: flex; align-items: center; justify-content: center;
     cursor: pointer; text-decoration: none;
@@ -52,76 +49,32 @@
     overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
   .screen.is-active { display: flex; }
+  #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; }
 
-  /* HUD */
-  .hud-strip {
+  .hud-bar {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
     padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    flex-shrink: 0; z-index: 20;
   }
   .hud-stat {
     display: flex; flex-direction: column; align-items: center;
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
     border-radius: var(--r-sm); padding: .3rem .4rem;
   }
-  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .55rem; color: var(--text-muted); text-transform: uppercase; }
-  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 800; color: var(--accent); }
+  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .52rem; color: var(--text-muted); text-transform: uppercase; }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 900; color: var(--accent); }
 
-  /* Pinball Table Canvas Shell */
-  .table-stage {
-    flex: 1; position: relative; width: 100%; height: 100%;
-    display: flex; align-items: center; justify-content: center; background: #000;
+  .canvas-stage-wrap {
+    flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
   }
   #pinballCanvas { width: 100%; height: 100%; display: block; touch-action: none; }
 
-  /* Plunger Control Strip */
-  .plunger-control {
-    position: absolute; right: 8px; bottom: 85px; width: 44px; height: 150px;
-    background: rgba(16, 20, 27, 0.85); border: 2px solid var(--border-ui);
-    border-radius: 22px; display: flex; flex-direction: column; align-items: center;
-    justify-content: flex-end; padding: 6px; touch-action: none; z-index: 10;
+  /* Flipper Control Touch Zones */
+  .flipper-zones {
+    position: absolute; inset: 0; display: flex; z-index: 10; pointer-events: auto;
   }
-  .plunger-handle {
-    width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
-    box-shadow: 0 0 12px var(--accent-glow); cursor: grab;
-    display: flex; align-items: center; justify-content: center;
-    transform: translateY(0px); transition: transform .05s ease-out;
-  }
-  .plunger-spring {
-    width: 4px; height: 80px; background: repeating-linear-gradient(to bottom, var(--accent) 0, var(--accent) 4px, transparent 4px, transparent 8px);
-    margin-bottom: 4px; opacity: .7;
-  }
+  .flipper-half { flex: 1; height: 100%; opacity: 0; touch-action: none; }
 
-  /* Dual Flipper Touch Overlays */
-  .flipper-touch-zones {
-    position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr;
-    pointer-events: none; z-index: 5;
-  }
-  .touch-zone {
-    pointer-events: auto; display: flex; align-items: flex-end; justify-content: center;
-    padding-bottom: 1.5rem; opacity: 0.15; transition: opacity .1s;
-    font-family: 'Space Mono', monospace; font-size: .75rem; font-weight: 700;
-  }
-  .touch-zone:active, .touch-zone.pressed { opacity: 0.45; background: rgba(0, 255, 204, 0.08); }
-
-  /* Setup & Verdict Cards */
-  .panel {
-    background: var(--bg-surface); border: 1px solid var(--border-ui);
-    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
-  }
-  .panel-title {
-    font-family: 'Space Mono', monospace; font-size: .62rem;
-    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
-  }
-  .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
-  .opt-btn {
-    min-height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
-    font-size: .78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-  .opt-btn.is-active {
-    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
-    box-shadow: 0 0 14px var(--accent-glow);
-  }
   .btn {
     width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
     background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
@@ -129,602 +82,328 @@
     box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
   }
   .btn:active { transform: scale(.98); }
-  .btn.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-ui); box-shadow: none; }
-  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,85,.4); }
-
-  /* Privacy Curtain */
-  .curtain {
-    position: fixed; inset: 0; z-index: 100; background: rgba(8, 9, 12, 0.96);
-    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
-  }
-  .curtain.is-open { display: flex; }
-  .cur-card {
-    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
-    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
-  }
-  .hold-btn {
-    position: relative; overflow: hidden; width: 100%; min-height: 60px;
-    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
-    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
-    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
-  }
-  .hold-fill {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
-    background: var(--accent); opacity: .85; transition: width .04s linear;
-  }
-  .hold-label { position: relative; z-index: 2; pointer-events: none; }
-  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
-
-  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
-  .ico svg { width: 100%; height: 100%; }
 </style>
-<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
-
-<header class="gm-top">
-  <div class="gm-idblock">
-    <span class="gm-title">Neon Pinball Gauntlet</span>
-    <span class="gm-sub" id="topSub">Tournament Setup</span>
-  </div>
-  <div class="gm-actions">
-    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-    </a>
-  </div>
-</header>
-
-<div class="stage">
-  <!-- 1. SETUP SCREEN -->
-  <section class="screen is-active" id="scrSetup">
-    <div class="panel">
-      <div class="panel-title">Target Point Quota</div>
-      <div class="opt-grid" id="quotaOpts">
-        <button class="opt-btn" data-q="15000">15,000</button>
-        <button class="opt-btn is-active" data-q="25000">25,000</button>
-        <button class="opt-btn" data-q="40000">40,000</button>
-      </div>
+<div class="gm-root">
+  <header class="gm-top">
+    <div class="gm-idblock">
+      <span class="gm-title">Neon Pinball</span>
+      <span class="gm-sub">Plunger &amp; Bumpers</span>
     </div>
-    <div class="panel">
-      <div class="panel-title">Tournament Rules</div>
-      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
-        • <strong>3 Balls</strong> per player.<br>
-        • Pull & release spring plunger to launch.<br>
-        • Tap left/right halves of the screen to activate flippers.<br>
-        • Clear 3 drop targets to trigger <strong>Multiball</strong>.<br>
-        • Fail to reach quota = Drink penalty & dare!
-      </p>
+    <div class="gm-actions">
+      <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
     </div>
-    <div class="panel">
-      <div class="panel-title">Active Roster</div>
-      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
-    </div>
-    <button class="btn" id="btnStartTourney" style="margin-top:auto;">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
-      Start Gauntlet
-    </button>
-  </section>
+  </header>
 
-  <!-- 2. GAMEPLAY CANVAS SCREEN -->
-  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
-    <div class="hud-strip">
-      <div class="hud-stat">
-        <span class="hud-lbl">Player</span>
-        <span class="hud-val" id="hudPlayer" style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
+  <div class="stage">
+    <!-- SETUP -->
+    <section class="screen is-active" id="scrSetup">
+      <div style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Pinball Cabinet Controls</div>
+        <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+          • <strong>Tap Left / Right half of the screen</strong> to actuate mechanical flippers.<br>
+          • Pull down and release the right-hand plunger to launch.<br>
+          • Hit glowing bumpers, light up the 3 drop targets, and trigger Multiball!
+        </p>
       </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">Score / Goal</span>
-        <span class="hud-val" id="hudScore">0</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">Ball</span>
-        <span class="hud-val" id="hudBall">1 / 3</span>
-      </div>
-    </div>
 
-    <div class="table-stage">
-      <canvas id="pinballCanvas"></canvas>
-      <div class="flipper-touch-zones">
-        <div class="touch-zone" id="zoneLeft">LEFT FLIPPER</div>
-        <div class="touch-zone" id="zoneRight">RIGHT FLIPPER</div>
-      </div>
-      <div class="plunger-control" id="plungerControl">
-        <div class="plunger-spring" id="pSpring"></div>
-        <div class="plunger-handle" id="pHandle">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg></span>
+      <button type="button" class="btn" id="btnStartPinball" style="margin-top:auto;">Insert Coin (Play)</button>
+    </section>
+
+    <!-- PLAY -->
+    <section class="screen" id="scrPlay">
+      <div class="hud-bar">
+        <div class="hud-stat">
+          <span class="hud-lbl">Score</span>
+          <span class="hud-val" id="hudScore">0</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Ball</span>
+          <span class="hud-val" id="hudBall">1 / 3</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Multiball</span>
+          <span class="hud-val" id="hudMulti" style="color:var(--warning);">LOCKED</span>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- 3. VERDICT / FORFEIT SCREEN -->
-  <section class="screen" id="scrVerdict">
-    <div class="panel" style="text-align:center;padding:1.6rem 1rem;" id="verdictPanel">
-      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);" id="verdictKicker">GAUNTLET RESOLUTION</div>
-      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="verdictPlayer">Player</h2>
-      <div style="font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:900;color:var(--accent);margin-bottom:.6rem;" id="verdictScore">0 PTS</div>
-      <div id="forfeitBox" style="background:rgba(255,0,85,.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
-        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--danger);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">QUOTA MISSED PENALTY</span>
-        <p style="font-size:.95rem;font-weight:700;margin-top:.4rem;line-height:1.4;" id="forfeitText">Take 3 sips!</p>
+      <div class="canvas-stage-wrap" id="canvasWrap">
+        <canvas id="pinballCanvas"></canvas>
+        <div class="flipper-zones">
+          <div class="flipper-half" id="zoneLeft"></div>
+          <div class="flipper-half" id="zoneRight"></div>
+        </div>
       </div>
-      <div id="passBox" style="background:rgba(0,255,102,.1);border:2px solid var(--success);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
-        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--success);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">QUOTA CRUSHED</span>
-        <p style="font-size:.95rem;font-weight:700;margin-top:.4rem;line-height:1.4;">Safe! Nominate any rival player to take 2 penalty sips.</p>
-      </div>
-    </div>
-    <button class="btn" id="btnNextPlayer" style="margin-top:auto;">Next Gauntlet Runner</button>
-  </section>
-</div>
+    </section>
 
-<!-- 4. PRIVACY / HANDOVER CURTAIN -->
-<div class="curtain" id="curtain">
-  <div class="cur-card">
-    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-    </div>
-    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT PILOT</div>
-    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
-    <p style="font-size:.82rem;color:var(--text-secondary);">Target: <strong id="curQuota" style="color:var(--accent);">25,000</strong> PTS</p>
-    <button class="hold-btn" id="btnCurtainHold">
-      <span class="hold-fill" id="holdFill"></span>
-      <span class="hold-label">HOLD 700MS TO UNLOCK</span>
-    </button>
+    <!-- VERDICT -->
+    <section class="screen" id="scrVerdict">
+      <div style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">GAME OVER</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictScore">0 PTS</h2>
+        <p style="font-size:.85rem;color:var(--text-secondary);">High-voltage pinball run completed!</p>
+      </div>
+
+      <button type="button" class="btn" id="btnRestartPinball" style="margin-top:auto;">Play Another Match</button>
+    </section>
   </div>
 </div>
 
 <script>
 (function(){
-"use strict";
+  "use strict";
+  const $ = id => document.getElementById(id);
 
-/* ================= WEB AUDIO SYNTHESIZER ================= */
-const Synth = {
-  ctx: null,
-  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-  tone(freq, dur, type="sine", gain=0.15, slide=null){
-    try {
-      this.init();
-      const t0 = this.ctx.currentTime, o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = type; o.frequency.setValueAtTime(freq, t0);
-      if(slide) o.frequency.exponentialRampToValueAtTime(slide, t0 + dur);
-      g.gain.setValueAtTime(gain, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(t0); o.stop(t0 + dur);
-    }catch(e){}
-  },
-  flipper(){ this.tone(280, 0.05, "square", 0.12, 140); },
-  bumper(){ this.tone(580, 0.09, "triangle", 0.22, 920); },
-  dropTarget(){ this.tone(880, 0.08, "sine", 0.2, 1320); },
-  plungerRelease(){ this.tone(140, 0.15, "sawtooth", 0.25, 450); },
-  drain(){ this.tone(180, 0.4, "sawtooth", 0.2, 50); },
-  multiball(){ [523, 659, 784, 1046].forEach((f, i)=>setTimeout(()=>this.tone(f, 0.12, "triangle", 0.18), i*70)); },
-  quotaPass(){ [440, 554, 659, 880, 1108].forEach((f, i)=>setTimeout(()=>this.tone(f, 0.2, "triangle", 0.15), i*80)); }
-};
-
-/* ================= TOURNAMENT STATE & DATA ================= */
-const FORFEITS = [
-  "Take 3 sips of your drink right now.",
-  "Take 1 sip for every 5,000 points you fell short.",
-  "Do 8 quick push-ups or take 4 sips.",
-  "Give a 15-second speech on why you failed the gauntlet.",
-  "Hold a plank for 20 seconds.",
-  "Let the highest scorer assign you 3 sips."
-];
-
-let roster = [];
-try {
-  const raw = localStorage.getItem("partydeck_players");
-  roster = raw ? JSON.parse(raw) : [];
-} catch(e){}
-if(!Array.isArray(roster) || roster.length < 2) roster = ["Player 1", "Player 2"];
-
-const S = {
-  quota: 25000,
-  playerIdx: 0,
-  ball: 1,
-  maxBalls: 3,
-  score: 0,
-  ballsInPlay: [],
-  flippers: { left: false, right: false },
-  dropTargets: [true, true, true],
-  multiballUnlocked: false,
-  running: false
-};
-
-const $ = id => document.getElementById(id);
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
-}
-
-/* ================= 3-STAGE PRIVACY CURTAIN ================= */
-let holdTimer = null, holdStart = 0;
-const HOLD_DURATION = 700;
-
-function openCurtain(playerName, onUnlock){
-  $("curName").textContent = playerName;
-  $("curQuota").textContent = S.quota.toLocaleString();
-  $("holdFill").style.width = "0%";
-  $("btnCurtainHold").classList.remove("armed");
-  $("curtain").classList.add("is-open");
-
-  const btn = $("btnCurtainHold");
-  const cancel = e => {
-    if(e) e.preventDefault();
-    if(holdTimer) cancelAnimationFrame(holdTimer);
-    holdTimer = null;
-    $("holdFill").style.width = "0%";
-    btn.classList.remove("armed");
-  };
-  const startHold = (e) => {
-    e.preventDefault();
-    Synth.tone(440, 0.05, "sine", 0.05);
-    btn.classList.add("armed");
-    holdStart = performance.now();
-    const tick = (now) => {
-      const elapsed = now - holdStart;
-      const pct = Math.min(100, (elapsed / HOLD_DURATION) * 100);
-      $("holdFill").style.width = pct + "%";
-      if(elapsed >= HOLD_DURATION){
-        cancel();
-        $("curtain").classList.remove("is-open");
-        Synth.tone(880, 0.1, "triangle", 0.15);
-        onUnlock();
-      } else {
-        holdTimer = requestAnimationFrame(tick);
-      }
-    };
-    holdTimer = requestAnimationFrame(tick);
+  const AudioPinball = {
+    ctx: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    flipper(){
+      try {
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(450, now);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.04);
+      }catch(e){}
+    },
+    bumper(){
+      try {
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(1400, now + 0.08);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.08);
+      }catch(e){}
+    }
   };
 
-  btn.onpointerdown = startHold;
-  btn.onpointerup = cancel;
-  btn.onpointercancel = cancel;
-  btn.onpointerleave = cancel;
-}
+  const cvs = $("pinballCanvas");
+  const ctx = cvs.getContext("2d");
+  const wrap = $("canvasWrap");
 
-/* ================= PINBALL 2D PHYSICS ENGINE ================= */
-const cvs = $("pinballCanvas");
-const ctx = cvs.getContext("2d");
-let W = 360, H = 540, DPR = 1;
+  let W = 360, H = 550, DPR = 1;
 
-function resizeCanvas(){
-  const wrap = cvs.parentElement;
-  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-  W = wrap.clientWidth;
-  H = wrap.clientHeight;
-  cvs.width = W * DPR;
-  cvs.height = H * DPR;
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-}
-window.addEventListener("resize", resizeCanvas);
-window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
+  const S = {
+    running: false,
+    score: 0,
+    ballNum: 1,
+    balls: [],
+    leftFlipperUp: false,
+    rightFlipperUp: false,
+    bumpers: [],
+    targets: [true, true, true]
+  };
 
-// Bumpers & Targets definitions scaled to table dimensions
-function getBumpers(){
-  return [
-    { x: W * 0.35, y: H * 0.28, r: 24, pts: 500, color: "#00ffcc" },
-    { x: W * 0.65, y: H * 0.28, r: 24, pts: 500, color: "#00ffcc" },
-    { x: W * 0.50, y: H * 0.40, r: 28, pts: 1000, color: "#ff007f" }
-  ];
-}
-
-function resetGameForPlayer(){
-  S.ball = 1;
-  S.score = 0;
-  S.dropTargets = [true, true, true];
-  S.multiballUnlocked = false;
-  S.ballsInPlay = [];
-  updateHUD();
-  spawnBall();
-  S.running = true;
-}
-
-function spawnBall(){
-  S.ballsInPlay.push({
-    x: W - 18,
-    y: H - 90,
-    vx: 0,
-    vy: 0,
-    r: 9,
-    inPlungerLane: true
-  });
-}
-
-function triggerMultiball(){
-  Synth.multiball();
-  S.multiballUnlocked = true;
-  S.score += 5000;
-  S.ballsInPlay.push({ x: W * 0.45, y: H * 0.2, vx: -3, vy: -4, r: 9, inPlungerLane: false });
-  S.ballsInPlay.push({ x: W * 0.55, y: H * 0.2, vx: 3, vy: -4, r: 9, inPlungerLane: false });
-}
-
-/* Physics Update Loop */
-let lastT = performance.now();
-function loop(t){
-  if(!S.running) return;
-  const dt = Math.min((t - lastT) / 1000, 0.033);
-  lastT = t;
-
-  // Clear Table
-  ctx.fillStyle = "#090c12";
-  ctx.fillRect(0, 0, W, H);
-
-  // Draw Cabinet Geometry & Guide Rails
-  ctx.strokeStyle = "rgba(0, 255, 204, 0.2)";
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  // Outer boundaries with plunger lane divider
-  ctx.moveTo(W - 32, H);
-  ctx.lineTo(W - 32, H * 0.3);
-  ctx.quadraticCurveTo(W - 32, 20, W * 0.5, 20);
-  ctx.quadraticCurveTo(20, 20, 20, H * 0.3);
-  ctx.lineTo(20, H * 0.7);
-  ctx.lineTo(W * 0.25, H * 0.85);
-  ctx.stroke();
-
-  // Draw Drop Targets
-  const dtWidth = 24, dtY = H * 0.16;
-  [W * 0.28, W * 0.46, W * 0.64].forEach((tx, i) => {
-    if(S.dropTargets[i]){
-      ctx.fillStyle = "#ffd000";
-      ctx.shadowColor = "#ffd000"; ctx.shadowBlur = 8;
-      ctx.fillRect(tx, dtY, dtWidth, 8);
-      ctx.shadowBlur = 0;
-    }
-  });
-
-  // Draw Bumpers
-  const bumpers = getBumpers();
-  bumpers.forEach(b => {
-    ctx.fillStyle = b.color;
-    ctx.shadowColor = b.color; ctx.shadowBlur = 14;
-    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = "#fff";
-    ctx.beginPath(); ctx.arc(b.x, b.y, b.r * 0.4, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
-  });
-
-  // Flipper Base Coordinates
-  const leftFlip = { x: W * 0.28, y: H * 0.88, len: 48, angle: S.flippers.left ? -0.45 : 0.45 };
-  const rightFlip = { x: W * 0.72 - 32, y: H * 0.88, len: 48, angle: S.flippers.right ? Math.PI + 0.45 : Math.PI - 0.45 };
-
-  // Draw Left Flipper
-  ctx.save();
-  ctx.translate(leftFlip.x, leftFlip.y);
-  ctx.rotate(leftFlip.angle);
-  ctx.fillStyle = "#00ffcc"; ctx.shadowColor = "#00ffcc"; ctx.shadowBlur = 10;
-  ctx.fillRect(0, -6, leftFlip.len, 12);
-  ctx.restore();
-
-  // Draw Right Flipper
-  ctx.save();
-  ctx.translate(rightFlip.x, rightFlip.y);
-  ctx.rotate(rightFlip.angle);
-  ctx.fillStyle = "#00ffcc"; ctx.shadowColor = "#00ffcc"; ctx.shadowBlur = 10;
-  ctx.fillRect(0, -6, rightFlip.len, 12);
-  ctx.restore();
-  ctx.shadowBlur = 0;
-
-  // Update Balls
-  for(let i = S.ballsInPlay.length - 1; i >= 0; i--){
-    const ball = S.ballsInPlay[i];
-    
-    // Gravity & Velocity
-    if(!ball.inPlungerLane){
-      ball.vy += 480 * dt; // Gravity
-      ball.vx *= 0.995;
-    }
-    ball.x += ball.vx * dt * 60;
-    ball.y += ball.vy * dt * 60;
-
-    // Plunger Lane Wall Collision
-    if(ball.inPlungerLane){
-      if(ball.y < 35){
-        ball.inPlungerLane = false;
-        ball.vx = -4 - Math.random() * 3;
-        ball.vy = 2;
-      }
-    } else {
-      // Wall Collisions
-      if(ball.x - ball.r < 22){ ball.x = 22 + ball.r; ball.vx = Math.abs(ball.vx) * 0.75; Synth.tone(300, 0.03, "sine", 0.05); }
-      if(ball.x + ball.r > W - 34){ ball.x = W - 34 - ball.r; ball.vx = -Math.abs(ball.vx) * 0.75; Synth.tone(300, 0.03, "sine", 0.05); }
-      if(ball.y - ball.r < 22){ ball.y = 22 + ball.r; ball.vy = Math.abs(ball.vy) * 0.75; Synth.tone(300, 0.03, "sine", 0.05); }
-
-      // Bumper Collisions
-      bumpers.forEach(b => {
-        const dx = ball.x - b.x, dy = ball.y - b.y;
-        const dist = Math.hypot(dx, dy);
-        if(dist < ball.r + b.r){
-          const nx = dx / dist, ny = dy / dist;
-          ball.vx = nx * 14;
-          ball.vy = ny * 14;
-          S.score += b.pts;
-          Synth.bumper();
-          updateHUD();
-        }
-      });
-
-      // Drop Targets Collision
-      [W * 0.28, W * 0.46, W * 0.64].forEach((tx, idx) => {
-        if(S.dropTargets[idx] && ball.x > tx && ball.x < tx + dtWidth && Math.abs(ball.y - dtY) < ball.r + 5){
-          S.dropTargets[idx] = false;
-          S.score += 2000;
-          ball.vy = Math.abs(ball.vy);
-          Synth.dropTarget();
-          updateHUD();
-          if(S.dropTargets.every(t => !t)) triggerMultiball();
-        }
-      });
-
-      // Flipper Collision (Simplified Segment Deflection)
-      if(ball.y > H * 0.82 && ball.y < H * 0.92){
-        if(ball.x > leftFlip.x - 10 && ball.x < leftFlip.x + leftFlip.len + 10){
-          ball.vy = S.flippers.left ? -16 : -7;
-          ball.vx += (Math.random() - 0.5) * 6;
-          Synth.flipper();
-        } else if(ball.x > rightFlip.x - rightFlip.len - 10 && ball.x < rightFlip.x + 10){
-          ball.vy = S.flippers.right ? -16 : -7;
-          ball.vx += (Math.random() - 0.5) * 6;
-          Synth.flipper();
-        }
-      }
-
-      // Ball Drain at Bottom
-      if(ball.y > H + 20){
-        S.ballsInPlay.splice(i, 1);
-        Synth.drain();
-      }
-    }
-
-    // Render Ball
-    ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = "#ffffff"; ctx.shadowBlur = 10;
-    ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI*2); ctx.fill();
-    ctx.shadowBlur = 0;
+  function showScreen(id){
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
   }
 
-  // Check Ball Drain State
-  if(S.ballsInPlay.length === 0){
-    if(S.ball < S.maxBalls){
-      S.ball++;
-      updateHUD();
-      spawnBall();
-    } else {
-      endGauntletTurn();
-      return;
-    }
+  function resizeCanvas(){
+    const rect = wrap.getBoundingClientRect();
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    W = rect.width;
+    H = rect.height;
+    cvs.width = Math.round(W * DPR);
+    cvs.height = Math.round(H * DPR);
+    cvs.style.width = W + "px";
+    cvs.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    buildCabinet();
   }
 
-  requestAnimationFrame(loop);
-}
-
-function updateHUD(){
-  $("hudScore").textContent = S.score.toLocaleString();
-  $("hudBall").textContent = `${S.ball} / ${S.maxBalls}`;
-}
-
-function endGauntletTurn(){
-  S.running = false;
-  const pName = roster[S.playerIdx];
-  const passed = S.score >= S.quota;
-
-  $("verdictPlayer").textContent = pName;
-  $("verdictScore").textContent = `${S.score.toLocaleString()} PTS`;
-  
-  if(passed){
-    $("passBox").style.display = "block";
-    $("forfeitBox").style.display = "none";
-    Synth.quotaPass();
-  } else {
-    $("passBox").style.display = "none";
-    $("forfeitBox").style.display = "block";
-    const dare = FORFEITS[Math.floor(Math.random() * FORFEITS.length)];
-    $("forfeitText").textContent = dare;
-    Synth.drain();
+  function buildCabinet(){
+    S.bumpers = [
+      { x: W * 0.32, y: H * 0.28, r: 22, color: "#00f0ff", pts: 500 },
+      { x: W * 0.68, y: H * 0.28, r: 22, color: "#ff007f", pts: 500 },
+      { x: W * 0.50, y: H * 0.40, r: 26, color: "#ffd000", pts: 1000 }
+    ];
   }
-  showScreen("scrVerdict");
-}
 
-/* ================= EVENT HANDLERS & TOUCH ================= */
-// Flipper Touch Zones
-const zL = $("zoneLeft"), zR = $("zoneRight");
-const setFlip = (side, on) => {
-  S.flippers[side] = on;
-  if(side === "left") zL.classList.toggle("pressed", on);
-  if(side === "right") zR.classList.toggle("pressed", on);
-  if(on) Synth.flipper();
-};
-
-zL.addEventListener("pointerdown", e => { e.preventDefault(); setFlip("left", true); });
-zL.addEventListener("pointerup", e => { e.preventDefault(); setFlip("left", false); });
-zL.addEventListener("pointercancel", e => { e.preventDefault(); setFlip("left", false); });
-
-zR.addEventListener("pointerdown", e => { e.preventDefault(); setFlip("right", true); });
-zR.addEventListener("pointerup", e => { e.preventDefault(); setFlip("right", false); });
-zR.addEventListener("pointercancel", e => { e.preventDefault(); setFlip("right", false); });
-
-// Spring Plunger Drag & Release
-let plungerDrag = false, startY = 0, pullDist = 0;
-const pHandle = $("pHandle"), pControl = $("plungerControl");
-
-pControl.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  plungerDrag = true;
-  startY = e.clientY;
-  pHandle.setPointerCapture(e.pointerId);
-});
-
-pControl.addEventListener("pointermove", e => {
-  if(!plungerDrag) return;
-  pullDist = Math.max(0, Math.min(80, e.clientY - startY));
-  pHandle.style.transform = `translateY(${pullDist}px)`;
-});
-
-const releasePlunger = () => {
-  if(!plungerDrag) return;
-  plungerDrag = false;
-  pHandle.style.transform = "translateY(0px)";
-  
-  if(pullDist > 15){
-    const launchPower = (pullDist / 80) * 22 + 8;
-    S.ballsInPlay.forEach(b => {
-      if(b.inPlungerLane){
-        b.vy = -launchPower;
-        Synth.plungerRelease();
-      }
+  function spawnBall(){
+    S.balls.push({
+      x: W - 18,
+      y: H - 90,
+      vx: 0,
+      vy: -550,
+      r: 8
     });
   }
-  pullDist = 0;
-};
-pControl.addEventListener("pointerup", releasePlunger);
-pControl.addEventListener("pointercancel", releasePlunger);
 
-// Roster Display
-function renderRoster(){
-  $("rosterList").innerHTML = roster.map((p, i) => `
-    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
-      <span>#${i+1} ${p}</span>
-      <span style="color:var(--accent);">3 BALLS</span>
-    </li>
-  `).join("");
-}
+  let lastT = performance.now();
+  function loop(t){
+    if(!S.running) return;
+    const dt = Math.min((t - lastT) / 1000, 0.033);
+    lastT = t;
 
-// Quota Option Selection
-$("quotaOpts").onclick = e => {
-  const b = e.target.closest(".opt-btn"); if(!b) return;
-  document.querySelectorAll("#quotaOpts .opt-btn").forEach(x => x.classList.remove("is-active"));
-  b.classList.add("is-active");
-  S.quota = parseInt(b.dataset.q, 10);
-};
+    ctx.fillStyle = "#0c0817";
+    ctx.fillRect(0, 0, W, H);
 
-// Start Tournament
-$("btnStartTourney").onclick = () => {
-  S.playerIdx = 0;
-  startTurn();
-};
+    // Cabinet Outlines
+    ctx.strokeStyle = "rgba(255, 0, 127, 0.3)";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(8, 8, W - 16, H - 16);
 
-function startTurn(){
-  const player = roster[S.playerIdx];
-  $("topSub").textContent = `${player}'s Turn`;
-  $("hudPlayer").textContent = player;
-  openCurtain(player, () => {
+    // Plunger Lane Divider
+    ctx.beginPath();
+    ctx.moveTo(W - 32, H);
+    ctx.lineTo(W - 32, H * 0.3);
+    ctx.stroke();
+
+    // Draw Bumpers
+    S.bumpers.forEach(b => {
+      ctx.save();
+      ctx.fillStyle = b.color;
+      ctx.shadowColor = b.color;
+      ctx.shadowBlur = 14;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // Draw Drop Targets
+    const targetW = 20, targetH = 8;
+    [W * 0.35, W * 0.5, W * 0.65].forEach((tx, i) => {
+      if(S.targets[i]){
+        ctx.fillStyle = "#00ffaa";
+        ctx.fillRect(tx - targetW/2, H * 0.16, targetW, targetH);
+      }
+    });
+
+    // Flippers
+    const flipperY = H - 55;
+    const flipperLen = W * 0.22;
+
+    function drawFlipper(startX, startY, isLeft, isUp){
+      const angle = isLeft ? (isUp ? -0.45 : 0.35) : (isUp ? Math.PI + 0.45 : Math.PI - 0.35);
+      const endX = startX + Math.cos(angle) * flipperLen;
+      const endY = startY + Math.sin(angle) * flipperLen;
+
+      ctx.save();
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 8;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(startX, startY);
+      ctx.lineTo(endX, endY);
+      ctx.stroke();
+      ctx.restore();
+      return { x1: startX, y1: startY, x2: endX, y2: endY };
+    }
+
+    const leftF = drawFlipper(W * 0.22, flipperY, true, S.leftFlipperUp);
+    const rightF = drawFlipper(W * 0.78 - 32, flipperY, false, S.rightFlipperUp);
+
+    // Physics Update
+    const gravity = 480;
+    for(let i = S.balls.length - 1; i >= 0; i--){
+      const ball = S.balls[i];
+      ball.vy += gravity * dt;
+      ball.x += ball.vx * dt;
+      ball.y += ball.vy * dt;
+
+      // Outer Walls
+      if(ball.x - ball.r < 12){ ball.x = 12 + ball.r; ball.vx = Math.abs(ball.vx) * 0.7; }
+      if(ball.x + ball.r > W - 12){ ball.x = W - 12 - ball.r; ball.vx = -Math.abs(ball.vx) * 0.7; }
+      if(ball.y - ball.r < 12){ ball.y = 12 + ball.r; ball.vy = Math.abs(ball.vy) * 0.7; }
+
+      // Bumper Bounces
+      S.bumpers.forEach(b => {
+        const dx = ball.x - b.x, dy = ball.y - b.y;
+        const d = Math.hypot(dx, dy);
+        if(d < ball.r + b.r){
+          const nx = dx / d, ny = dy / d;
+          ball.vx = nx * 380;
+          ball.vy = ny * 380;
+          S.score += b.pts;
+          $("hudScore").textContent = S.score;
+          AudioPinball.bumper();
+        }
+      });
+
+      // Flipper Collisions
+      [leftF, rightF].forEach(f => {
+        const dFlip = Math.hypot(ball.x - f.x1, ball.y - f.y1);
+        if(dFlip < flipperLen + 10 && Math.abs(ball.y - f.y1) < 18){
+          ball.vy = -380;
+          ball.vx += (ball.x - f.x1) * 3;
+          AudioPinball.flipper();
+        }
+      });
+
+      // Ball Drain
+      if(ball.y > H + 20){
+        S.balls.splice(i, 1);
+        if(S.balls.length === 0){
+          if(S.ballNum < 3){
+            S.ballNum++;
+            $("hudBall").textContent = `${S.ballNum} / 3`;
+            spawnBall();
+          } else {
+            S.running = false;
+            $("verdictScore").textContent = `${S.score} PTS`;
+            showScreen("scrVerdict");
+          }
+        }
+        continue;
+      }
+
+      // Draw Ball
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = "#38bdf8";
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  // Flipper Touch Zones
+  const zLeft = $("zoneLeft"), zRight = $("zoneRight");
+  zLeft.addEventListener("pointerdown", () => { S.leftFlipperUp = true; AudioPinball.flipper(); });
+  zLeft.addEventListener("pointerup", () => { S.leftFlipperUp = false; });
+  zLeft.addEventListener("pointercancel", () => { S.leftFlipperUp = false; });
+
+  zRight.addEventListener("pointerdown", () => { S.rightFlipperUp = true; AudioPinball.flipper(); });
+  zRight.addEventListener("pointerup", () => { S.rightFlipperUp = false; });
+  zRight.addEventListener("pointercancel", () => { S.rightFlipperUp = false; });
+
+  $("btnStartPinball").onclick = () => {
+    S.running = true;
+    S.score = 0;
+    S.ballNum = 1;
+    S.balls = [];
+    $("hudScore").textContent = "0";
+    $("hudBall").textContent = "1 / 3";
     showScreen("scrPlay");
     resizeCanvas();
-    resetGameForPlayer();
-    lastT = performance.now();
+    spawnBall();
     requestAnimationFrame(loop);
-  });
-}
+  };
 
-$("btnNextPlayer").onclick = () => {
-  S.playerIdx = (S.playerIdx + 1) % roster.length;
-  startTurn();
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-  renderRoster();
-});
+  $("btnRestartPinball").onclick = () => {
+    $("btnStartPinball").click();
+  };
 })();
 </script>
-<script src="../../js/theme-sync.js"></script>
 </body>
 </html>

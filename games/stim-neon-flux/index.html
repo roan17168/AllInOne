@@ -1,36 +1,32 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="synthwave-84">
 <head>
-    
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#100b1a" id="metaThemeColor" />
-<title>Neon Flux: Polarity Switch | PartyDeck</title>
+<title>Neon Flux Polarity | PartyDeck</title>
 <script>
 (function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/themes.css" />
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
   :root {
     --bg-primary: #100b1a; --bg-surface: #1a1228; --bg-elevated: #281b3d;
     --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
-    --accent: #00f0ff; --accent-glow: rgba(0,240,255,0.4); --accent-contrast: #031525;
-    --danger: #ff007f; --success: #00ffaa; --warning: #ffd000;
-    --border-ui: rgba(0,240,255,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+    --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-contrast: #ffffff;
+    --cyan: #00f0ff; --magenta: #ff007f;
+    --border-ui: rgba(255,0,127,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    min-height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
+  body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    user-select: none; -webkit-user-select: none;
-  }
-  .gm-root {
-    display: flex; flex-direction: column; min-height: 100%; height: 100dvh; width: 100%; overflow: hidden;
+    min-height: 100%; height: 100dvh; display: flex; flex-direction: column;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
     position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
@@ -56,7 +52,7 @@
   #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; }
 
   .hud-bar {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: .4rem;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
     padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
     flex-shrink: 0; z-index: 20;
   }
@@ -72,6 +68,7 @@
     flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
   }
   #fluxCanvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: pointer; }
+
   .btn {
     width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
     background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
@@ -85,12 +82,15 @@
 <div class="gm-root">
   <header class="gm-top">
     <div class="gm-idblock">
-      <span class="gm-title">Neon Flux</span>
-      <span class="gm-sub">Polarity Stim Highway</span>
+      <span class="gm-title">Neon Flux Polarity</span>
+      <span class="gm-sub" id="topSub">Stim Photon Absorber</span>
     </div>
-    <div class="gm-actions">
+    <div class="gm-actions" style="display:flex;gap:.4rem;">
+      <button type="button" class="btn-icon-only" id="btnToggleGyro" title="Enable Gyro Tilt">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+      </button>
       <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </a>
     </div>
   </header>
@@ -98,19 +98,16 @@
   <div class="stage">
     <!-- SETUP -->
     <section class="screen is-active" id="scrSetup">
-      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
-        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Stim Protocol</div>
+      <div style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Polarity Instructions</div>
         <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
-          • Energy stream flows down at accelerating speeds.<br>
-          • <strong>Tap anywhere to switch polarity</strong> between <span style="color:#00f0ff;font-weight:800;">CYAN</span> and <span style="color:#ff007f;font-weight:800;">MAGENTA</span>.<br>
-          • <strong>Absorb matching photons</strong> to charge harmonic synths and multipliers.<br>
-          • Colliding with opposite polarity discharges your shield!
+          • <strong>Tap anywhere or tilt phone</strong> to switch core polarity (Cyan / Magenta).<br>
+          • Absorb matching photons to build combo flow streaks.<br>
+          • Opposite polarity collisions break combo and cause energy leaks!
         </p>
       </div>
 
-      <button class="btn" id="btnStartFlux" style="margin-top:auto;">
-        Enter Polarity Flow
-      </button>
+      <button type="button" class="btn" id="btnStartFlux" style="margin-top:auto;">Enter Polarity Flow</button>
     </section>
 
     <!-- PLAY -->
@@ -125,14 +122,11 @@
           <span class="hud-val" id="hudCombo">0x</span>
         </div>
         <div class="hud-stat">
-          <span class="hud-lbl">Multiplier</span>
-          <span class="hud-val" id="hudMult">1x</span>
-        </div>
-        <div class="hud-stat">
-          <span class="hud-lbl">Velocity</span>
-          <span class="hud-val" id="hudSpeed">1.0x</span>
+          <span class="hud-lbl">Polarity</span>
+          <span class="hud-val" id="hudPolarity" style="color:var(--cyan);">CYAN</span>
         </div>
       </div>
+
       <div class="canvas-stage-wrap" id="canvasWrap">
         <canvas id="fluxCanvas"></canvas>
       </div>
@@ -140,328 +134,204 @@
 
     <!-- VERDICT -->
     <section class="screen" id="scrVerdict">
-      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
-        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">DISCHARGE RESOLUTION</div>
+      <div style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">SESSION SUMMARY</div>
         <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictScore">0 PTS</h2>
-        <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:1rem;" id="verdictStats">Max Combo: 0x | Absorptions: 0</p>
+        <div style="font-family:'Space Mono',monospace;font-size:.9rem;color:var(--cyan);" id="verdictMaxCombo">Max Streak: 0x</div>
       </div>
-      <button class="btn" id="btnRestartFlux" style="margin-top:auto;">Re-Enter Stream</button>
+
+      <button type="button" class="btn" id="btnRestartFlux" style="margin-top:auto;">Re-Enter Flow</button>
     </section>
   </div>
 </div>
 
 <script>
 (function(){
-"use strict";
+  "use strict";
+  const $ = id => document.getElementById(id);
 
-const $ = id => document.getElementById(id);
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
-}
-
-/* ================= WEB AUDIO SYNTH ================= */
-const AudioFlux = {
-  ctx: null,
-  scale: [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25],
-  scaleIdx: 0,
-  init(){
-    if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-  },
-  flip(){
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(500, now);
-      osc.frequency.exponentialRampToValueAtTime(1000, now + 0.05);
-      gain.gain.setValueAtTime(0.08, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.05);
-    }catch(e){}
-  },
-  absorb(isCyan){
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const baseFreq = this.scale[this.scaleIdx % this.scale.length];
-      this.scaleIdx++;
-      [baseFreq, baseFreq * 1.5].forEach((f, i) => {
+  const AudioFlux = {
+    ctx: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    pop(isMatch){
+      try {
+        this.init();
+        const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
-        osc.type = isCyan ? "sine" : "triangle";
-        osc.frequency.setValueAtTime(f, now + i * 0.02);
-        gain.gain.setValueAtTime(0.1, now + i * 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.02 + 0.14);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(now + i * 0.02);
-        osc.stop(now + i * 0.02 + 0.14);
-      });
-    }catch(e){}
-  },
-  discharge(){
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(160, now);
-      osc.frequency.exponentialRampToValueAtTime(40, now + 0.25);
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.25);
-    }catch(e){}
-  }
-};
+        osc.type = isMatch ? "sine" : "sawtooth";
+        osc.frequency.setValueAtTime(isMatch ? 587 : 140, now);
+        if(isMatch) osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.08);
+      }catch(e){}
+    }
+  };
 
-/* ================= SIMULATION CORE ================= */
-const cvs = $("fluxCanvas");
-const ctx = cvs.getContext("2d");
-const wrap = $("canvasWrap");
+  const cvs = $("fluxCanvas");
+  const ctx = cvs.getContext("2d");
+  const wrap = $("canvasWrap");
 
-let W = 360, H = 550, DPR = 1;
+  let W = 360, H = 550, DPR = 1;
 
-const S = {
-  running: false,
-  polarity: "cyan", // 'cyan' | 'magenta'
-  shipX: 180,
-  score: 0,
-  combo: 0,
-  maxCombo: 0,
-  absorbs: 0,
-  speed: 1.0,
-  particles: [],
-  photons: [],
-  streamLines: [],
-  nextSpawnT: 0
-};
+  const S = {
+    running: false,
+    playerX: 180,
+    playerY: 460,
+    playerColor: "cyan", // 'cyan' | 'magenta'
+    score: 0,
+    combo: 0,
+    maxCombo: 0,
+    photons: [],
+    nextSpawnT: 0
+  };
 
-function resizeCanvas(){
-  const rect = wrap.getBoundingClientRect();
-  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-  W = rect.width;
-  H = rect.height;
-  cvs.width = Math.round(W * DPR);
-  cvs.height = Math.round(H * DPR);
-  cvs.style.width = W + "px";
-  cvs.style.height = H + "px";
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  S.shipX = W / 2;
-}
-
-function spawnPhoton(){
-  const lanes = [W * 0.25, W * 0.5, W * 0.75];
-  const lane = lanes[Math.floor(Math.random() * lanes.length)];
-  const pol = Math.random() < 0.5 ? "cyan" : "magenta";
-  S.photons.push({
-    x: lane,
-    y: -30,
-    pol: pol,
-    r: 16,
-    color: pol === "cyan" ? "#00f0ff" : "#ff007f"
-  });
-}
-
-function triggerAbsorbSparks(x, y, color){
-  for(let i = 0; i < 14; i++){
-    const ang = Math.random() * Math.PI * 2;
-    const spd = 2 + Math.random() * 5;
-    S.particles.push({
-      x, y,
-      vx: Math.cos(ang) * spd,
-      vy: Math.sin(ang) * spd,
-      color,
-      alpha: 1.0
-    });
-  }
-}
-
-let lastT = performance.now();
-function loop(t){
-  if(!S.running) return;
-  const dt = Math.min((t - lastT) / 1000, 0.033);
-  lastT = t;
-
-  const now = performance.now();
-  if(now >= S.nextSpawnT){
-    spawnPhoton();
-    S.nextSpawnT = now + Math.max(350, 900 - S.speed * 80);
+  function showScreen(id){
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
   }
 
-  // Clear Screen
-  ctx.fillStyle = "#100b1a";
-  ctx.fillRect(0, 0, W, H);
+  function resizeCanvas(){
+    const rect = wrap.getBoundingClientRect();
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    W = rect.width;
+    H = rect.height;
+    cvs.width = Math.round(W * DPR);
+    cvs.height = Math.round(H * DPR);
+    cvs.style.width = W + "px";
+    cvs.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    S.playerX = W / 2;
+    S.playerY = H * 0.82;
+  }
 
-  // Background Warp Streaks
-  if(Math.random() < 0.4){
-    S.streamLines.push({
-      x: Math.random() * W,
-      y: 0,
-      len: 20 + Math.random() * 40,
-      speed: (600 + Math.random() * 400) * S.speed
+  function togglePolarity(){
+    S.playerColor = S.playerColor === "cyan" ? "magenta" : "cyan";
+    const isCyan = S.playerColor === "cyan";
+    $("hudPolarity").textContent = isCyan ? "CYAN" : "MAGENTA";
+    $("hudPolarity").style.color = isCyan ? "var(--cyan)" : "var(--magenta)";
+  }
+
+  function spawnPhoton(){
+    const isCyan = Math.random() < 0.5;
+    S.photons.push({
+      x: W * 0.15 + Math.random() * (W * 0.7),
+      y: -20,
+      vy: 180 + Math.random() * 90,
+      color: isCyan ? "cyan" : "magenta",
+      r: 12
     });
   }
 
-  ctx.strokeStyle = "rgba(214, 180, 252, 0.12)";
-  ctx.lineWidth = 1.5;
-  for(let k = S.streamLines.length - 1; k >= 0; k--){
-    const sl = S.streamLines[k];
-    sl.y += sl.speed * dt;
-    ctx.beginPath();
-    ctx.moveTo(sl.x, sl.y);
-    ctx.lineTo(sl.x, sl.y + sl.len);
-    ctx.stroke();
-    if(sl.y > H) S.streamLines.splice(k, 1);
-  }
+  let lastT = performance.now();
+  function loop(t){
+    if(!S.running) return;
+    const dt = Math.min((t - lastT) / 1000, 0.033);
+    lastT = t;
+    const now = performance.now();
 
-  // Update & Draw Photons
-  const shipY = H - 90;
-  for(let i = S.photons.length - 1; i >= 0; i--){
-    const p = S.photons[i];
-    p.y += (280 + S.speed * 40) * dt;
+    if(now >= S.nextSpawnT){
+      spawnPhoton();
+      S.nextSpawnT = now + Math.max(350, 750 - S.combo * 15);
+    }
 
+    ctx.fillStyle = "#0c0817";
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw Player Orb
+    const pColorHex = S.playerColor === "cyan" ? "#00f0ff" : "#ff007f";
     ctx.save();
+    ctx.shadowColor = pColorHex;
+    ctx.shadowBlur = 18;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = p.color;
-    ctx.shadowColor = p.color;
-    ctx.shadowBlur = 16;
+    ctx.arc(S.playerX, S.playerY, 20, 0, Math.PI * 2);
+    ctx.fillStyle = pColorHex;
     ctx.fill();
     ctx.restore();
 
-    // Check collision with ship (lanes snap)
-    if(Math.abs(p.y - shipY) < p.r + 20 && Math.abs(p.x - S.shipX) < 32){
-      if(p.pol === S.polarity){
-        // Matched Absorption
-        S.absorbs++;
-        S.combo++;
-        if(S.combo > S.maxCombo) S.maxCombo = S.combo;
-        S.speed = Math.min(3.5, 1.0 + S.combo * 0.05);
-        const mult = S.combo >= 20 ? 8 : (S.combo >= 10 ? 4 : (S.combo >= 5 ? 2 : 1));
-        S.score += 250 * mult;
-        AudioFlux.absorb(S.polarity === "cyan");
-        triggerAbsorbSparks(p.x, p.y, p.color);
-        if("vibrate" in navigator) navigator.vibrate(15);
+    // Update Photons
+    for(let i = S.photons.length - 1; i >= 0; i--){
+      const p = S.photons[i];
+      p.y += p.vy * dt;
+
+      const hex = p.color === "cyan" ? "#00f0ff" : "#ff007f";
+      ctx.save();
+      ctx.shadowColor = hex;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = hex;
+      ctx.fill();
+      ctx.restore();
+
+      // Collision Check
+      const dist = Math.hypot(p.x - S.playerX, p.y - S.playerY);
+      if(dist < p.r + 20){
+        const match = p.color === S.playerColor;
+        AudioFlux.pop(match);
+        if(match){
+          S.combo++;
+          if(S.combo > S.maxCombo) S.maxCombo = S.combo;
+          S.score += 100 * Math.min(5, 1 + Math.floor(S.combo / 5));
+        } else {
+          S.combo = 0;
+        }
+        $("hudScore").textContent = S.score;
+        $("hudCombo").textContent = `${S.combo}x`;
         S.photons.splice(i, 1);
-        updateHUD();
-      } else {
-        // Discharged Collision
-        AudioFlux.discharge();
-        if("vibrate" in navigator) navigator.vibrate([60, 60]);
-        S.running = false;
-        $("verdictScore").textContent = `${S.score.toLocaleString()} PTS`;
-        $("verdictStats").textContent = `Max Combo: ${S.maxCombo}x | Absorptions: ${S.absorbs}`;
-        showScreen("scrVerdict");
-        return;
+        continue;
       }
-    } else if(p.y > H + 40){
-      S.photons.splice(i, 1);
+
+      if(p.y > H + 30) S.photons.splice(i, 1);
     }
+
+    requestAnimationFrame(loop);
   }
 
-  // Draw Sparks
-  for(let j = S.particles.length - 1; j >= 0; j--){
-    const pt = S.particles[j];
-    pt.x += pt.vx;
-    pt.y += pt.vy;
-    pt.alpha -= 0.035;
-
-    ctx.save();
-    ctx.globalAlpha = Math.max(0, pt.alpha);
-    ctx.fillStyle = pt.color;
-    ctx.fillRect(pt.x, pt.y, 3, 3);
-    ctx.restore();
-
-    if(pt.alpha <= 0) S.particles.splice(j, 1);
-  }
-
-  // Draw Polarity Ship
-  const activeColor = S.polarity === "cyan" ? "#00f0ff" : "#ff007f";
-  ctx.save();
-  ctx.translate(S.shipX, shipY);
-  ctx.shadowColor = activeColor;
-  ctx.shadowBlur = 18;
-
-  ctx.beginPath();
-  ctx.moveTo(0, -22);
-  ctx.lineTo(18, 16);
-  ctx.lineTo(0, 8);
-  ctx.lineTo(-18, 16);
-  ctx.closePath();
-  ctx.fillStyle = activeColor;
-  ctx.fill();
-  ctx.restore();
-
-  requestAnimationFrame(loop);
-}
-
-function updateHUD(){
-  $("hudScore").textContent = S.score.toLocaleString();
-  $("hudCombo").textContent = `${S.combo}x`;
-  const mult = S.combo >= 20 ? "8x" : (S.combo >= 10 ? "4x" : (S.combo >= 5 ? "2x" : "1x"));
-  $("hudMult").textContent = mult;
-  $("hudSpeed").textContent = `${S.speed.toFixed(1)}x`;
-}
-
-/* ================= INPUTS ================= */
-cvs.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  if(!S.running) return;
-  S.polarity = S.polarity === "cyan" ? "magenta" : "cyan";
-  AudioFlux.flip();
-  if("vibrate" in navigator) navigator.vibrate(10);
-});
-
-// Horizontal Drag to Switch Lanes
-cvs.addEventListener("pointermove", e => {
-  if(!S.running) return;
-  const rect = cvs.getBoundingClientRect();
-  const px = e.clientX - rect.left;
-  const lanes = [W * 0.25, W * 0.5, W * 0.75];
-  let closest = lanes[0];
-  let minDist = Math.abs(px - lanes[0]);
-  lanes.forEach(l => {
-    const d = Math.abs(px - l);
-    if(d < minDist){ minDist = d; closest = l; }
+  // Touch / Drag controls
+  wrap.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    togglePolarity();
   });
-  S.shipX = closest;
-});
 
-$("btnStartFlux").onclick = () => {
-  S.running = true;
-  S.polarity = "cyan";
-  S.score = 0;
-  S.combo = 0;
-  S.maxCombo = 0;
-  S.absorbs = 0;
-  S.speed = 1.0;
-  S.photons = [];
-  S.particles = [];
-  S.streamLines = [];
-  S.nextSpawnT = performance.now() + 400;
-  showScreen("scrPlay");
-  resizeCanvas();
-  updateHUD();
-  lastT = performance.now();
-  requestAnimationFrame(loop);
-};
+  wrap.addEventListener("pointermove", e => {
+    if(!S.running) return;
+    const rect = cvs.getBoundingClientRect();
+    S.playerX = Math.max(30, Math.min(W - 30, e.clientX - rect.left));
+  });
 
-$("btnRestartFlux").onclick = () => {
-  showScreen("scrSetup");
-};
+  // Gyro Tilt Support
+  function handleTilt(e){
+    if(!S.running || e.gamma === null) return;
+    const tilt = Math.max(-1, Math.min(1, e.gamma / 25));
+    S.playerX = Math.max(30, Math.min(W - 30, (W / 2) + tilt * (W * 0.4)));
+  }
 
-window.addEventListener("resize", () => { if(S.running) resizeCanvas(); });
-window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
+  $("btnToggleGyro").onclick = async () => {
+    if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+      try {
+        const res = await DeviceOrientationEvent.requestPermission();
+        if (res === "granted") window.addEventListener("deviceorientation", handleTilt);
+      } catch(e){}
+    } else {
+      window.addEventListener("deviceorientation", handleTilt);
+    }
+  };
 
+  $("btnStartFlux").onclick = () => {
+    S.running = true;
+    S.score = 0;
+    S.combo = 0;
+    S.photons = [];
+    showScreen("scrPlay");
+    resizeCanvas();
+    requestAnimationFrame(loop);
+  };
+
+  $("btnRestartFlux").onclick = () => {
+    $("btnStartFlux").click();
+  };
 })();
 </script>
 </body>

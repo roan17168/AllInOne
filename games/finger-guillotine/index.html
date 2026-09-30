@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="nordic-slate">
 <head>
-    
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#0e1117" id="metaThemeColor" />
-<title>Finger Guillotine Reflex | PartyDeck</title>
+<title>Finger Guillotine | PartyDeck</title>
 <script>
 (function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
@@ -16,18 +15,17 @@
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
   :root {
-    --bg-primary: #08090d; --bg-surface: #10141d; --bg-elevated: #18202d;
-    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #57657a;
-    --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.35); --accent-contrast: #031525;
-    --p1-color: #00e5ff; --p2-color: #ff007f;
-    --danger: #ff0055; --success: #00ff66; --warning: #ffd000;
-    --border-ui: rgba(56,189,248,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+    --bg-primary: #0e1117; --bg-surface: #161b24; --bg-elevated: #1f2633;
+    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #627288;
+    --accent: #ff0055; --accent-glow: rgba(255,0,85,0.35); --accent-contrast: #ffffff;
+    --p1-col: #00f0ff; --p2-col: #ffd000;
+    --border-ui: rgba(148,163,184,0.16); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    min-height: 100dvh; display: flex; flex-direction: column;
+    min-height: 100%; height: 100dvh; display: flex; flex-direction: column;
     overflow: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
@@ -38,96 +36,52 @@
   .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
   .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
   .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
-  .gm-actions { display: flex; gap: .4rem; }
   .btn-icon-only {
-    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
     color: var(--text-primary); display: flex; align-items: center; justify-content: center;
     cursor: pointer; text-decoration: none;
   }
-  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .screen {
     display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
-    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
-    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1.2rem));
   }
   .screen.is-active { display: flex; }
+  #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; height: 100%; }
 
-  /* HUD Strip */
-  .hud-bar {
-    display: grid; grid-template-columns: 1fr auto 1fr; gap: .5rem;
-    padding: .4rem .8rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
-    align-items: center;
+  .arena-grid {
+    flex: 1; display: grid; grid-template-rows: 1fr 1fr; gap: 12px; padding: 14px;
   }
-  .hud-player-tag { display: flex; flex-direction: column; min-width: 0; }
-  .hud-pname { font-family: 'Space Grotesk', sans-serif; font-size: .95rem; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .hud-score { font-family: 'Space Mono', monospace; font-size: .75rem; color: var(--accent); font-weight: 700; }
-
-  /* Guillotine Arena Viewport */
-  .guillotine-stage {
-    flex: 1; position: relative; width: 100%; height: 100%;
-    background: #030508; touch-action: none; overflow: hidden;
+  .stock-zone {
+    border-radius: var(--r-md); border: 2.5px dashed var(--border-ui);
+    background: var(--bg-surface); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; position: relative;
+    touch-action: none; cursor: pointer; transition: all 0.15s ease;
   }
-  #guillotineCanvas { width: 100%; height: 100%; display: block; }
-
-  /* Dual Touch Zones Overlay */
-  .touch-stocks-bar {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 130px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px;
-    background: linear-gradient(to top, rgba(8,9,13,.95), transparent);
-    pointer-events: none; z-index: 10;
+  .stock-zone.p1 { border-color: var(--p1-col); }
+  .stock-zone.p2 { border-color: var(--p2-col); }
+  .stock-zone.held {
+    border-style: solid; background: rgba(255,255,255,0.06); box-shadow: inset 0 0 25px rgba(0,0,0,0.8);
   }
   .stock-target {
-    pointer-events: auto; border: 2px dashed rgba(56,189,248,0.4); border-radius: var(--r-md);
-    background: rgba(24,32,45,0.7); display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 6px; cursor: pointer;
-    touch-action: none; transition: all .15s;
+    width: 70px; height: 70px; border-radius: 50%; border: 3px solid currentColor;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 8px;
   }
-  .stock-target.p1.held {
-    background: rgba(0,229,255,0.25); border-color: var(--p1-color);
-    box-shadow: 0 0 20px rgba(0,229,255,0.4); border-style: solid;
-  }
-  .stock-target.p2.held {
-    background: rgba(255,0,127,0.25); border-color: var(--p2-color);
-    box-shadow: 0 0 20px rgba(255,0,127,0.4); border-style: solid;
-  }
-  .stock-target.chopped {
-    background: rgba(255,0,85,0.4) !important; border-color: var(--danger) !important;
-    animation: shake 0.2s infinite;
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
-  }
+  .stock-zone.p1 .stock-target { color: var(--p1-col); }
+  .stock-zone.p2 .stock-target { color: var(--p2-col); }
+  .stock-zone.held .stock-target { background: currentColor; }
 
-  /* Match Log & Name Selectors */
-  .player-select-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
-  .name-box {
-    background: var(--bg-elevated); border: 2px solid var(--border-ui); border-radius: var(--r-sm);
-    padding: .6rem; text-align: center; cursor: pointer;
+  /* Blade Drop Animation */
+  .blade-overlay {
+    position: absolute; inset: 0; background: rgba(255,0,85,0.9);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif; font-size: 2.4rem; font-weight: 900; color: #fff;
+    opacity: 0; pointer-events: none; transition: opacity 0.08s ease; z-index: 50;
   }
-  .name-box.selected-p1 { border-color: var(--p1-color); color: var(--p1-color); }
-  .name-box.selected-p2 { border-color: var(--p2-color); color: var(--p2-color); }
+  .blade-overlay.dropped { opacity: 1; }
 
-  /* Panels & Controls */
-  .panel {
-    background: var(--bg-surface); border: 1px solid var(--border-ui);
-    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
-  }
-  .panel-title {
-    font-family: 'Space Mono', monospace; font-size: .62rem;
-    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
-  }
-  .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
-  .opt-btn {
-    min-height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
-    font-size: .78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-  .opt-btn.is-active {
-    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
-    box-shadow: 0 0 14px var(--accent-glow);
-  }
   .btn {
     width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
     background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
@@ -135,528 +89,228 @@
     box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
   }
   .btn:active { transform: scale(.98); }
-  .btn.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-ui); box-shadow: none; }
-  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,85,.4); }
-
-  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
-  .ico svg { width: 100%; height: 100%; }
+  .panel { background: var(--bg-surface); border: 1px solid var(--border-ui); border-radius: var(--r-md); padding: 1.1rem; }
+  .panel-title { font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; margin-bottom: .6rem; }
 </style>
-<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
-
-<header class="gm-top">
-  <div class="gm-idblock">
-    <span class="gm-title">Finger Guillotine Reflex</span>
-    <span class="gm-sub" id="topSub">2-Player Showdown</span>
-  </div>
-  <div class="gm-actions">
-    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-    </a>
-  </div>
-</header>
-
-<div class="stage">
-  <!-- 1. SETUP SCREEN -->
-  <section class="screen is-active" id="scrSetup">
-    <div class="panel">
-      <div class="panel-title">Duel Rules</div>
-      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
-        • Both players place their fingers on their designated stock zones.<br>
-        • The heavy blade is suspended with randomized mechanical tension.<br>
-        • <strong>WHEN THE BLADE DROPS:</strong> Pull your finger out immediately!<br>
-        • Lifting <em>before</em> the blade drops = <strong>FALSE START FOUL</strong>.<br>
-        • The slower player gets sliced and takes the penalty drinks!
-      </p>
+<div class="gm-root">
+  <header class="gm-top">
+    <div class="gm-idblock">
+      <span class="gm-title">Finger Guillotine</span>
+      <span class="gm-sub">Reaction Trap Showdown</span>
     </div>
+    <div class="gm-actions">
+      <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
+    </div>
+  </header>
 
-    <div class="panel">
-      <div class="panel-title">Match Format</div>
-      <div class="opt-grid" id="matchTargetGrid">
-        <button class="opt-btn" data-pts="1">First to 1</button>
-        <button class="opt-btn is-active" data-pts="3">First to 3</button>
-        <button class="opt-btn" data-pts="5">First to 5</button>
+  <div class="stage">
+    <!-- SETUP -->
+    <section class="screen is-active" id="scrSetup">
+      <div class="panel">
+        <div class="panel-title">Duel Rules</div>
+        <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+          • Two players place and <strong>HOLD their fingers</strong> in their respective stock targets.<br>
+          • The blade will drop at an unpredictable random interval (2 to 6 seconds).<br>
+          • <strong>Lift your finger</strong> the instant the blade falls!<br>
+          • The slower player to release gets chopped and takes the drink penalty! (Lifting early = false start forfeit).
+        </p>
       </div>
-    </div>
 
-    <div class="panel">
-      <div class="panel-title">Select Combatants</div>
-      <div class="player-select-grid" id="playerSelectGrid"></div>
-    </div>
+      <button type="button" class="btn" id="btnStartGuillotine" style="margin-top:auto;">Place Fingers</button>
+    </section>
 
-    <button class="btn" id="btnEnterGuillotine" style="margin-top:auto;">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
-      Enter Stocks Arena
-    </button>
-  </section>
-
-  <!-- 2. GAMEPLAY VIEWPORT -->
-  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
-    <div class="hud-bar">
-      <div class="hud-player-tag">
-        <span class="hud-pname" id="hudP1Name" style="color:var(--p1-color);">Player 1</span>
-        <span class="hud-score" id="hudP1Score">0 Wins</span>
-      </div>
-      <div style="font-family:'Space Mono',monospace;font-size:.75rem;font-weight:900;color:var(--text-muted);" id="roundBadge">R1</div>
-      <div class="hud-player-tag" style="text-align:right;">
-        <span class="hud-pname" id="hudP2Name" style="color:var(--p2-color);">Player 2</span>
-        <span class="hud-score" id="hudP2Score">0 Wins</span>
-      </div>
-    </div>
-
-    <div class="guillotine-stage" id="stageWrap">
-      <canvas id="guillotineCanvas"></canvas>
-      <div class="touch-stocks-bar">
-        <div class="stock-target p1" id="stockP1">
-          <span class="ico" style="color:var(--p1-color);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg></span>
-          <span style="font-family:'Space Mono',monospace;font-size:.7rem;font-weight:800;" id="p1StockLabel">P1 HOLD HERE</span>
+    <!-- PLAY -->
+    <section class="screen" id="scrPlay">
+      <div class="blade-overlay" id="bladeAlert">CHOP!</div>
+      
+      <div class="arena-grid">
+        <div class="stock-zone p1" id="stockZone1">
+          <div class="stock-target"></div>
+          <strong style="color:var(--p1-col);font-family:monospace;" id="p1Label">PLAYER 1 (HOLD)</strong>
+          <span style="font-size:11px;color:#94a3b8;margin-top:4px;" id="p1Status">Waiting for finger...</span>
         </div>
-        <div class="stock-target p2" id="stockP2">
-          <span class="ico" style="color:var(--p2-color);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg></span>
-          <span style="font-family:'Space Mono',monospace;font-size:.7rem;font-weight:800;" id="p2StockLabel">P2 HOLD HERE</span>
+
+        <div class="stock-zone p2" id="stockZone2">
+          <div class="stock-target"></div>
+          <strong style="color:var(--p2-col);font-family:monospace;" id="p2Label">PLAYER 2 (HOLD)</strong>
+          <span style="font-size:11px;color:#94a3b8;margin-top:4px;" id="p2Status">Waiting for finger...</span>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- 3. VERDICT -->
-  <section class="screen" id="scrVerdict">
-    <div class="panel" style="text-align:center;padding:1.8rem 1rem;border-color:var(--danger);">
-      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--danger);">GUILLOTINE EXECUTION</div>
-      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictLoser">Player 2</h2>
-      <div style="font-family:'Space Mono',monospace;font-size:1.8rem;font-weight:900;color:var(--danger);margin-bottom:.4rem;" id="verdictReaction">CHOPPED!</div>
-      <p style="font-size:.9rem;color:var(--text-secondary);line-height:1.4;" id="verdictDetails">Slower reaction on blade release.</p>
-      <div style="background:rgba(255,0,85,0.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;">
-        <p style="font-size:1.05rem;font-weight:800;color:#fff;" id="verdictPenalty">Take 3 penalty sips!</p>
+    <!-- VERDICT -->
+    <section class="screen" id="scrVerdict">
+      <div class="panel" style="text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--danger);" id="verdictKicker">EXECUTION LOG</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictTitle">Player 1 Chopped!</h2>
+        <p style="font-size:.85rem;color:var(--text-secondary);" id="verdictDetails">Reaction: 340ms vs 280ms</p>
       </div>
-    </div>
-    <div style="display:flex;gap:.5rem;margin-top:auto;">
-      <button class="btn ghost" id="btnRematch">Rematch</button>
-      <button class="btn" id="btnNextDuel">Next Duel</button>
-    </div>
-  </section>
+
+      <button type="button" class="btn" id="btnRestartGuillotine" style="margin-top:auto;">Another Round</button>
+    </section>
+  </div>
 </div>
 
 <script>
 (function(){
-"use strict";
+  "use strict";
+  const $ = id => document.getElementById(id);
 
-/* ================= WEB AUDIO SYNTH ================= */
-const Synth = {
-  ctx: null,
-  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-  creak(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sawtooth"; o.frequency.setValueAtTime(110 + Math.random()*30, this.ctx.currentTime);
-      o.frequency.linearRampToValueAtTime(140, this.ctx.currentTime + 0.18);
-      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.18);
-    }catch(e){}
-  },
-  bladeDrop(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sine"; o.frequency.setValueAtTime(800, this.ctx.currentTime);
-      o.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.22);
-      g.gain.setValueAtTime(0.2, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.22);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.22);
-    }catch(e){}
-  },
-  chopImpact(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "square"; o.frequency.setValueAtTime(80, this.ctx.currentTime);
-      o.frequency.exponentialRampToValueAtTime(25, this.ctx.currentTime + 0.35);
-      g.gain.setValueAtTime(0.4, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.35);
-    }catch(e){}
-  },
-  foulBuzzer(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sawtooth"; o.frequency.setValueAtTime(200, this.ctx.currentTime);
-      g.gain.setValueAtTime(0.25, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.3);
-    }catch(e){}
-  },
-  victory(){
-    try {
-      this.init();
-      [523, 659, 784, 1046].forEach((f, i) => {
-        setTimeout(() => {
-          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
-          g.gain.setValueAtTime(0.18, this.ctx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
-          o.connect(g); g.connect(this.ctx.destination);
-          o.start(); o.stop(this.ctx.currentTime + 0.18);
-        }, i * 70);
-      });
-    }catch(e){}
-  }
-};
-
-/* ================= STATE & ROSTER ================= */
-let roster = [];
-try {
-  const raw = localStorage.getItem("partydeck_players");
-  roster = raw ? JSON.parse(raw) : [];
-} catch(e){}
-if(!Array.isArray(roster) || roster.length < 2) roster = ["Player 1", "Player 2"];
-
-const S = {
-  p1: roster[0],
-  p2: roster[1] || "Player 2",
-  scoreP1: 0,
-  scoreP2: 0,
-  targetScore: 3,
-  round: 1,
-  state: "idle", // idle, armed, dropped, resolved
-  bladeY: 0,
-  bladeTargetY: 0,
-  dropStartTime: 0,
-  dropDelayTimer: null,
-  p1Held: false,
-  p2Held: false,
-  p1PullTime: null,
-  p2PullTime: null
-};
-
-const $ = id => document.getElementById(id);
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
-}
-
-/* ================= 2D CANVAS ENGINE ================= */
-const cvs = $("guillotineCanvas");
-const ctx = cvs.getContext("2d");
-let W = 360, H = 540, DPR = 1;
-
-function resizeCanvas(){
-  const wrap = cvs.parentElement;
-  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-  W = wrap.clientWidth;
-  H = wrap.clientHeight;
-  cvs.width = W * DPR;
-  cvs.height = H * DPR;
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-}
-window.addEventListener("resize", resizeCanvas);
-window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
-
-function startMatch(){
-  S.scoreP1 = 0;
-  S.scoreP2 = 0;
-  S.round = 1;
-  showScreen("scrPlay");
-  resizeCanvas();
-  beginRound();
-}
-
-function beginRound(){
-  S.state = "idle";
-  S.bladeY = 30;
-  S.bladeTargetY = 30;
-  S.p1Held = false;
-  S.p2Held = false;
-  S.p1PullTime = null;
-  S.p2PullTime = null;
-
-  $("hudP1Name").textContent = S.p1;
-  $("hudP2Name").textContent = S.p2;
-  $("hudP1Score").textContent = `${S.scoreP1} Wins`;
-  $("hudP2Score").textContent = `${S.scoreP2} Wins`;
-  $("roundBadge").textContent = `R${S.round}`;
-  $("p1StockLabel").textContent = `${S.p1.toUpperCase()}: HOLD`;
-  $("p2StockLabel").textContent = `${S.p2.toUpperCase()}: HOLD`;
-
-  $("stockP1").className = "stock-target p1";
-  $("stockP2").className = "stock-target p2";
-
-  requestAnimationFrame(renderLoop);
-}
-
-function checkBothArmed(){
-  if(S.p1Held && S.p2Held && S.state === "idle"){
-    S.state = "armed";
-    Synth.creak();
-
-    // Random delay between 2.2s and 6.5s
-    const delay = Math.floor(Math.random() * 4300) + 2200;
-    clearTimeout(S.dropDelayTimer);
-    S.dropDelayTimer = setTimeout(releaseBlade, delay);
-  }
-}
-
-function releaseBlade(){
-  if(S.state !== "armed") return;
-  S.state = "dropped";
-  S.dropStartTime = performance.now();
-  S.bladeTargetY = H - 120; // Bottom stocks level
-  Synth.bladeDrop();
-
-  // Mechanical drop animation completes in ~240ms
-  setTimeout(() => {
-    if(S.state === "dropped"){
-      S.bladeY = S.bladeTargetY;
-      Synth.chopImpact();
-      resolveRound();
+  const AudioTrap = {
+    ctx: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    tension(){
+      try{
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 1.5);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 1.5);
+      }catch(e){}
+    },
+    drop(){
+      try{
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.2);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.2);
+      }catch(e){}
     }
-  }, 240);
-}
+  };
 
-function resolveRound(){
-  S.state = "resolved";
+  const S = {
+    state: "idle", // 'idle' | 'armed' | 'dropped' | 'resolved'
+    p1Held: false,
+    p2Held: false,
+    dropTimer: null,
+    dropT: 0,
+    p1LiftT: null,
+    p2LiftT: null
+  };
 
-  let loser = null;
-  let reason = "";
+  function showScreen(id){
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+  }
 
-  // If someone was still holding when blade struck bottom:
-  if(S.p1Held && !S.p2Held){
-    loser = S.p1;
-    reason = `${S.p1} did not pull their finger out in time!`;
-    $("stockP1").classList.add("chopped");
-  } else if(S.p2Held && !S.p1Held){
-    loser = S.p2;
-    reason = `${S.p2} did not pull their finger out in time!`;
-    $("stockP2").classList.add("chopped");
-  } else if(S.p1Held && S.p2Held){
-    loser = "Both";
-    reason = "Neither player pulled out in time! Double chop!";
-    $("stockP1").classList.add("chopped");
-    $("stockP2").classList.add("chopped");
-  } else {
-    // Both pulled out: check reaction times
-    if(S.p1PullTime !== null && S.p2PullTime !== null){
-      if(S.p1PullTime > S.p2PullTime){
-        loser = S.p1;
-        const diff = Math.round(S.p1PullTime - S.p2PullTime);
-        reason = `${S.p2} reacted ${diff}ms faster than ${S.p1}!`;
-        $("stockP1").classList.add("chopped");
-      } else {
-        loser = S.p2;
-        const diff = Math.round(S.p2PullTime - S.p1PullTime);
-        reason = `${S.p1} reacted ${diff}ms faster than ${S.p2}!`;
-        $("stockP2").classList.add("chopped");
+  function checkArmed(){
+    if(S.p1Held && S.p2Held && S.state === "idle"){
+      S.state = "armed";
+      $("p1Status").textContent = "ARMED - DO NOT LIFT!";
+      $("p2Status").textContent = "ARMED - DO NOT LIFT!";
+      AudioTrap.tension();
+
+      const delay = 2200 + Math.random() * 3200;
+      S.dropTimer = setTimeout(triggerDrop, delay);
+    }
+  }
+
+  function triggerDrop(){
+    if(S.state !== "armed") return;
+    S.state = "dropped";
+    S.dropT = performance.now();
+    AudioTrap.drop();
+    $("bladeAlert").classList.add("dropped");
+  }
+
+  function resolveMatch(loser, reason){
+    S.state = "resolved";
+    clearTimeout(S.dropTimer);
+    $("bladeAlert").classList.remove("dropped");
+
+    $("verdictTitle").textContent = `${loser} Takes The Penalty!`;
+    $("verdictDetails").textContent = reason;
+    showScreen("scrVerdict");
+  }
+
+  // P1 Touch Handlers
+  const z1 = $("stockZone1");
+  z1.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    if(S.state === "resolved") return;
+    S.p1Held = true;
+    z1.classList.add("held");
+    $("p1Status").textContent = "FINGER DETECTED";
+    checkArmed();
+  });
+
+  z1.addEventListener("pointerup", e => {
+    e.preventDefault();
+    S.p1Held = false;
+    z1.classList.remove("held");
+    $("p1Status").textContent = "LIFTED";
+
+    if(S.state === "armed"){
+      resolveMatch("Player 1", "Early lift / False start before the blade fell!");
+    } else if(S.state === "dropped" && S.p1LiftT === null){
+      S.p1LiftT = performance.now() - S.dropT;
+      if(S.p2LiftT !== null){
+        const loser = S.p1LiftT > S.p2LiftT ? "Player 1" : "Player 2";
+        resolveMatch(loser, `Player 1: ${Math.round(S.p1LiftT)}ms vs Player 2: ${Math.round(S.p2LiftT)}ms`);
       }
     }
-  }
+  });
 
-  // Update match scores
-  if(loser === S.p1) S.scoreP2++;
-  if(loser === S.p2) S.scoreP1++;
+  // P2 Touch Handlers
+  const z2 = $("stockZone2");
+  z2.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    if(S.state === "resolved") return;
+    S.p2Held = true;
+    z2.classList.add("held");
+    $("p2Status").textContent = "FINGER DETECTED";
+    checkArmed();
+  });
 
-  setTimeout(() => {
-    if(S.scoreP1 >= S.targetScore || S.scoreP2 >= S.targetScore){
-      const matchWinner = S.scoreP1 >= S.targetScore ? S.p1 : S.p2;
-      const matchLoser = S.scoreP1 >= S.targetScore ? S.p2 : S.p1;
-      Synth.victory();
-      $("verdictLoser").textContent = matchLoser;
-      $("verdictReaction").textContent = `${matchWinner} WINS MATCH!`;
-      $("verdictDetails").textContent = reason;
-      $("verdictPenalty").textContent = `Match defeat! Take 3 penalty sips!`;
-      showScreen("scrVerdict");
-    } else {
-      S.round++;
-      beginRound();
+  z2.addEventListener("pointerup", e => {
+    e.preventDefault();
+    S.p2Held = false;
+    z2.classList.remove("held");
+    $("p2Status").textContent = "LIFTED";
+
+    if(S.state === "armed"){
+      resolveMatch("Player 2", "Early lift / False start before the blade fell!");
+    } else if(S.state === "dropped" && S.p2LiftT === null){
+      S.p2LiftT = performance.now() - S.dropT;
+      if(S.p1LiftT !== null){
+        const loser = S.p1LiftT > S.p2LiftT ? "Player 1" : "Player 2";
+        resolveMatch(loser, `Player 1: ${Math.round(S.p1LiftT)}ms vs Player 2: ${Math.round(S.p2LiftT)}ms`);
+      }
     }
-  }, 1000);
-}
+  });
 
-function handleFalseStart(fouler){
-  clearTimeout(S.dropDelayTimer);
-  S.state = "resolved";
-  Synth.foulBuzzer();
-
-  if(fouler === "p1"){
-    S.scoreP2++;
-    $("p1StockLabel").textContent = "FALSE START!";
-  } else {
-    S.scoreP1++;
-    $("p2StockLabel").textContent = "FALSE START!";
-  }
-
-  setTimeout(() => {
-    if(S.scoreP1 >= S.targetScore || S.scoreP2 >= S.targetScore){
-      const matchWinner = S.scoreP1 >= S.targetScore ? S.p1 : S.p2;
-      const matchLoser = S.scoreP1 >= S.targetScore ? S.p2 : S.p1;
-      $("verdictLoser").textContent = matchLoser;
-      $("verdictReaction").textContent = "FALSE START FORFEIT";
-      $("verdictDetails").textContent = `${matchLoser} lifted before the blade dropped!`;
-      $("verdictPenalty").textContent = "Take 3 penalty sips!";
-      showScreen("scrVerdict");
-    } else {
-      S.round++;
-      beginRound();
-    }
-  }, 1200);
-}
-
-/* ================= RENDER LOOP ================= */
-let lastT = performance.now();
-function renderLoop(t){
-  const dt = Math.min((t - lastT) / 1000, 0.033);
-  lastT = t;
-
-  // Clear Surface
-  ctx.fillStyle = "#04060a";
-  ctx.fillRect(0, 0, W, H);
-
-  // Draw Guillotine Frame Pillars
-  ctx.strokeStyle = "#1e293b";
-  ctx.lineWidth = 14;
-  ctx.beginPath();
-  ctx.moveTo(W * 0.15, 20); ctx.lineTo(W * 0.15, H - 20);
-  ctx.moveTo(W * 0.85, 20); ctx.lineTo(W * 0.85, H - 20);
-  ctx.stroke();
-
-  // Top Crossbeam & Pulley
-  ctx.fillStyle = "#334155";
-  ctx.fillRect(W * 0.1, 15, W * 0.8, 22);
-
-  // Blade Position Physics
-  if(S.state === "dropped"){
-    S.bladeY += 1250 * dt;
-    if(S.bladeY > S.bladeTargetY) S.bladeY = S.bladeTargetY;
-  }
-
-  // Draw Hanging Blade (Angled Heavy Steel)
-  ctx.save();
-  ctx.translate(W / 2, S.bladeY);
-  
-  // Steel Bevel
-  ctx.fillStyle = "#e2e8f0";
-  ctx.shadowColor = "#38bdf8"; ctx.shadowBlur = 12;
-  ctx.beginPath();
-  ctx.moveTo(-W * 0.32, -20);
-  ctx.lineTo(W * 0.32, -20);
-  ctx.lineTo(W * 0.32, 20);
-  ctx.lineTo(-W * 0.32, 50); // Sharp angled slant
-  ctx.closePath();
-  ctx.fill();
-
-  // Blade Center Weight Hole
-  ctx.fillStyle = "#0f172a";
-  ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI*2); ctx.fill();
-  ctx.restore();
-  ctx.shadowBlur = 0;
-
-  // Draw Bottom Stocks Wooden Barrier
-  ctx.fillStyle = "#1e293b";
-  ctx.fillRect(W * 0.08, H - 120, W * 0.84, 18);
-
-  if(S.state !== "resolved" || S.bladeY < S.bladeTargetY){
-    requestAnimationFrame(renderLoop);
-  }
-}
-
-/* ================= TOUCH STOCKS INTERACTION ================= */
-const stockP1 = $("stockP1"), stockP2 = $("stockP2");
-
-// Player 1 Touch
-stockP1.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  if(S.state === "dropped" || S.state === "resolved") return;
-  S.p1Held = true;
-  stockP1.classList.add("held");
-  try { stockP1.setPointerCapture(e.pointerId); } catch(error) {}
-  checkBothArmed();
-});
-
-const releaseP1 = e => {
-  e.preventDefault();
-  if(!S.p1Held) return;
-  S.p1Held = false;
-  stockP1.classList.remove("held");
-
-  if(S.state === "armed"){
-    handleFalseStart("p1");
-  } else if(S.state === "dropped" && S.p1PullTime === null){
-    S.p1PullTime = performance.now() - S.dropStartTime;
-  }
-};
-stockP1.addEventListener("pointerup", releaseP1);
-stockP1.addEventListener("pointercancel", releaseP1);
-stockP1.addEventListener("pointerleave", releaseP1);
-stockP1.addEventListener("lostpointercapture", releaseP1);
-
-// Player 2 Touch
-stockP2.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  if(S.state === "dropped" || S.state === "resolved") return;
-  S.p2Held = true;
-  stockP2.classList.add("held");
-  try { stockP2.setPointerCapture(e.pointerId); } catch(error) {}
-  checkBothArmed();
-});
-
-const releaseP2 = e => {
-  e.preventDefault();
-  if(!S.p2Held) return;
-  S.p2Held = false;
-  stockP2.classList.remove("held");
-
-  if(S.state === "armed"){
-    handleFalseStart("p2");
-  } else if(S.state === "dropped" && S.p2PullTime === null){
-    S.p2PullTime = performance.now() - S.dropStartTime;
-  }
-};
-stockP2.addEventListener("pointerup", releaseP2);
-stockP2.addEventListener("pointercancel", releaseP2);
-stockP2.addEventListener("pointerleave", releaseP2);
-stockP2.addEventListener("lostpointercapture", releaseP2);
-
-/* ================= SETUP & ROSTER ================= */
-function renderPlayerSelect(){
-  const grid = $("playerSelectGrid");
-  grid.innerHTML = roster.map((p, i) => `
-    <div class="name-box ${p === S.p1 ? 'selected-p1' : (p === S.p2 ? 'selected-p2' : '')}" data-name="${p}">
-      <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);display:block;">${p === S.p1 ? 'P1' : (p === S.p2 ? 'P2' : 'SEAT')}</span>
-      <strong>${p}</strong>
-    </div>
-  `).join("");
-
-  grid.onclick = e => {
-    const box = e.target.closest(".name-box"); if(!box) return;
-    const name = box.dataset.name;
-    if(name === S.p1) return;
-    if(name === S.p2){ S.p2 = S.p1; S.p1 = name; }
-    else { S.p2 = name; }
-    renderPlayerSelect();
+  $("btnStartGuillotine").onclick = () => {
+    S.state = "idle";
+    S.p1Held = false;
+    S.p2Held = false;
+    S.p1LiftT = null;
+    S.p2LiftT = null;
+    clearTimeout(S.dropTimer);
+    z1.classList.remove("held");
+    z2.classList.remove("held");
+    $("p1Status").textContent = "Place and hold finger";
+    $("p2Status").textContent = "Place and hold finger";
+    showScreen("scrPlay");
   };
-}
 
-$("matchTargetGrid").onclick = e => {
-  const b = e.target.closest(".opt-btn"); if(!b) return;
-  document.querySelectorAll("#matchTargetGrid .opt-btn").forEach(x => x.classList.remove("is-active"));
-  b.classList.add("is-active");
-  S.targetScore = parseInt(b.dataset.pts, 10);
-};
-
-$("btnEnterGuillotine").onclick = startMatch;
-$("btnRematch").onclick = startMatch;
-$("btnNextDuel").onclick = () => showScreen("scrSetup");
-
-document.addEventListener("DOMContentLoaded", () => {
-  renderPlayerSelect();
-});
+  $("btnRestartGuillotine").onclick = () => {
+    $("btnStartGuillotine").click();
+  };
 })();
 </script>
-<script src="../../js/theme-sync.js"></script>
 </body>
 </html>

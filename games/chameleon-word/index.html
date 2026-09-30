@@ -1,377 +1,291 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="nordic-slate">
 <head>
-  
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#0e1117" id="metaThemeColor" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>Chameleon Word | PartyDeck</title>
-
 <script>
-(function(){try{var t=localStorage.getItem("partydeck_theme")||"nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/themes.css" />
 <link rel="stylesheet" href="../../css/base.css" />
-
 <style>
-  body { overflow: hidden; height: 100dvh; }
-  .gm-top { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui); flex-shrink: 0; }
+  :root {
+    --bg-primary: #0e1117; --bg-surface: #161b24; --bg-elevated: #1f2633;
+    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #627288;
+    --accent: #00ffaa; --accent-glow: rgba(0,255,170,0.35); --accent-contrast: #031c14;
+    --danger: #ff0055; --warning: #ffd000;
+    --border-ui: rgba(148,163,184,0.16); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg-primary); color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    min-height: 100%; height: 100dvh; display: flex; flex-direction: column;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .gm-top {
+    position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
+    gap: .75rem; padding: .55rem .9rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    padding-top: max(.55rem, env(safe-area-inset-top)); flex-shrink: 0;
+  }
   .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
-  .gm-title { font-family: var(--font-display); font-size: .98rem; font-weight: 900; }
-  .gm-sub { font-family: var(--font-mono); font-size: .64rem; color: var(--text-muted); }
-  .gm-actions { display: flex; gap: .4rem; }
-  .gm-actions .btn-icon-only { width: 48px; height: 48px; min-height: 48px; }
-
-  .stage { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .screen { display: none; flex-direction: column; gap: 1rem; padding: 1.1rem; max-width: 680px; margin: 0 auto; width: 100%; }
+  .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
+  .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
+  .btn-icon-only {
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
+    background: var(--bg-elevated); border: 1px solid var(--border-ui);
+    color: var(--text-primary); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; text-decoration: none;
+  }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .screen {
+    display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
+    max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1.2rem));
+  }
   .screen.is-active { display: flex; }
+  .panel { background: var(--bg-surface); border: 1px solid var(--border-ui); border-radius: var(--r-md); padding: 1.1rem; }
+  .panel-title { font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; margin-bottom: .6rem; }
 
-  .panel { background: var(--bg-surface); border: 1px solid var(--border-ui); border-radius: var(--r-lg); padding: 1.1rem; box-shadow: var(--card-shadow); }
-  .panel-label { font-family: var(--font-mono); font-size: .65rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem; }
-  h2.sec { font-size: 1.45rem; line-height: 1.2; }
-  p.lede { font-size: .88rem; color: var(--text-secondary); line-height: 1.5; }
+  /* 4x4 Grid Board */
+  .grid-matrix {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; box-sizing: border-box;
+  }
+  .matrix-cell {
+    background: #090c12; border: 1.5px solid #334155; border-radius: 8px; padding: 8px 4px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; min-height: 62px; cursor: pointer; transition: all 0.15s ease;
+  }
+  .matrix-cell:active { transform: scale(0.96); border-color: var(--accent); }
+  .matrix-cell.target-secret {
+    border-color: var(--accent); background: rgba(0, 255, 170, 0.15); box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .cell-coord { font-family: 'Space Mono', monospace; font-size: 10px; color: #64748b; font-weight: bold; }
+  .cell-word { font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 800; color: #fff; word-break: break-word; }
 
-  .grid-matrix { display: grid; grid-template-columns: repeat(4, 1fr); gap: .45rem; margin: .5rem 0; }
-  .matrix-cell { background: var(--bg-elevated); border: 1px solid var(--border-ui); border-radius: var(--r-sm); padding: .75rem .4rem; text-align: center; font-family: var(--font-display); font-size: .85rem; font-weight: 800; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 54px; }
-  .matrix-cell.selected { border-color: var(--accent); background: var(--accent); color: var(--accent-contrast); }
-  .matrix-cell .coord-tag { font-family: var(--font-mono); font-size: .55rem; color: var(--text-muted); margin-bottom: 2px; }
-  .matrix-cell.selected .coord-tag { color: var(--accent-contrast); opacity: .8; }
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
+  }
+  .btn:active { transform: scale(.98); filter: brightness(1.2); }
+  .btn.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-ui); box-shadow: none; }
+  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 14px rgba(255,0,85,0.4); }
 
-  .curtain { position: fixed; inset: 0; z-index: 900; background: var(--bg-primary); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem; padding: 2rem 1.5rem; text-align: center; }
-  .curtain.is-open { display: flex; }
-  .curtain-name { font-family: var(--font-display); font-size: 2.2rem; font-weight: 900; }
-  .hold-btn { position: relative; overflow: hidden; width: 100%; max-width: 340px; min-height: 62px; font-size: .95rem; border-radius: var(--r-lg); background: var(--bg-elevated); border: 1px solid var(--border-ui-active); }
-  .hold-fill { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: var(--accent); opacity: .9; transition: width .06s linear; }
-  .hold-label { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: .5rem; }
-  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
-
-  .vote-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-  .vote-btn { padding: .85rem; font-family: var(--font-display); font-weight: 800; font-size: .95rem; background: var(--bg-elevated); border: 1px solid var(--border-ui); border-radius: var(--r-md); }
-  .vote-btn.is-active { border-color: var(--danger); background: rgba(244, 63, 94, .15); color: var(--danger); }
+  .tag-btn {
+    background: #1a2230; border: 1px solid #334155; padding: 10px; border-radius: 8px; color: #cbd5e1;
+    font-family: 'Space Mono', monospace; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center;
+  }
+  .tag-btn.is-active { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
 </style>
-<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
-
 <header class="gm-top">
   <div class="gm-idblock">
     <span class="gm-title">Chameleon Word</span>
-    <span class="gm-sub" id="topSub">Topic Grid Deduction</span>
+    <span class="gm-sub">Topic Matrix Impostor</span>
   </div>
   <div class="gm-actions">
-    <button class="btn btn-ghost btn-icon-only" id="btnRules"><span class="ico" data-ic="help"></span></button>
-    <a class="btn btn-ghost btn-icon-only" href="../../index.html"><span class="ico" data-ic="home"></span></a>
+    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </a>
   </div>
 </header>
 
 <div class="stage">
   <!-- SETUP -->
   <section class="screen is-active" id="scrSetup">
-    <div>
-      <h2 class="sec">Blend In or Get Caught</h2>
-      <p class="lede">Everyone knows the secret grid coordinate except the Chameleon. Give 1-word clues, catch the impostor, or guess the word to escape.</p>
+    <div class="panel">
+      <div class="panel-title">Choose Topic Pack</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;" id="topicBtnGrid">
+        <button type="button" class="tag-btn is-active" data-topic="Food">🍕 Food &amp; Dining</button>
+        <button type="button" class="tag-btn" data-topic="Animals">🦁 Wild Animals</button>
+        <button type="button" class="tag-btn" data-topic="Travel">✈️ World Travel</button>
+        <button type="button" class="tag-btn" data-topic="Objects">📦 Household</button>
+      </div>
     </div>
 
     <div class="panel">
-      <div class="panel-label">Choose Topic Pack</div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem" id="topicGrid"></div>
+      <div class="panel-title">Active Roster (<span id="pCount">4</span> Players)</div>
+      <ul id="pList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:20vh;overflow-y:auto;font-family:monospace;font-size:.85rem;"></ul>
     </div>
 
-    <button class="btn btn-accent" id="btnDealRoles" style="min-height:56px;font-size:1rem"><span class="ico" data-ic="play"></span> Deal Secret Coordinates</button>
+    <button type="button" class="btn" id="btnStartDeal" style="margin-top:auto;">Deal Secret Coordinates</button>
   </section>
 
-  <!-- SECRET RECEIPT VIEW -->
-  <section class="screen" id="scrSecret">
-    <div class="panel" style="text-align:center" id="secretBox"></div>
-    <button class="btn btn-accent" id="btnNextPlayer" style="min-height:54px"><span class="ico" data-ic="check"></span> Got It &mdash; Pass Phone</button>
-  </section>
-
-  <!-- CLUE ROUND & MATRIX DISPLAY -->
-  <section class="screen" id="scrMatrix">
-    <div class="panel">
-      <div class="panel-label">Topic: <strong id="matrixTopic" style="color:var(--accent)">Animals</strong></div>
-      <div class="grid-matrix" id="liveMatrix"></div>
+  <!-- ROLE DEAL (PASS & PEEK) -->
+  <section class="screen" id="scrDeal">
+    <div class="panel" style="text-align:center;">
+      <div class="panel-title" id="dealStepNum">Player 1 of 4</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:900;color:var(--accent);margin:.3rem 0;" id="dealPlayerName">Alex</h2>
+      <p style="font-size:.85rem;color:var(--text-secondary);">Hold the button below away from other eyes.</p>
     </div>
-    <div class="panel" style="text-align:center">
-      <p style="font-size:.85rem;color:var(--text-secondary)">
-        Go around the circle: Each player says <strong>EXACTLY ONE WORD</strong> related to the secret topic.
+
+    <div id="roleBox" style="background:#090c12;border:2px dashed #334155;border-radius:12px;padding:1.5rem;text-align:center;min-height:140px;display:flex;flex-direction:column;justify-content:center;">
+      <div id="roleHiddenNotice" style="color:#64748b;font-family:monospace;">HOLD BUTTON TO REVEAL</div>
+      <div id="roleRevealedContent" style="display:none;"></div>
+    </div>
+
+    <button type="button" class="btn" id="btnHoldReveal" style="margin-top:auto;">Hold to Peek Identity</button>
+    <button type="button" class="btn ghost" id="btnNextPlayer" style="display:none;margin-top:8px;">Next Player Pass &rarr;</button>
+  </section>
+
+  <!-- CLUE GIVING & BOARD VIEW -->
+  <section class="screen" id="scrBoard">
+    <div class="panel" style="text-align:center;">
+      <div class="panel-title">Active Topic: <span id="activeTopicLabel" style="color:var(--accent);">Food</span></div>
+      <p style="font-size:.8rem;color:var(--text-secondary);line-height:1.4;">
+        Go around the circle: Each person says <strong>EXACTLY 1 WORD</strong> describing the secret coordinate.
       </p>
     </div>
-    <button class="btn btn-accent" id="btnToVote" style="min-height:56px"><span class="ico" data-ic="users"></span> All Clues Given &mdash; Vote Impostor</button>
+
+    <div class="grid-matrix" id="boardGrid"></div>
+
+    <button type="button" class="btn danger" id="btnToVote" style="margin-top:auto;">Accuse The Chameleon</button>
   </section>
 
-  <!-- VOTING PHASE -->
-  <section class="screen" id="scrVote">
-    <div class="panel">
-      <div class="panel-label">Accuse the Chameleon</div>
-      <h2 class="sec">Who is the Impostor?</h2>
-      <p class="lede" style="margin-top:.2rem">Vote for the player who gave the shadiest or most generic clue.</p>
-      <div class="vote-grid" id="playerVoteGrid" style="margin-top:.75rem"></div>
-    </div>
-    <button class="btn btn-accent" id="btnAccuse" style="min-height:56px" disabled><span class="ico" data-ic="check"></span> Confirm Accusation</button>
-  </section>
-
-  <!-- CHAMELEON ESCAPE GUESS -->
-  <section class="screen" id="scrEscape">
-    <div class="panel" style="border-color:var(--danger)">
-      <span class="panel-label" style="color:var(--danger)">CHAMELEON TRAPPED</span>
-      <h2 class="sec">Escape Matrix Guess</h2>
-      <p class="lede" style="margin-top:.3rem">
-        <strong id="chameleonName">Player</strong> was caught! Tap the secret word on the grid to steal the win.
-      </p>
-      <div class="grid-matrix" id="escapeMatrix"></div>
-    </div>
-    <button class="btn btn-accent" id="btnLockEscape" style="min-height:56px" disabled><span class="ico" data-ic="lock"></span> Lock In Escape Guess</button>
-  </section>
-
-  <!-- FINALE VERDICT -->
+  <!-- ESCAPE GUESS & VERDICT -->
   <section class="screen" id="scrVerdict">
-    <div class="panel" style="text-align:center" id="verdictBox"></div>
-    <button class="btn btn-accent" id="btnPlayAgain" style="min-height:56px"><span class="ico" data-ic="refresh"></span> New Round</button>
-  </section>
-</div>
+    <div class="panel" style="text-align:center;">
+      <div class="panel-title" id="verdictKicker">ROUND RESULT</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:900;" id="verdictTitle">Chameleon Wins!</h2>
+      <p style="font-size:.9rem;color:var(--text-secondary);margin-top:4px;" id="verdictSub"></p>
+    </div>
 
-<!-- CURTAIN -->
-<div class="curtain" id="curtain">
-  <div style="width:72px;height:72px;border-radius:var(--r-lg);background:var(--bg-elevated);border:1px solid var(--border-ui);display:flex;align-items:center;justify-content:center;color:var(--accent)">
-    <span class="ico ico-xl" data-ic="eye"></span>
-  </div>
-  <span style="font-family:var(--font-mono);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted)">SECRET COORDINATE</span>
-  <span class="curtain-name" id="curtainPlayer">Player</span>
-  <p style="font-size:.85rem;color:var(--text-secondary);max-width:32ch">No peeking! Only the active player may hold the screen.</p>
-  <button class="hold-btn" id="holdBtn">
-    <span class="hold-fill" id="holdFill"></span>
-    <span class="hold-label"><span class="ico" data-ic="finger"></span> Hold to reveal coordinate</span>
-  </button>
+    <div class="panel">
+      <div class="panel-title">Secret Word Was:</div>
+      <strong style="color:var(--accent);font-family:monospace;font-size:1.2rem;" id="finalWordReveal">PIZZA (B2)</strong>
+    </div>
+
+    <button type="button" class="btn" id="btnPlayAgain" style="margin-top:auto;">Play Next Round</button>
+  </section>
 </div>
 
 <script>
-"use strict";
 (function(){
-  const ICONS = {
-    help:'<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
-    home:'<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
-    play:'<polygon points="6 3 20 12 6 21 6 3"/>',
-    check:'<polyline points="20 6 9 17 4 12"/>',
-    eye:'<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
-    lock:'<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-    users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-    finger:'<path d="M8 13V5.5a1.5 1.5 0 0 1 3 0V12"/><path d="M11 11.5v-2a1.5 1.5 0 1 1 3 0V12"/><path d="M14 10.5a1.5 1.5 0 0 1 3 0V13"/><path d="M17 12a1.5 1.5 0 0 1 3 0v3a6 6 0 0 1-6 6h-2a7 7 0 0 1-7-7v-1a1.5 1.5 0 1 1 3 0"/>',
-    refresh:'<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>'
-  };
-  function paintIcons(){ document.querySelectorAll("[data-ic]").forEach(el=>{ const k=el.getAttribute("data-ic"); if(ICONS[k]) el.innerHTML=`<svg viewBox="0 0 24 24">${ICONS[k]}</svg>`; }); }
-
-  const SFX = {
-    ctx: null,
-    init(){ if(!this.ctx) this.ctx = new (window.AudioContext||window.webkitAudioContext)(); },
-    tone(f,d,type="sine"){ this.init(); const o=this.ctx.createOscillator(), g=this.ctx.createGain(); o.type=type; o.frequency.value=f; o.connect(g); g.connect(this.ctx.destination); g.gain.setValueAtTime(0.1, this.ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime+d); o.start(); o.stop(this.ctx.currentTime+d); },
-    pop(){ this.tone(550, 0.05, "triangle"); },
-    win(){ this.tone(523, 0.1); setTimeout(()=>this.tone(659, 0.1), 90); setTimeout(()=>this.tone(784, 0.25), 180); },
-    alarm(){ this.tone(200, 0.35, "sawtooth"); }
-  };
+  "use strict";
+  const $ = id => document.getElementById(id);
 
   const TOPICS = {
-    "Animals": ["Lion", "Penguin", "Elephant", "Kangaroo", "Dolphin", "Cheetah", "Giraffe", "Gorilla", "Chameleon", "Koala", "Octopus", "Flamingo", "Wolf", "Panda", "Zebra", "Eagle"],
-    "Food & Drink": ["Pizza", "Sushi", "Tacos", "Burger", "Pancakes", "Ramen", "Pasta", "Croissant", "Ice Cream", "Coffee", "Donut", "Bacon", "Curry", "Steak", "Waffle", "Chocolate"],
-    "Everyday Objects": ["Umbrella", "Keys", "Backpack", "Toaster", "Headphones", "Flashlight", "Clock", "Mirror", "Wallet", "Toothbrush", "Pencil", "Bicycle", "Sunglasses", "Bottle", "Sofa", "Hammer"],
-    "Movie Genres": ["Sci-Fi", "Horror", "Comedy", "Western", "Romance", "Thriller", "Action", "Fantasy", "Animation", "Documentary", "Mystery", "Musical", "Drama", "Noir", "Superhero", "Zombies"]
+    "Food": ["Pizza", "Sushi", "Burger", "Taco", "Ramen", "Steak", "Pasta", "Donut", "Salad", "Waffle", "Curry", "Bagel", "Cookie", "Fries", "Soup", "Cake"],
+    "Animals": ["Lion", "Tiger", "Bear", "Elephant", "Giraffe", "Monkey", "Zebra", "Penguin", "Wolf", "Eagle", "Shark", "Otter", "Panda", "Fox", "Hippo", "Koala"],
+    "Travel": ["Paris", "Tokyo", "London", "Rome", "Beach", "Airport", "Hotel", "Passport", "Luggage", "Island", "Mountain", "Subway", "Camera", "Cruise", "Taxi", "Map"],
+    "Objects": ["Clock", "Lamp", "Chair", "Mirror", "Phone", "Bottle", "Guitar", "Wallet", "Keys", "Glasses", "Book", "Pillow", "Candle", "Shoes", "Watch", "Scissors"]
   };
 
   const COORDS = ["A1","A2","A3","A4","B1","B2","B3","B4","C1","C2","C3","C4","D1","D2","D3","D4"];
 
-  let roster = ["Alex", "Jordan", "Taylor", "Sam"];
+  let roster = ["Player 1", "Player 2", "Player 3", "Player 4"];
   try {
     const raw = localStorage.getItem("partydeck_players");
-    if(raw) { const arr = JSON.parse(raw); if(Array.isArray(arr) && arr.length >= 3) roster = arr; }
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length >= 3) roster = parsed.map(p => typeof p === "string" ? p : p.name);
+    }
   } catch(e){}
 
-  let state = { topic: "Animals", chameleonIdx: 0, secretCellIdx: 5, dealIdx: 0, accusedIdx: -1, escapeChoiceIdx: -1 };
+  let selectedTopic = "Food";
+  let chameleonIdx = 0;
+  let secretIdx = 0;
+  let dealIdx = 0;
 
-  const $ = id => document.getElementById(id);
-  function showScreen(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("is-active", s.id===id)); }
+  function showScreen(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+  }
 
-  function renderTopicOptions(){
-    $("topicGrid").innerHTML = Object.keys(TOPICS).map((t, idx)=>`
-      <button class="btn opt-btn ${idx===0?'is-active':''}" data-topic="${t}">${t}</button>
+  function renderSetup() {
+    $("pCount").textContent = roster.length;
+    $("pList").innerHTML = roster.map((p, i) => `
+      <li style="display:flex;justify-content:space-between;background:#1a2230;padding:6px 10px;border-radius:6px;border:1px solid #334155;">
+        <span>#${i+1} ${p}</span>
+      </li>
     `).join("");
   }
 
-  function startDeal(){
-    state.chameleonIdx = Math.floor(Math.random() * roster.length);
-    state.secretCellIdx = Math.floor(Math.random() * 16);
-    state.dealIdx = 0;
-    openCurtainForPlayer();
-  }
+  $("topicBtnGrid").onclick = e => {
+    const b = e.target.closest(".tag-btn");
+    if (!b) return;
+    document.querySelectorAll(".tag-btn").forEach(t => t.classList.remove("is-active"));
+    b.classList.add("is-active");
+    selectedTopic = b.dataset.topic;
+  };
 
-  function openCurtainForPlayer(){
-    $("curtainPlayer").textContent = roster[state.dealIdx];
-    $("curtain").classList.add("is-open");
-
-    let holdStart = 0, raf = null;
-    const btn = $("holdBtn");
-    const cancel = e => { if(e) e.preventDefault(); if (raf) cancelAnimationFrame(raf); raf = null; $("holdFill").style.width = "0%"; btn.classList.remove("armed"); };
-
-    btn.onpointerdown = e => {
-      e.preventDefault();
-      holdStart = performance.now();
-      btn.classList.add("armed");
-      const tick = () => {
-        const p = Math.min(1, (performance.now() - holdStart) / 700);
-        $("holdFill").style.width = (p * 100) + "%";
-        if (p >= 1) {
-          cancel();
-          $("curtain").classList.remove("is-open");
-          showPlayerSecret();
-        } else raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-    };
-    btn.onpointerup = cancel;
-    btn.onpointercancel = cancel;
-    btn.onpointerleave = cancel;
-  }
-
-  function showPlayerSecret(){
-    const isChameleon = state.dealIdx === state.chameleonIdx;
-    const words = TOPICS[state.topic];
-    const secretWord = words[state.secretCellIdx];
-    const coord = COORDS[state.secretCellIdx];
-
-    $("secretBox").innerHTML = isChameleon ? `
-      <span class="panel-label" style="color:var(--danger)">SECRET ROLE</span>
-      <h2 style="font-size:2.4rem;font-family:var(--font-display);color:var(--danger);margin:.3rem 0">YOU ARE THE CHAMELEON</h2>
-      <p style="font-size:.95rem;color:var(--text-secondary)">
-        You do not know the secret coordinate! Listen carefully to other players' clues and blend in.
-      </p>
-    ` : `
-      <span class="panel-label">SECRET TOPIC COORDINATE</span>
-      <h2 style="font-size:3.2rem;font-family:var(--font-display);color:var(--accent);margin:.2rem 0">${coord}</h2>
-      <p style="font-size:1.15rem;font-weight:800;color:var(--text-primary)">Word: ${secretWord}</p>
-      <p style="font-size:.85rem;color:var(--text-muted);margin-top:.4rem">Give 1 subtle clue related to this word.</p>
-    `;
-
-    showScreen("scrSecret");
-    if(isChameleon) SFX.alarm(); else SFX.pop();
-  }
-
-  function renderMatrix(containerId, isEscape = false){
-    const words = TOPICS[state.topic];
-    $(containerId).innerHTML = words.map((w, idx)=>`
-      <div class="matrix-cell" data-idx="${idx}">
-        <span class="coord-tag">${COORDS[idx]}</span>
-        <span>${w}</span>
+  function renderGrid(containerId, isReveal) {
+    const words = TOPICS[selectedTopic];
+    const host = $(containerId);
+    host.innerHTML = words.map((w, i) => `
+      <div class="matrix-cell ${isReveal && i === secretIdx ? 'target-secret' : ''}" data-idx="${i}">
+        <span class="cell-coord">${COORDS[i]}</span>
+        <span class="cell-word">${w}</span>
       </div>
     `).join("");
-
-    if(isEscape){
-      $(containerId).onclick = e => {
-        const cell = e.target.closest(".matrix-cell"); if(!cell) return;
-        document.querySelectorAll(`#${containerId} .matrix-cell`).forEach(c=>c.classList.remove("selected"));
-        cell.classList.add("selected");
-        state.escapeChoiceIdx = parseInt(cell.dataset.idx, 10);
-        $("btnLockEscape").disabled = false;
-        SFX.pop();
-      };
-    }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    paintIcons();
-    renderTopicOptions();
+  function startDealStep() {
+    $("dealStepNum").textContent = `Player ${dealIdx + 1} of ${roster.length}`;
+    $("dealPlayerName").textContent = roster[dealIdx];
+    $("roleHiddenNotice").style.display = "block";
+    $("roleRevealedContent").style.display = "none";
+    $("btnNextPlayer").style.display = "none";
+    $("btnHoldReveal").style.display = "flex";
+  }
 
-    $("topicGrid").onclick = e => {
-      const b = e.target.closest(".opt-btn"); if(!b) return;
-      document.querySelectorAll("#topicGrid .opt-btn").forEach(x=>x.classList.remove("is-active"));
-      b.classList.add("is-active");
-      state.topic = b.dataset.topic;
-    };
+  $("btnStartDeal").onclick = () => {
+    chameleonIdx = Math.floor(Math.random() * roster.length);
+    secretIdx = Math.floor(Math.random() * 16);
+    dealIdx = 0;
+    showScreen("scrDeal");
+    startDealStep();
+  };
 
-    $("btnDealRoles").onclick = startDeal;
+  const holdBtn = $("btnHoldReveal");
+  function revealRole() {
+    $("roleHiddenNotice").style.display = "none";
+    const rev = $("roleRevealedContent");
+    rev.style.display = "block";
+    if (dealIdx === chameleonIdx) {
+      rev.innerHTML = `<strong style="color:var(--danger);font-size:1.4rem;">YOU ARE THE CHAMELEON!</strong><p style="font-size:12px;color:#94a3b8;margin-top:4px;">Blend in, give a vague clue, and deduce the secret word!</p>`;
+    } else {
+      rev.innerHTML = `<span style="color:#64748b;font-family:monospace;font-size:11px;">SECRET COORDINATE</span><h2 style="color:var(--accent);font-size:1.8rem;margin:4px 0;">${COORDS[secretIdx]}</h2><strong style="color:#fff;">Word: ${TOPICS[selectedTopic][secretIdx]}</strong>`;
+    }
+    $("btnNextPlayer").style.display = "flex";
+  }
 
-    $("btnNextPlayer").onclick = () => {
-      state.dealIdx++;
-      if(state.dealIdx >= roster.length){
-        $("matrixTopic").textContent = state.topic;
-        renderMatrix("liveMatrix");
-        showScreen("scrMatrix");
-      } else {
-        openCurtainForPlayer();
-      }
-    };
-
-    $("btnToVote").onclick = () => {
-      $("playerVoteGrid").innerHTML = roster.map((p, idx)=>`
-        <button class="vote-btn" data-v="${idx}">${p}</button>
-      `).join("");
-      $("btnAccuse").disabled = true;
-      showScreen("scrVote");
-    };
-
-    $("playerVoteGrid").onclick = e => {
-      const b = e.target.closest(".vote-btn"); if(!b) return;
-      document.querySelectorAll(".vote-btn").forEach(x=>x.classList.remove("is-active"));
-      b.classList.add("is-active");
-      state.accusedIdx = parseInt(b.dataset.v, 10);
-      $("btnAccuse").disabled = false;
-      SFX.pop();
-    };
-
-    $("btnAccuse").onclick = () => {
-      const caught = state.accusedIdx === state.chameleonIdx;
-      if(caught){
-        $("chameleonName").textContent = roster[state.chameleonIdx];
-        renderMatrix("escapeMatrix", true);
-        showScreen("scrEscape");
-        SFX.alarm();
-      } else {
-        $("verdictBox").innerHTML = `
-          <span class="panel-label" style="color:var(--danger)">CHAMELEON WINS</span>
-          <h2 style="font-size:2.2rem;font-family:var(--font-display);color:var(--danger);margin:.3rem 0">${roster[state.chameleonIdx]} Escaped!</h2>
-          <p style="font-size:.95rem;color:var(--text-secondary)">
-            The group wrongly accused <strong>${roster[state.accusedIdx]}</strong>. The secret word was <strong>${TOPICS[state.topic][state.secretCellIdx]}</strong>.
-          </p>
-        `;
-        showScreen("scrVerdict");
-        SFX.win();
-      }
-    };
-
-    $("btnLockEscape").onclick = () => {
-      const correct = state.escapeChoiceIdx === state.secretCellIdx;
-      const secretWord = TOPICS[state.topic][state.secretCellIdx];
-      const guessWord = TOPICS[state.topic][state.escapeChoiceIdx];
-
-      if(correct){
-        $("verdictBox").innerHTML = `
-          <span class="panel-label" style="color:var(--danger)">CHAMELEON STOLE THE WIN</span>
-          <h2 style="font-size:2.2rem;font-family:var(--font-display);color:var(--danger);margin:.3rem 0">${roster[state.chameleonIdx]} Guessed Correctly!</h2>
-          <p style="font-size:.95rem;color:var(--text-secondary)">
-            Caught in the vote, but correctly identified the secret word: <strong>${secretWord}</strong> (${COORDS[state.secretCellIdx]}).
-          </p>
-        `;
-      } else {
-        $("verdictBox").innerHTML = `
-          <span class="panel-label" style="color:var(--success)">GROUP WINS</span>
-          <h2 style="font-size:2.2rem;font-family:var(--font-display);color:var(--success);margin:.3rem 0">Chameleon Defeated!</h2>
-          <p style="font-size:.95rem;color:var(--text-secondary)">
-            ${roster[state.chameleonIdx]} guessed <em>${guessWord}</em>. The real secret was <strong>${secretWord}</strong>.
-          </p>
-        `;
-      }
-      showScreen("scrVerdict");
-      SFX.win();
-    };
-
-    $("btnPlayAgain").onclick = () => showScreen("scrSetup");
+  holdBtn.addEventListener("pointerdown", revealRole);
+  holdBtn.addEventListener("pointerup", () => {
+    $("btnHoldReveal").style.display = "none";
   });
+
+  $("btnNextPlayer").onclick = () => {
+    dealIdx++;
+    if (dealIdx < roster.length) {
+      startDealStep();
+    } else {
+      showScreen("scrBoard");
+      $("activeTopicLabel").textContent = selectedTopic;
+      renderGrid("boardGrid", false);
+    }
+  };
+
+  $("btnToVote").onclick = () => {
+    showScreen("scrVerdict");
+    $("verdictTitle").textContent = "The Chameleon was:";
+    $("verdictSub").textContent = `${roster[chameleonIdx]} was in disguise!`;
+    $("finalWordReveal").textContent = `${TOPICS[selectedTopic][secretIdx]} (${COORDS[secretIdx]})`;
+  };
+
+  $("btnPlayAgain").onclick = () => {
+    showScreen("scrSetup");
+  };
+
+  renderSetup();
 })();
 </script>
-<script src="../../js/theme-sync.js"></script>
 </body>
 </html>

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="nordic-slate">
+<html lang="en" data-theme="tokyo-sunset">
 <head>
-    
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
+<meta name="theme-color" content="#120e24" id="metaThemeColor" />
 <title>5-Second Blitz | PartyDeck</title>
 <script>
 (function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
@@ -16,18 +15,18 @@
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
   :root {
-    --bg-primary: #08090d; --bg-surface: #10141d; --bg-elevated: #18202d;
-    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #57657a;
-    --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.35); --accent-contrast: #031525;
-    --danger: #ff0055; --success: #00ff66; --warning: #ffd000;
-    --border-ui: rgba(56,189,248,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+    --bg-primary: #120e24; --bg-surface: #1a1433; --bg-elevated: #261e47;
+    --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
+    --accent: #ffd000; --accent-glow: rgba(255,208,0,0.4); --accent-contrast: #1c1400;
+    --danger: #ff0055; --success: #00ffaa;
+    --border-ui: rgba(255,208,0,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    min-height: 100dvh; display: flex; flex-direction: column;
-    overflow-x: hidden; user-select: none; -webkit-user-select: none;
+    min-height: 100%; height: 100dvh; display: flex; flex-direction: column;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
     position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
@@ -37,80 +36,36 @@
   .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
   .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
   .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
-  .gm-actions { display: flex; gap: .4rem; }
   .btn-icon-only {
-    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
     color: var(--text-primary); display: flex; align-items: center; justify-content: center;
     cursor: pointer; text-decoration: none;
   }
-  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .screen {
     display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
     max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1.2rem));
   }
   .screen.is-active { display: flex; }
 
-  /* HUD */
-  .hud-strip {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
-    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+  /* Descending Neon Marble Track */
+  .marble-track-box {
+    width: 100%; height: 26px; background: #090614; border-radius: 999px;
+    border: 2px solid var(--border-ui); position: relative; overflow: hidden; padding: 2px;
   }
-  .hud-stat {
-    display: flex; flex-direction: column; align-items: center;
-    background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    border-radius: var(--r-sm); padding: .3rem .4rem;
-  }
-  .hud-lbl { font-family: 'Space Mono', monospace; font-size: .55rem; color: var(--text-muted); text-transform: uppercase; }
-  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 900; color: var(--accent); }
-
-  /* Kinetic Marble Track */
-  .marble-stage {
-    position: relative; width: 100%; height: 60px; background: var(--bg-surface);
-    border: 2px solid var(--border-ui); border-radius: 30px; overflow: hidden;
-    display: flex; align-items: center; padding: 6px; margin: 0.5rem 0;
-  }
-  .marble-track {
-    position: absolute; left: 16px; right: 16px; height: 8px;
-    background: repeating-linear-gradient(90deg, var(--border-ui) 0, var(--border-ui) 8px, transparent 8px, transparent 16px);
-  }
-  .marble-ball {
-    position: absolute; left: 10px; width: 44px; height: 44px; border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, #ffffff 0%, var(--accent) 60%, #0369a1 100%);
-    box-shadow: 0 0 20px var(--accent-glow); transform: translateX(0px);
-    transition: transform 0.05s linear;
-  }
-  .marble-ball.detonate {
-    background: radial-gradient(circle at 30% 30%, #ffffff 0%, var(--danger) 60%, #880022 100%);
-    box-shadow: 0 0 25px rgba(255,0,85,0.8);
+  .marble-pip {
+    height: 100%; width: 0%; background: linear-gradient(90deg, #ff0055, #ffd000);
+    border-radius: 999px; box-shadow: 0 0 16px var(--accent-glow); transition: width 0.05s linear;
   }
 
-  /* Prompt Card */
   .prompt-card {
-    background: var(--bg-surface); border: 2px solid var(--border-ui);
-    border-radius: var(--r-lg); padding: 1.8rem 1.2rem; text-align: center;
-    box-shadow: 0 10px 35px rgba(0,0,0,0.6); min-height: 180px;
-    display: flex; flex-direction: column; justify-content: center; gap: .6rem;
-  }
-  .prompt-kicker {
-    font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--accent);
-    letter-spacing: .16em; text-transform: uppercase; font-weight: 800;
-  }
-  .prompt-text {
-    font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 900;
-    line-height: 1.3; color: #fff;
+    background: #0d081c; border: 2px solid var(--accent); border-radius: var(--r-lg);
+    padding: 2rem 1.4rem; text-align: center; box-shadow: 0 0 24px rgba(255,208,0,0.2);
+    min-height: 180px; display: flex; flex-direction: column; justify-content: center;
   }
 
-  /* Panels */
-  .panel {
-    background: var(--bg-surface); border: 1px solid var(--border-ui);
-    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
-  }
-  .panel-title {
-    font-family: 'Space Mono', monospace; font-size: .62rem;
-    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
-  }
-  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
   .btn {
     width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
     background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
@@ -118,406 +73,205 @@
     box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
   }
   .btn:active { transform: scale(.98); }
-  .btn.ghost { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-ui); box-shadow: none; }
-  .btn.danger { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,85,.4); }
-  .btn.success { background: var(--success); color: #022c22; box-shadow: 0 0 16px rgba(0,255,102,.4); }
-
-  /* 3-Stage Privacy Curtain */
-  .curtain {
-    position: fixed; inset: 0; z-index: 100; background: rgba(8, 9, 13, 0.96);
-    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
-  }
-  .curtain.is-open { display: flex; }
-  .cur-card {
-    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
-    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
-  }
-  .hold-btn {
-    position: relative; overflow: hidden; width: 100%; min-height: 60px;
-    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
-    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
-    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
-  }
-  .hold-fill {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
-    background: var(--accent); opacity: .85; transition: width .04s linear;
-  }
-  .hold-label { position: relative; z-index: 2; pointer-events: none; }
-  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
-
-  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
-  .ico svg { width: 100%; height: 100%; }
+  .btn.pass { background: var(--success); color: #022c22; box-shadow: 0 0 16px rgba(0,255,170,0.4); }
+  .btn.fail { background: var(--danger); color: #fff; box-shadow: 0 0 16px rgba(255,0,85,0.4); }
+  .panel { background: var(--bg-surface); border: 1px solid var(--border-ui); border-radius: var(--r-md); padding: 1.1rem; }
+  .panel-title { font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; margin-bottom: .6rem; }
 </style>
-<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
-
-<header class="gm-top">
-  <div class="gm-idblock">
-    <span class="gm-title">5-Second Blitz</span>
-    <span class="gm-sub" id="topSub">High-Stress Naming</span>
-  </div>
-  <div class="gm-actions">
-    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-    </a>
-  </div>
-</header>
-
-<div class="stage">
-  <!-- 1. SETUP -->
-  <section class="screen is-active" id="scrSetup">
-    <div class="panel">
-      <div class="panel-title">Rules of Engagement</div>
-      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
-        • <strong>Name 3 valid items</strong> matching the prompt before the kinetic marble reaches the bottom (5.0s).<br>
-        • Referee (the group) taps <strong>PASS</strong> or <strong>FAIL</strong>.<br>
-        • Fail = Drink 2 sips & reset streak!<br>
-        • Pass = +1 Streak point & bank safety.
-      </p>
+<div class="gm-root">
+  <header class="gm-top">
+    <div class="gm-idblock">
+      <span class="gm-title">5-Second Blitz</span>
+      <span class="gm-sub">Rapid Fire Pressure</span>
     </div>
-    <div class="panel">
-      <div class="panel-title">Active Contestants</div>
-      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:25vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+    <div class="gm-actions">
+      <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
     </div>
-    <button class="btn" id="btnStartGame" style="margin-top:auto;">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
-      Enter The Hot Seat
-    </button>
-  </section>
+  </header>
 
-  <!-- 2. GAMEPLAY SCREEN -->
-  <section class="screen" id="scrPlay">
-    <div class="hud-strip">
-      <div class="hud-stat">
-        <span class="hud-lbl">Hot Seat</span>
-        <span class="hud-val" id="hudPlayer" style="font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
+  <div class="stage">
+    <!-- SETUP -->
+    <section class="screen is-active" id="scrSetup">
+      <div class="panel">
+        <div class="panel-title">Rules of The Blitz</div>
+        <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+          • One player is in the Hot Seat.<br>
+          • When the timer starts, you have <strong>EXACTLY 5 SECONDS</strong> to name 3 items from the prompt card!<br>
+          • Group acts as referee — tap <strong>PASS</strong> if delivered in time, or <strong>FAIL</strong> to assign drink penalties!
+        </p>
       </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">Streak</span>
-        <span class="hud-val" id="hudStreak" style="color:var(--success);">0x</span>
+
+      <button type="button" class="btn" id="btnStartBlitz" style="margin-top:auto;">Enter Hot Seat</button>
+    </section>
+
+    <!-- PLAY -->
+    <section class="screen" id="scrPlay">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:monospace;font-size:12px;color:var(--text-muted);">MARBLE FUSE</span>
+        <strong id="timerText" style="font-family:monospace;font-size:16px;color:var(--accent);">5.0s</strong>
       </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">Clock</span>
-        <span class="hud-val" id="hudTime" style="color:var(--warning);">5.0s</span>
+
+      <div class="marble-track-box">
+        <div class="marble-pip" id="marbleProgress"></div>
       </div>
-    </div>
 
-    <!-- Descending Marble Track -->
-    <div class="marble-stage" id="marbleStage">
-      <div class="marble-track"></div>
-      <div class="marble-ball" id="marbleBall"></div>
-    </div>
-
-    <div class="prompt-card">
-      <span class="prompt-kicker">NAME 3 IN 5 SECONDS</span>
-      <h2 class="prompt-text" id="promptText">Name 3 pizza toppings...</h2>
-    </div>
-
-    <div class="panel">
-      <div class="panel-title">Referee Verdict</div>
-      <div class="btn-grid">
-        <button class="btn danger" id="btnFail" disabled>FAIL (DRINK)</button>
-        <button class="btn success" id="btnPass" disabled>PASS (+1)</button>
+      <div class="prompt-card">
+        <span style="font-family:monospace;font-size:11px;color:var(--accent);letter-spacing:1px;margin-bottom:8px;">NAME 3 THINGS IN 5 SECONDS:</span>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:900;line-height:1.25;" id="promptText">Pizza toppings</h2>
       </div>
-    </div>
 
-    <button class="btn" id="btnTriggerCountdown" style="margin-top:auto;">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
-      Start 5-Second Fuse
-    </button>
-  </section>
+      <button type="button" class="btn" id="btnTriggerCountdown" style="margin-top:auto;">START 5-SECOND FUSE</button>
 
-  <!-- 3. VERDICT -->
-  <section class="screen" id="scrVerdict">
-    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
-      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;" id="verdictBadge">TIME EXPIRED</div>
-      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictPlayer">Player</h2>
-      <div style="font-family:'Space Mono',monospace;font-size:1.8rem;font-weight:900;margin-bottom:.4rem;" id="verdictAction">TAKE 2 SIPS</div>
-      <p style="font-size:.88rem;color:var(--text-secondary);" id="verdictDetails">Hesitated or gave invalid answers under the pressure clock.</p>
-    </div>
-    <button class="btn" id="btnNextRunner" style="margin-top:auto;">Next Hot Seat Pilot</button>
-  </section>
-</div>
+      <div style="display:none;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto;" id="refereeButtons">
+        <button type="button" class="btn fail" id="btnJudgeFail">FAILED (DRINK)</button>
+        <button type="button" class="btn pass" id="btnJudgePass">PASSED (+1 PT)</button>
+      </div>
+    </section>
 
-<!-- 4. PRIVACY CURTAIN -->
-<div class="curtain" id="curtain">
-  <div class="cur-card">
-    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    </div>
-    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT HOT SEAT</div>
-    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
-    <p style="font-size:.82rem;color:var(--text-secondary);">3 answers in 5 seconds. Get ready.</p>
-    <button class="hold-btn" id="btnCurtainHold">
-      <span class="hold-fill" id="holdFill"></span>
-      <span class="hold-label">HOLD 700MS TO UNLOCK</span>
-    </button>
+    <!-- VERDICT -->
+    <section class="screen" id="scrVerdict">
+      <div class="panel" style="text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;" id="verdictKicker">ROUND RESOLUTION</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:900;margin:.3rem 0;" id="verdictTitle">Passed!</h2>
+        <p style="font-size:.85rem;color:var(--text-secondary);" id="verdictSub">Delivered 3 valid answers under pressure.</p>
+      </div>
+
+      <button type="button" class="btn" id="btnNextBlitz" style="margin-top:auto;">Next Prompt Card</button>
+    </section>
   </div>
 </div>
 
 <script>
 (function(){
-"use strict";
+  "use strict";
+  const $ = id => document.getElementById(id);
 
-/* ================= WEB AUDIO SYNTH ================= */
-const Synth = {
-  ctx: null,
-  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-  countdownTick(pitch = 600){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "square"; o.frequency.setValueAtTime(pitch, this.ctx.currentTime);
-      g.gain.setValueAtTime(0.08, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.04);
-    }catch(e){}
-  },
-  buzzer(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sawtooth"; o.frequency.setValueAtTime(140, this.ctx.currentTime);
-      o.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.35);
-      g.gain.setValueAtTime(0.3, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.35);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.35);
-    }catch(e){}
-  },
-  success(){
-    try {
-      this.init();
-      [523, 659, 784, 1046].forEach((f, i) => {
-        setTimeout(() => {
-          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
-          g.gain.setValueAtTime(0.12, this.ctx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
-          o.connect(g); g.connect(this.ctx.destination);
-          o.start(); o.stop(this.ctx.currentTime + 0.12);
-        }, i * 60);
-      });
-    }catch(e){}
+  const PROMPTS = [
+    "Pizza toppings", "Pizza chains", "Excuses for being late", "Things you shouldn't microwave",
+    "Superheroes with capes", "Video game consoles", "Breakfast cereals", "Reasons to break up",
+    "Things that are cold", "Animals that live underwater", "Movie villains", "Types of pasta",
+    "Fast food burgers", "Things in a junk drawer", "Ice cream flavors", "Songs you know all words to",
+    "Things you pack for the beach", "Board games", "Car brands", "Things made of metal",
+    "Celebrities named Chris", "Vegetables you hate", "Things with wheels", "Halloween costumes"
+  ];
+
+  const AudioBlitz = {
+    ctx: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    tick(freq){
+      try{
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.frequency.setValueAtTime(freq || 600, now);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.04);
+      }catch(e){}
+    },
+    buzzer(){
+      try{
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(140, now);
+        gain.gain.setValueAtTime(0.24, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.35);
+      }catch(e){}
+    }
+  };
+
+  const S = {
+    active: false,
+    startT: 0,
+    raf: null,
+    deck: [...PROMPTS].sort(() => Math.random() - 0.5)
+  };
+
+  function showScreen(id){
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
   }
-};
 
-/* ================= 100+ "NAME 3" PROMPT POOL ================= */
-const PROMPTS = [
-  "Pizza toppings", "Reasons to be late to work", "Superheroes with capes",
-  "Things you shouldn't microwave", "Horror movie villains", "Items in a backpack",
-  "Types of pasta", "Famous duos", "Things you find at a beach",
-  "Video game characters", "Things that fly", "Jobs that require a uniform",
-  "Excuses to get out of a date", "Things you plug into an outlet", "Countries in Europe",
-  "Board games", "Dog breeds", "Breakfast cereals", "Fast food chains",
-  "Things you buy at a pharmacy", "Types of cheese", "Things with wheels",
-  "Musicals", "80s songs", "Things that smell good", "Things made of glass",
-  "Things that are red", "Words starting with 'Z'", "Things in a junk drawer",
-  "Cocktails", "Olympic sports", "Cartoon characters", "Things that make you sneeze",
-  "Desserts with chocolate", "Apps on your home screen", "Things you do before sleeping",
-  "Things at a wedding", "Animals that hibernate", "Vehicles with sirens"
-];
+  function pickPrompt(){
+    if(!S.deck.length) S.deck = [...PROMPTS].sort(() => Math.random() - 0.5);
+    $("promptText").textContent = S.deck.pop();
+    $("marbleProgress").style.width = "0%";
+    $("timerText").textContent = "5.0s";
+    $("btnTriggerCountdown").style.display = "flex";
+    $("refereeButtons").style.display = "none";
+  }
 
-let roster = [];
-try {
-  const raw = localStorage.getItem("partydeck_players");
-  roster = raw ? JSON.parse(raw) : [];
-} catch(e){}
-if(!Array.isArray(roster) || roster.length < 2) roster = ["Alex", "Jordan", "Taylor"];
+  function startCountdown(){
+    S.active = true;
+    S.startT = performance.now();
+    $("btnTriggerCountdown").style.display = "none";
 
-const S = {
-  playerIdx: 0,
-  streaks: {},
-  deck: [],
-  currentPrompt: "",
-  timerHandle: null,
-  marbleRAF: null,
-  timerActive: false
-};
+    let lastSec = 5;
+    function tick(now){
+      if(!S.active) return;
+      const elapsed = (now - S.startT) / 1000;
+      const left = Math.max(0, 5 - elapsed);
+      const pct = Math.min(100, (elapsed / 5) * 100);
 
-const $ = id => document.getElementById(id);
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
-}
+      $("marbleProgress").style.width = `${pct}%`;
+      $("timerText").textContent = `${left.toFixed(1)}s`;
 
-/* ================= 3-STAGE PRIVACY CURTAIN ================= */
-let holdTimer = null, holdStart = 0;
-const HOLD_MS = 700;
-
-function openCurtain(pName, onUnlock){
-  $("curName").textContent = pName;
-  $("holdFill").style.width = "0%";
-  $("btnCurtainHold").classList.remove("armed");
-  $("curtain").classList.add("is-open");
-
-  const btn = $("btnCurtainHold");
-  const cancel = e => {
-    if(e) e.preventDefault();
-    if(holdTimer) cancelAnimationFrame(holdTimer);
-    holdTimer = null;
-    $("holdFill").style.width = "0%";
-    btn.classList.remove("armed");
-  };
-  const start = e => {
-    e.preventDefault();
-    btn.classList.add("armed");
-    holdStart = performance.now();
-    const tick = now => {
-      const el = now - holdStart;
-      const pct = Math.min(100, (el / HOLD_MS) * 100);
-      $("holdFill").style.width = pct + "%";
-      if(el >= HOLD_MS){
-        cancel();
-        $("curtain").classList.remove("is-open");
-        onUnlock();
-      } else {
-        holdTimer = requestAnimationFrame(tick);
+      const curSec = Math.ceil(left);
+      if(curSec < lastSec && curSec > 0){
+        lastSec = curSec;
+        AudioBlitz.tick(500 + (5 - curSec) * 140);
       }
-    };
-    holdTimer = requestAnimationFrame(tick);
+
+      if(left <= 0){
+        S.active = false;
+        AudioBlitz.buzzer();
+        $("timerText").textContent = "TIME UP!";
+        $("refereeButtons").style.display = "grid";
+      } else {
+        S.raf = requestAnimationFrame(tick);
+      }
+    }
+    S.raf = requestAnimationFrame(tick);
+  }
+
+  $("btnTriggerCountdown").onclick = startCountdown;
+
+  $("btnJudgePass").onclick = () => {
+    cancelAnimationFrame(S.raf);
+    $("verdictKicker").textContent = "BLITZ SUCCESSFUL";
+    $("verdictKicker").style.color = "var(--success)";
+    $("verdictTitle").textContent = "3 Items Named!";
+    $("verdictSub").textContent = "Well done under the wire. Hand out 1 drink.";
+    showScreen("scrVerdict");
   };
 
-  btn.onpointerdown = start;
-  btn.onpointerup = cancel;
-  btn.onpointercancel = cancel;
-  btn.onpointerleave = cancel;
-}
+  $("btnJudgeFail").onclick = () => {
+    cancelAnimationFrame(S.raf);
+    $("verdictKicker").textContent = "BLITZ FAILED";
+    $("verdictKicker").style.color = "var(--danger)";
+    $("verdictTitle").textContent = "Time Expired!";
+    $("verdictSub").textContent = "Hesitation or missing items. Take 2 sips of your drink.";
+    showScreen("scrVerdict");
+  };
 
-/* ================= GAMEPLAY ENGINE ================= */
-function startTurn(){
-  const player = roster[S.playerIdx];
-  $("topSub").textContent = `${player}'s Hot Seat`;
-  $("hudPlayer").textContent = player;
-  $("hudStreak").textContent = `${S.streaks[player] || 0}x`;
-  $("hudTime").textContent = "5.0s";
-  $("btnFail").disabled = true;
-  $("btnPass").disabled = true;
-  $("btnTriggerCountdown").style.display = "flex";
-
-  const ball = $("marbleBall");
-  ball.classList.remove("detonate");
-  ball.style.transform = "translateX(0px)";
-
-  if(S.deck.length === 0) S.deck = [...PROMPTS].sort(() => Math.random() - 0.5);
-  S.currentPrompt = S.deck.pop();
-  $("promptText").textContent = `Name 3 ${S.currentPrompt}...`;
-
-  openCurtain(player, () => {
+  $("btnStartBlitz").onclick = () => {
     showScreen("scrPlay");
-  });
-}
-
-$("btnTriggerCountdown").onclick = () => {
-  if(S.timerActive) return;
-  S.timerActive = true;
-  $("btnTriggerCountdown").style.display = "none";
-  $("btnFail").disabled = false;
-  $("btnPass").disabled = false;
-
-  const stageW = $("marbleStage").clientWidth - 64;
-  const ball = $("marbleBall");
-  const startTime = performance.now();
-  const duration = 5000;
-  let lastSecondBeep = 5;
-
-  const tick = now => {
-    const elapsed = now - startTime;
-    const progress = Math.min(1, elapsed / duration);
-    const timeLeft = Math.max(0, (5 - elapsed / 1000)).toFixed(1);
-    
-    $("hudTime").textContent = `${timeLeft}s`;
-    ball.style.transform = `translateX(${progress * stageW}px)`;
-
-    const secInt = Math.ceil(parseFloat(timeLeft));
-    if(secInt < lastSecondBeep && secInt > 0){
-      lastSecondBeep = secInt;
-      Synth.countdownTick(600 + (5 - secInt) * 120);
-    }
-
-    if(progress >= 1){
-      S.timerActive = false;
-      ball.classList.add("detonate");
-      Synth.buzzer();
-      handleTimeExpired();
-    } else if(S.timerActive){
-      S.marbleRAF = requestAnimationFrame(tick);
-    }
+    pickPrompt();
   };
-  S.marbleRAF = requestAnimationFrame(tick);
-};
 
-function handleTimeExpired(){
-  const p = roster[S.playerIdx];
-  S.streaks[p] = 0;
-  $("verdictBadge").textContent = "TIME EXPIRED";
-  $("verdictBadge").style.color = "var(--danger)";
-  $("verdictPlayer").textContent = p;
-  $("verdictAction").textContent = "TAKE 2 SIPS";
-  $("verdictAction").style.color = "var(--danger)";
-  $("verdictDetails").textContent = "The 5-second marble crossed the detonation line!";
-  setTimeout(() => showScreen("scrVerdict"), 800);
-}
-
-$("btnPass").onclick = () => {
-  S.timerActive = false;
-  cancelAnimationFrame(S.marbleRAF);
-  Synth.success();
-  const p = roster[S.playerIdx];
-  S.streaks[p] = (S.streaks[p] || 0) + 1;
-
-  $("verdictBadge").textContent = "BLITZ CLEARED";
-  $("verdictBadge").style.color = "var(--success)";
-  $("verdictPlayer").textContent = p;
-  $("verdictAction").textContent = `STREAK: ${S.streaks[p]}x`;
-  $("verdictAction").style.color = "var(--success)";
-  $("verdictDetails").textContent = "3 valid items delivered under the wire! Hand out 1 sip.";
-  showScreen("scrVerdict");
-};
-
-$("btnFail").onclick = () => {
-  S.timerActive = false;
-  cancelAnimationFrame(S.marbleRAF);
-  Synth.buzzer();
-  const p = roster[S.playerIdx];
-  S.streaks[p] = 0;
-
-  $("verdictBadge").textContent = "REFEREE REJECTED";
-  $("verdictBadge").style.color = "var(--danger)";
-  $("verdictPlayer").textContent = p;
-  $("verdictAction").textContent = "TAKE 2 SIPS";
-  $("verdictAction").style.color = "var(--danger)";
-  $("verdictDetails").textContent = "The group rejected one or more of your 3 answers!";
-  showScreen("scrVerdict");
-};
-
-$("btnNextRunner").onclick = () => {
-  S.playerIdx = (S.playerIdx + 1) % roster.length;
-  startTurn();
-};
-
-/* ================= ROSTER ================= */
-function renderRoster(){
-  $("rosterList").innerHTML = roster.map((p, i) => `
-    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
-      <span>#${i+1} ${p}</span>
-      <span style="color:var(--accent);">CONTESTANT</span>
-    </li>
-  `).join("");
-}
-
-$("btnStartGame").onclick = () => {
-  S.playerIdx = 0;
-  roster.forEach(p => { S.streaks[p] = 0; });
-  startTurn();
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-  renderRoster();
-});
+  $("btnNextBlitz").onclick = () => {
+    showScreen("scrPlay");
+    pickPrompt();
+  };
 })();
 </script>
-<script src="../../js/theme-sync.js"></script>
 </body>
 </html>

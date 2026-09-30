@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="synthwave-84">
 <head>
-  
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#100b1a" id="metaThemeColor" />
@@ -16,17 +15,17 @@
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
   :root {
-    --bg-primary: #0e0717; --bg-surface: #180d28; --bg-elevated: #261540;
+    --bg-primary: #100b1a; --bg-surface: #1a1228; --bg-elevated: #281b3d;
     --text-primary: #ffffff; --text-secondary: #d6b4fc; --text-muted: #8b62b8;
     --accent: #ff007f; --accent-glow: rgba(255,0,127,0.45); --accent-contrast: #ffffff;
-    --lane1: #ff0055; --lane2: #00e5ff; --lane3: #ffd000; --lane4: #00ffaa;
-    --border-ui: rgba(255,0,127,0.28); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+    --cyan: #00f0ff; --lime: #00ffaa; --gold: #ffd000;
+    --border-ui: rgba(255,0,127,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    min-height: 100dvh; display: flex; flex-direction: column;
+    min-height: 100%; height: 100dvh; display: flex; flex-direction: column;
     overflow: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
@@ -37,9 +36,8 @@
   .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
   .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
   .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
-  .gm-actions { display: flex; gap: .4rem; }
   .btn-icon-only {
-    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
     color: var(--text-primary); display: flex; align-items: center; justify-content: center;
     cursor: pointer; text-decoration: none;
@@ -49,577 +47,529 @@
     display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
     max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
     overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding-bottom: max(1.2rem, calc(env(safe-area-inset-bottom) + 1rem));
   }
   .screen.is-active { display: flex; }
+  #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; }
 
-  /* HUD */
-  .hud-strip {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem;
-    padding: .4rem .6rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+  .hud-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    flex-shrink: 0; z-index: 20;
   }
   .hud-stat {
     display: flex; flex-direction: column; align-items: center;
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    border-radius: var(--r-sm); padding: .25rem .3rem;
+    border-radius: var(--r-sm); padding: .3rem .4rem;
   }
   .hud-lbl { font-family: 'Space Mono', monospace; font-size: .52rem; color: var(--text-muted); text-transform: uppercase; }
-  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; color: var(--accent); }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 900; color: var(--accent); }
 
-  /* Highway Viewport */
-  .highway-stage { flex: 1; position: relative; width: 100%; height: 100%; background: #07030d; }
+  .canvas-stage-wrap { flex: 1; min-height: 0; width: 100%; position: relative; overflow: hidden; touch-action: none; }
   #beatCanvas { width: 100%; height: 100%; display: block; touch-action: none; }
 
-  /* Hit Buttons */
-  .tap-lanes {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 95px;
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 6px;
-    background: rgba(14, 7, 23, 0.85); border-top: 2px solid var(--border-ui);
-    padding-bottom: max(6px, env(safe-area-inset-bottom));
+  .pad-dock {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+    padding: 8px 8px; background: var(--bg-surface); border-top: 1px solid var(--border-ui);
+    padding-bottom: max(8px, env(safe-area-inset-bottom)); flex-shrink: 0;
   }
-  .lane-btn {
-    border: none; border-radius: var(--r-sm); font-family: 'Space Mono', monospace;
-    font-size: .95rem; font-weight: 900; color: #fff; cursor: pointer; touch-action: none;
-    display: flex; align-items: center; justify-content: center; opacity: 0.85;
-    box-shadow: 0 4px 12px rgba(0,0,0,.5);
+  .pad {
+    min-height: 74px; border-radius: var(--r-sm); border: 2px solid; background: #160f24;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    touch-action: manipulation; font-family: 'Space Mono', monospace; font-weight: 900; font-size: .72rem;
+    color: #fff; transition: background .06s linear, transform .06s linear;
   }
-  .lane-btn:active, .lane-btn.active { transform: translateY(2px); opacity: 1; }
-  .lane-btn.l0 { background: var(--lane1); }
-  .lane-btn.l1 { background: var(--lane2); }
-  .lane-btn.l2 { background: var(--lane3); color: #000; }
-  .lane-btn.l3 { background: var(--lane4); color: #000; }
+  .pad.lane0 { border-color: #ff007f; }
+  .pad.lane1 { border-color: #00f0ff; }
+  .pad.lane2 { border-color: #ffd000; }
+  .pad.lane3 { border-color: #00ffaa; }
+  .pad.pressed { transform: scale(.96); background: rgba(255,255,255,0.18); }
 
-  /* Panels */
-  .panel {
-    background: var(--bg-surface); border: 1px solid var(--border-ui);
-    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
-  }
-  .panel-title {
-    font-family: 'Space Mono', monospace; font-size: .62rem;
-    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
-  }
-  .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
-  .opt-btn {
-    min-height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
-    font-size: .78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-  .opt-btn.is-active {
-    background: var(--accent); color: #fff; border-color: var(--accent);
-    box-shadow: 0 0 14px var(--accent-glow);
-  }
   .btn {
     width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
-    background: var(--accent); color: #fff; border: none; border-radius: var(--r-sm);
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
     font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
     box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
   }
   .btn:active { transform: scale(.98); }
-
-  /* 3-Stage Privacy Curtain */
-  .curtain {
-    position: fixed; inset: 0; z-index: 100; background: rgba(14, 7, 23, 0.96);
-    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
+  .panel { background: var(--bg-surface); border: 1px solid var(--border-ui); border-radius: var(--r-md); padding: 1.1rem; }
+  .panel-title { font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--text-muted); letter-spacing: .14em; text-transform: uppercase; margin-bottom: .6rem; }
+  .diff-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .tag-btn {
+    background: #241735; border: 1px solid #3d2b57; padding: 10px 6px; border-radius: 8px; color: #d6b4fc;
+    font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 800; cursor: pointer; text-align: center;
+    text-transform: uppercase;
   }
-  .curtain.is-open { display: flex; }
-  .cur-card {
-    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
-    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
-  }
-  .hold-btn {
-    position: relative; overflow: hidden; width: 100%; min-height: 60px;
-    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
-    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
-    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
-  }
-  .hold-fill {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
-    background: var(--accent); opacity: .85; transition: width .04s linear;
-  }
-  .hold-label { position: relative; z-index: 2; pointer-events: none; }
-  .hold-btn.armed .hold-label { color: #fff; }
-
-  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
-  .ico svg { width: 100%; height: 100%; }
+  .tag-btn.is-active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
 </style>
-<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
-
 <header class="gm-top">
   <div class="gm-idblock">
     <span class="gm-title">Neon Beat Smasher</span>
-    <span class="gm-sub" id="topSub">Rhythm Gauntlet</span>
+    <span class="gm-sub">4-Lane Note Highway</span>
   </div>
-  <div class="gm-actions">
-    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-    </a>
-  </div>
+  <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+  </a>
 </header>
 
 <div class="stage">
   <!-- SETUP -->
   <section class="screen is-active" id="scrSetup">
     <div class="panel">
-      <div class="panel-title">Pass Quota Threshold</div>
-      <div class="opt-grid" id="quotaGrid">
-        <button class="opt-btn" data-q="15000">15,000 Pts</button>
-        <button class="opt-btn is-active" data-q="30000">30,000 Pts</button>
-        <button class="opt-btn" data-q="50000">50,000 Pts</button>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-title">Gameplay Rules</div>
+      <div class="panel-title">Track Brief</div>
       <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
-        • Tap the 4 neon buttons exactly as descending bars hit the strike zone.<br>
-        • Perfect = 300 pts &middot; Good = 150 pts &middot; Miss = 0 pts + streak reset.<br>
-        • 4x Combo Multiplier unlocks over 10 consecutive hits.<br>
-        • Total misses convert directly into penalty sips!
+        • Notes fall down 4 lanes toward the glowing judgment line.<br>
+        • Tap the matching pad as the note crosses the line.<br>
+        • <strong>Perfect</strong> (&plusmn;55ms) = 300 &nbsp;|&nbsp; <strong>Good</strong> (&plusmn;110ms) = 150 &nbsp;|&nbsp; Miss breaks your streak.<br>
+        • Streak builds a multiplier up to <strong>4x</strong>. Clear <strong>85% accuracy</strong> to pass the set.
       </p>
     </div>
+
     <div class="panel">
-      <div class="panel-title">Gauntlet Lineup</div>
-      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
+      <div class="panel-title">Chart Difficulty</div>
+      <div class="diff-row" id="diffRow">
+        <button type="button" class="tag-btn is-active" data-diff="easy">Easy</button>
+        <button type="button" class="tag-btn" data-diff="normal">Normal</button>
+        <button type="button" class="tag-btn" data-diff="hard">Hard</button>
+      </div>
     </div>
-    <button class="btn" id="btnStartTourney" style="margin-top:auto;">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
-      Start Rhythm Trial (60s)
-    </button>
+
+    <button type="button" class="btn" id="btnStartBeat" style="margin-top:auto;">Drop The Track</button>
   </section>
 
-  <!-- GAMEPLAY HIGHWAY -->
-  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
-    <div class="hud-strip">
-      <div class="hud-stat">
-        <span class="hud-lbl">Striker</span>
-        <span class="hud-val" id="hudPlayer" style="font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
-      </div>
+  <!-- PLAY -->
+  <section class="screen" id="scrPlay">
+    <div class="hud-bar">
       <div class="hud-stat">
         <span class="hud-lbl">Score</span>
         <span class="hud-val" id="hudScore">0</span>
       </div>
       <div class="hud-stat">
         <span class="hud-lbl">Streak</span>
-        <span class="hud-val" id="hudStreak" style="color:var(--lane2);">0x</span>
+        <span class="hud-val" id="hudStreak" style="color:var(--gold);">0 (1x)</span>
       </div>
       <div class="hud-stat">
-        <span class="hud-lbl">Clock</span>
-        <span class="hud-val" id="hudClock" style="color:var(--lane3);">60s</span>
+        <span class="hud-lbl">Track</span>
+        <span class="hud-val" id="hudTime" style="color:var(--cyan);">0:00</span>
       </div>
     </div>
 
-    <div class="highway-stage">
+    <div class="canvas-stage-wrap" id="canvasWrap">
       <canvas id="beatCanvas"></canvas>
-      <div class="tap-lanes">
-        <button class="lane-btn l0" data-lane="0">D</button>
-        <button class="lane-btn l1" data-lane="1">F</button>
-        <button class="lane-btn l2" data-lane="2">J</button>
-        <button class="lane-btn l3" data-lane="3">K</button>
-      </div>
+    </div>
+
+    <div class="pad-dock">
+      <button type="button" class="pad lane0" data-lane="0">LANE 1</button>
+      <button type="button" class="pad lane1" data-lane="1">LANE 2</button>
+      <button type="button" class="pad lane2" data-lane="2">LANE 3</button>
+      <button type="button" class="pad lane3" data-lane="3">LANE 4</button>
     </div>
   </section>
 
   <!-- VERDICT -->
   <section class="screen" id="scrVerdict">
-    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
-      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">TRACK PERFORMANCE</div>
-      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="verdictPlayer">Player</h2>
-      <div style="font-family:'Space Mono',monospace;font-size:2.2rem;font-weight:900;color:var(--accent);margin-bottom:.4rem;" id="verdictScore">0 PTS</div>
-      
-      <div id="forfeitBox" style="background:rgba(255,0,127,.1);border:2px solid var(--accent);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
-        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--accent);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">OFF-BEAT PENALTY</span>
-        <p style="font-size:1.1rem;font-weight:800;color:#fff;margin-top:.4rem;" id="forfeitSips">Take 3 sips!</p>
-        <p style="font-size:.8rem;color:var(--text-secondary);margin-top:.3rem;" id="forfeitMisses">Missed 8 notes below quota.</p>
-      </div>
+    <div class="panel" style="text-align:center;">
+      <div class="panel-title" id="verdictKicker" style="color:var(--accent);">SET COMPLETE</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2.1rem;font-weight:900;margin:.3rem 0;" id="verdictGrade">GRADE B</h2>
+      <p style="font-family:'Space Mono',monospace;font-size:1rem;color:var(--cyan);" id="verdictScore">0 PTS</p>
+    </div>
 
-      <div id="passBox" style="background:rgba(0,255,170,.1);border:2px solid var(--lane4);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
-        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--lane4);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">SYNTH MASTER</span>
-        <p style="font-size:1rem;font-weight:800;color:#fff;margin-top:.4rem;">Rhythm god! Hand out 3 penalty drinks.</p>
+    <div class="panel">
+      <div class="panel-title">Judgment Breakdown</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-family:'Space Mono',monospace;font-size:.78rem;">
+        <div style="background:#241735;padding:8px 10px;border-radius:6px;">Perfect: <strong id="statPerfect" style="color:var(--gold);">0</strong></div>
+        <div style="background:#241735;padding:8px 10px;border-radius:6px;">Good: <strong id="statGood" style="color:var(--cyan);">0</strong></div>
+        <div style="background:#241735;padding:8px 10px;border-radius:6px;">Miss: <strong id="statMiss" style="color:var(--accent);">0</strong></div>
+        <div style="background:#241735;padding:8px 10px;border-radius:6px;">Accuracy: <strong id="statAcc" style="color:var(--lime);">0%</strong></div>
       </div>
     </div>
-    <button class="btn" id="btnNextRunner" style="margin-top:auto;">Next Gauntlet Striker</button>
+
+    <button type="button" class="btn" id="btnRestartBeat" style="margin-top:auto;">Replay Track</button>
   </section>
-</div>
-
-<!-- 4. PRIVACY CURTAIN -->
-<div class="curtain" id="curtain">
-  <div class="cur-card">
-    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-    </div>
-    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT STRIKER</div>
-    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Player</h2>
-    <p style="font-size:.82rem;color:var(--text-secondary);">Target: <strong id="curQuota" style="color:var(--accent);">30,000</strong> PTS</p>
-    <button class="hold-btn" id="btnCurtainHold">
-      <span class="hold-fill" id="holdFill"></span>
-      <span class="hold-label">HOLD 700MS TO DROP THE BEAT</span>
-    </button>
-  </div>
 </div>
 
 <script>
 (function(){
-"use strict";
+  "use strict";
+  const $ = id => document.getElementById(id);
 
-/* ================= WEB AUDIO SYNTH TRACK ================= */
-const AudioBeat = {
-  ctx: null,
-  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-  playNote(lane){
-    try {
-      this.init();
-      const freqs = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sawtooth";
-      o.frequency.setValueAtTime(freqs[lane], this.ctx.currentTime);
-      g.gain.setValueAtTime(0.16, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.14);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.14);
-    }catch(e){}
-  },
-  missSound(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "square"; o.frequency.setValueAtTime(110, this.ctx.currentTime);
-      g.gain.setValueAtTime(0.12, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.18);
-    }catch(e){}
-  }
-};
-
-/* ================= STATE & ROSTER ================= */
-let roster = [];
-try {
-  const raw = localStorage.getItem("partydeck_players");
-  roster = raw ? JSON.parse(raw) : [];
-} catch(e){}
-if(!Array.isArray(roster) || roster.length < 2) roster = ["Player 1", "Player 2"];
-
-const S = {
-  quota: 30000,
-  playerIdx: 0,
-  score: 0,
-  streak: 0,
-  misses: 0,
-  timeLeft: 60,
-  timerHandle: null,
-  running: false,
-  notes: [],
-  feedbacks: []
-};
-
-const $ = id => document.getElementById(id);
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
-}
-
-/* ================= PRIVACY CURTAIN ================= */
-let holdTimer = null, holdStart = 0;
-const HOLD_MS = 700;
-
-function openCurtain(pName, onUnlock){
-  $("curName").textContent = pName;
-  $("curQuota").textContent = S.quota.toLocaleString();
-  $("holdFill").style.width = "0%";
-  $("btnCurtainHold").classList.remove("armed");
-  $("curtain").classList.add("is-open");
-
-  const btn = $("btnCurtainHold");
-  const cancel = e => {
-    if(e) e.preventDefault();
-    if(holdTimer) cancelAnimationFrame(holdTimer);
-    holdTimer = null;
-    $("holdFill").style.width = "0%";
-    btn.classList.remove("armed");
+  const Audio2 = {
+    ctx: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    tone(freq, dur, type, vol, slideTo){
+      try{
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator(), g = this.ctx.createGain();
+        osc.type = type || "square";
+        osc.frequency.setValueAtTime(freq, now);
+        if(slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, now + dur);
+        g.gain.setValueAtTime(vol || 0.09, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        osc.connect(g); g.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + dur);
+      }catch(e){}
+    },
+    noise(dur, vol){
+      try{
+        this.init();
+        const len = Math.floor(this.ctx.sampleRate * dur);
+        const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for(let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / len);
+        const src = this.ctx.createBufferSource();
+        const g = this.ctx.createGain();
+        src.buffer = buf;
+        g.gain.setValueAtTime(vol || 0.1, this.ctx.currentTime);
+        src.connect(g); g.connect(this.ctx.destination);
+        src.start();
+      }catch(e){}
+    },
+    kick(){ this.tone(150, 0.16, "sine", 0.24, 45); },
+    snare(){ this.noise(0.12, 0.13); },
+    lead(lane){ this.tone([392, 523, 659, 784][lane], 0.1, "square", 0.07); },
+    perfect(lane){ this.tone([523, 659, 784, 1046][lane], 0.09, "sine", 0.12); },
+    good(lane){ this.tone([392, 494, 587, 698][lane], 0.09, "triangle", 0.1); },
+    miss(){ this.tone(150, 0.16, "sawtooth", 0.12, 60); }
   };
-  const start = e => {
-    e.preventDefault();
-    btn.classList.add("armed");
-    holdStart = performance.now();
-    const tick = now => {
-      const el = now - holdStart;
-      const pct = Math.min(100, (el / HOLD_MS) * 100);
-      $("holdFill").style.width = pct + "%";
-      if(el >= HOLD_MS){
-        cancel();
-        $("curtain").classList.remove("is-open");
-        onUnlock();
+
+  const cvs = $("beatCanvas"), ctx = cvs.getContext("2d"), wrap = $("canvasWrap");
+  let W = 360, H = 480, DPR = 1;
+
+  const LANE_COLORS = ["#ff007f", "#00f0ff", "#ffd000", "#00ffaa"];
+  const DIFFS = {
+    easy:   { bpm: 96,  density: 0.55, approach: 1900, dual: 0.00 },
+    normal: { bpm: 120, density: 0.78, approach: 1500, dual: 0.08 },
+    hard:   { bpm: 150, density: 0.95, approach: 1200, dual: 0.20 }
+  };
+  const TRACK_SECONDS = 60;
+  const W_PERFECT = 55, W_GOOD = 110, W_MISS = 165;
+
+  const S = {
+    running: false,
+    diff: "easy",
+    notes: [],        // { lane, t, hit, judged }
+    startT: 0,
+    approach: 1500,
+    score: 0,
+    streak: 0,
+    bestStreak: 0,
+    perfect: 0, good: 0, miss: 0,
+    flashes: [0, 0, 0, 0],
+    feedback: null,   // { text, color, at }
+    lastBeatIdx: -1,
+    beatMs: 500
+  };
+
+  function showScreen(id){
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
+  }
+
+  function resizeCanvas(){
+    const rect = wrap.getBoundingClientRect();
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    W = rect.width; H = rect.height;
+    cvs.width = Math.round(W * DPR);
+    cvs.height = Math.round(H * DPR);
+    cvs.style.width = W + "px";
+    cvs.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+
+  function buildChart(){
+    const d = DIFFS[S.diff];
+    S.beatMs = 60000 / d.bpm;
+    S.approach = d.approach;
+    S.notes = [];
+
+    const totalBeats = Math.floor((TRACK_SECONDS * 1000) / S.beatMs);
+    let lastLane = -1;
+
+    for(let b = 4; b < totalBeats; b++){
+      const t = b * S.beatMs;
+      // Rhythmic gating: always on downbeats, probabilistic on offbeats
+      const onDownbeat = (b % 2 === 0);
+      const chance = onDownbeat ? d.density : d.density * 0.55;
+      if(Math.random() > chance) continue;
+
+      let lane = Math.floor(Math.random() * 4);
+      if(lane === lastLane && Math.random() < 0.6) lane = (lane + 1 + Math.floor(Math.random() * 3)) % 4;
+      lastLane = lane;
+      S.notes.push({ lane: lane, t: t, judged: false });
+
+      if(Math.random() < d.dual){
+        let l2 = (lane + 2) % 4;
+        S.notes.push({ lane: l2, t: t, judged: false });
+      }
+
+      // Occasional 8th-note flourish on hard
+      if(S.diff === "hard" && Math.random() < 0.18){
+        S.notes.push({ lane: (lane + 1) % 4, t: t + S.beatMs / 2, judged: false });
+      }
+    }
+    S.notes.sort((a, b) => a.t - b.t);
+  }
+
+  function multiplier(){
+    if(S.streak >= 30) return 4;
+    if(S.streak >= 20) return 3;
+    if(S.streak >= 10) return 2;
+    return 1;
+  }
+
+  function updateHud(){
+    $("hudScore").textContent = S.score;
+    $("hudStreak").textContent = S.streak + " (" + multiplier() + "x)";
+  }
+
+  function feedback(text, color){
+    S.feedback = { text: text, color: color, at: performance.now() };
+  }
+
+  function judge(lane){
+    if(!S.running) return;
+    const now = performance.now() - S.startT;
+    S.flashes[lane] = performance.now();
+
+    let best = null, bestAbs = Infinity;
+    for(const n of S.notes){
+      if(n.judged || n.lane !== lane) continue;
+      const diff = n.t - now;
+      if(diff > W_MISS) break;
+      const abs = Math.abs(diff);
+      if(abs < bestAbs){ bestAbs = abs; best = n; }
+    }
+
+    if(!best || bestAbs > W_MISS){
+      Audio2.lead(lane);
+      return;
+    }
+
+    best.judged = true;
+    if(bestAbs <= W_PERFECT){
+      S.perfect++; S.streak++;
+      S.score += 300 * multiplier();
+      Audio2.perfect(lane);
+      feedback("PERFECT", "#ffd000");
+    } else if(bestAbs <= W_GOOD){
+      S.good++; S.streak++;
+      S.score += 150 * multiplier();
+      Audio2.good(lane);
+      feedback("GOOD", "#00f0ff");
+    } else {
+      S.miss++; S.streak = 0;
+      Audio2.miss();
+      feedback("MISS", "#ff007f");
+    }
+    if(S.streak > S.bestStreak) S.bestStreak = S.streak;
+    updateHud();
+  }
+
+  function draw(elapsed){
+    const hitY = H - 54;
+    const laneW = W / 4;
+
+    ctx.fillStyle = "#0c0817";
+    ctx.fillRect(0, 0, W, H);
+
+    // Lane columns
+    for(let i = 0; i < 4; i++){
+      const x = i * laneW;
+      ctx.save();
+      ctx.globalAlpha = 0.07;
+      ctx.fillStyle = LANE_COLORS[i];
+      ctx.fillRect(x + 3, 0, laneW - 6, H);
+      ctx.restore();
+
+      ctx.strokeStyle = "rgba(255,255,255,0.06)";
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    // Judgment line
+    ctx.save();
+    ctx.strokeStyle = "#ffffff";
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0, hitY); ctx.lineTo(W, hitY); ctx.stroke();
+    ctx.restore();
+
+    // Lane receptors + flashes
+    for(let i = 0; i < 4; i++){
+      const cx = i * laneW + laneW / 2;
+      const since = performance.now() - S.flashes[i];
+      const glow = since < 140 ? (1 - since / 140) : 0;
+      ctx.save();
+      ctx.strokeStyle = LANE_COLORS[i];
+      ctx.lineWidth = 3 + glow * 4;
+      ctx.globalAlpha = 0.5 + glow * 0.5;
+      ctx.shadowColor = LANE_COLORS[i];
+      ctx.shadowBlur = 8 + glow * 22;
+      ctx.beginPath();
+      ctx.arc(cx, hitY, laneW * 0.28, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Notes
+    for(const n of S.notes){
+      if(n.judged) continue;
+      const dt = n.t - elapsed;
+      if(dt > S.approach) break;
+      if(dt < -W_MISS) continue;
+
+      const prog = 1 - (dt / S.approach);
+      const y = prog * hitY;
+      const cx = n.lane * laneW + laneW / 2;
+      const rw = laneW * 0.62, rh = 20;
+
+      ctx.save();
+      ctx.fillStyle = LANE_COLORS[n.lane];
+      ctx.shadowColor = LANE_COLORS[n.lane];
+      ctx.shadowBlur = 14;
+      ctx.beginPath();
+      const rx = cx - rw / 2, ry = y - rh / 2;
+      if(ctx.roundRect){ ctx.roundRect(rx, ry, rw, rh, 7); } else { ctx.rect(rx, ry, rw, rh); }
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Feedback text
+    if(S.feedback){
+      const since = performance.now() - S.feedback.at;
+      if(since < 520){
+        const a = 1 - since / 520;
+        ctx.save();
+        ctx.globalAlpha = a;
+        ctx.fillStyle = S.feedback.color;
+        ctx.font = "900 26px 'Space Grotesk', sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(S.feedback.text, W / 2, hitY - 70 - (1 - a) * 22);
+        ctx.restore();
       } else {
-        holdTimer = requestAnimationFrame(tick);
+        S.feedback = null;
       }
-    };
-    holdTimer = requestAnimationFrame(tick);
+    }
+
+    // Multiplier meter
+    const mult = multiplier();
+    ctx.save();
+    ctx.fillStyle = "rgba(255,255,255,0.1)";
+    ctx.fillRect(W - 12, 14, 6, H * 0.4);
+    ctx.fillStyle = mult >= 4 ? "#ffd000" : (mult >= 2 ? "#00ffaa" : "#8b62b8");
+    const fill = Math.min(1, (S.streak % 10) / 10 + (mult - 1) * 0.001);
+    ctx.fillRect(W - 12, 14 + H * 0.4 * (1 - fill), 6, H * 0.4 * fill);
+    ctx.restore();
+  }
+
+  function loop(){
+    if(!S.running) return;
+    const elapsed = performance.now() - S.startT;
+
+    // Backing track scheduling (kick/snare per beat)
+    const beatIdx = Math.floor(elapsed / S.beatMs);
+    if(beatIdx !== S.lastBeatIdx && beatIdx >= 0){
+      S.lastBeatIdx = beatIdx;
+      if(beatIdx % 2 === 0) Audio2.kick(); else Audio2.snare();
+    }
+
+    // Auto-miss notes that fell past the window
+    for(const n of S.notes){
+      if(n.judged) continue;
+      if(n.t < elapsed - W_MISS){
+        n.judged = true;
+        S.miss++;
+        S.streak = 0;
+        feedback("MISS", "#ff007f");
+        updateHud();
+      }
+    }
+
+    const secs = Math.max(0, Math.floor(elapsed / 1000));
+    $("hudTime").textContent = "0:" + String(Math.min(secs, TRACK_SECONDS)).padStart(2, "0");
+
+    draw(elapsed);
+
+    if(elapsed > (TRACK_SECONDS * 1000) + S.approach){ finish(); return; }
+    requestAnimationFrame(loop);
+  }
+
+  function finish(){
+    S.running = false;
+    const total = S.perfect + S.good + S.miss;
+    const acc = total ? Math.round(((S.perfect + S.good * 0.6) / total) * 100) : 0;
+
+    $("statPerfect").textContent = S.perfect;
+    $("statGood").textContent = S.good;
+    $("statMiss").textContent = S.miss;
+    $("statAcc").textContent = acc + "%";
+    $("verdictScore").textContent = S.score + " PTS";
+
+    let grade = "GRADE D", kicker = "SET FAILED";
+    if(acc >= 95){ grade = "GRADE S"; kicker = "FLAWLESS SET"; }
+    else if(acc >= 90){ grade = "GRADE A"; kicker = "SET CLEARED"; }
+    else if(acc >= 85){ grade = "GRADE B"; kicker = "SET CLEARED"; }
+    else if(acc >= 70){ grade = "GRADE C"; kicker = "SET COMPLETE"; }
+    $("verdictGrade").textContent = grade;
+    $("verdictKicker").textContent = kicker;
+
+    showScreen("scrVerdict");
+  }
+
+  // Pads
+  document.querySelectorAll(".pad").forEach(p => {
+    const lane = parseInt(p.dataset.lane, 10);
+    p.addEventListener("pointerdown", ev => {
+      ev.preventDefault();
+      p.classList.add("pressed");
+      judge(lane);
+    });
+    const off = () => p.classList.remove("pressed");
+    p.addEventListener("pointerup", off);
+    p.addEventListener("pointercancel", off);
+    p.addEventListener("pointerleave", off);
+  });
+
+  // Also allow tapping directly in the lane column
+  wrap.addEventListener("pointerdown", e => {
+    if(!S.running) return;
+    e.preventDefault();
+    const r = cvs.getBoundingClientRect();
+    const lane = Math.max(0, Math.min(3, Math.floor(((e.clientX - r.left) / r.width) * 4)));
+    judge(lane);
+  });
+
+  $("diffRow").onclick = e => {
+    const b = e.target.closest(".tag-btn");
+    if(!b) return;
+    document.querySelectorAll("#diffRow .tag-btn").forEach(t => t.classList.remove("is-active"));
+    b.classList.add("is-active");
+    S.diff = b.dataset.diff;
   };
 
-  btn.onpointerdown = start;
-  btn.onpointerup = cancel;
-  btn.onpointercancel = cancel;
-  btn.onpointerleave = cancel;
-}
-
-/* ================= CANVAS RHYTHM ENGINE ================= */
-const cvs = $("beatCanvas");
-const ctx = cvs.getContext("2d");
-let W = 360, H = 540, DPR = 1;
-
-function resizeCanvas(){
-  const wrap = cvs.parentElement;
-  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-  W = wrap.clientWidth;
-  H = wrap.clientHeight;
-  cvs.width = W * DPR;
-  cvs.height = H * DPR;
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-}
-window.addEventListener("resize", resizeCanvas);
-window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
-
-const LANE_COLORS = ["#ff0055", "#00e5ff", "#ffd000", "#00ffaa"];
-
-function resetGame(){
-  S.score = 0;
-  S.streak = 0;
-  S.misses = 0;
-  S.timeLeft = 60;
-  S.notes = [];
-  S.feedbacks = [];
-  updateHUD();
-
-  clearInterval(S.timerHandle);
-  S.timerHandle = setInterval(() => {
-    S.timeLeft--;
-    $("hudClock").textContent = `${S.timeLeft}s`;
-    if(S.timeLeft <= 0){
-      clearInterval(S.timerHandle);
-      endGauntlet();
-    }
-  }, 1000);
-
-  S.running = true;
-}
-
-function updateHUD(){
-  $("hudScore").textContent = S.score.toLocaleString();
-  const mult = S.streak >= 20 ? "4x" : (S.streak >= 10 ? "2x" : "1x");
-  $("hudStreak").textContent = `${S.streak} (${mult})`;
-}
-
-let lastT = performance.now();
-let noteSpawnTimer = 0;
-
-function loop(t){
-  if(!S.running) return;
-  const dt = Math.min((t - lastT) / 1000, 0.033);
-  lastT = t;
-
-  // Clear Highway
-  ctx.fillStyle = "#0a0412";
-  ctx.fillRect(0, 0, W, H);
-
-  // Draw 4 Lanes
-  const laneW = W / 4;
-  const strikeY = H - 80;
-
-  for(let i = 0; i < 4; i++){
-    ctx.strokeStyle = "rgba(255, 0, 127, 0.15)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(i * laneW, 0);
-    ctx.lineTo(i * laneW, H);
-    ctx.stroke();
-  }
-
-  // Draw Strike Line Zone
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
-  ctx.lineWidth = 3;
-  ctx.beginPath();
-  ctx.moveTo(0, strikeY);
-  ctx.lineTo(W, strikeY);
-  ctx.stroke();
-
-  // Spawn Rhythm Patterns
-  noteSpawnTimer += dt;
-  if(noteSpawnTimer > 0.28){
-    noteSpawnTimer = 0;
-    if(Math.random() < 0.65){
-      const lane = Math.floor(Math.random() * 4);
-      S.notes.push({
-        lane,
-        y: -20,
-        speed: 380,
-        hit: false
-      });
-    }
-  }
-
-  // Update & Draw Notes
-  for(let i = S.notes.length - 1; i >= 0; i--){
-    const n = S.notes[i];
-    n.y += n.speed * dt;
-
-    ctx.fillStyle = LANE_COLORS[n.lane];
-    ctx.shadowColor = LANE_COLORS[n.lane];
-    ctx.shadowBlur = 10;
-    ctx.fillRect(n.lane * laneW + 6, n.y - 8, laneW - 12, 16);
-    ctx.shadowBlur = 0;
-
-    // Missed Note
-    if(n.y > strikeY + 45 && !n.hit){
-      S.notes.splice(i, 1);
-      S.streak = 0;
-      S.misses++;
-      AudioBeat.missSound();
-      addFeedback("MISS", n.lane, "#ff0044");
-      updateHUD();
-    }
-  }
-
-  // Update Floating Feedback texts
-  for(let i = S.feedbacks.length - 1; i >= 0; i--){
-    const f = S.feedbacks[i];
-    f.y -= 35 * dt;
-    f.life -= dt;
-    if(f.life <= 0){ S.feedbacks.splice(i, 1); continue; }
-    ctx.fillStyle = f.color;
-    ctx.font = "800 13px 'Space Mono', monospace";
-    ctx.textAlign = "center";
-    ctx.fillText(f.text, f.lane * laneW + laneW/2, f.y);
-  }
-
-  requestAnimationFrame(loop);
-}
-
-function addFeedback(text, lane, color){
-  S.feedbacks.push({ text, lane, color, y: H - 90, life: 0.5 });
-}
-
-function handleLaneHit(laneIdx){
-  AudioBeat.playNote(laneIdx);
-  const strikeY = H - 80;
-  let hitFound = false;
-
-  for(let i = 0; i < S.notes.length; i++){
-    const n = S.notes[i];
-    if(n.lane === laneIdx && !n.hit){
-      const dist = Math.abs(n.y - strikeY);
-      if(dist < 42){
-        n.hit = true;
-        hitFound = true;
-        const mult = S.streak >= 20 ? 4 : (S.streak >= 10 ? 2 : 1);
-        
-        if(dist < 16){
-          S.score += 300 * mult;
-          S.streak++;
-          addFeedback("PERFECT!", laneIdx, "#00ffaa");
-        } else {
-          S.score += 150 * mult;
-          S.streak++;
-          addFeedback("GOOD", laneIdx, "#ffd000");
-        }
-        S.notes.splice(i, 1);
-        updateHUD();
-        break;
-      }
-    }
-  }
-
-  if(!hitFound){
-    S.streak = 0;
-    updateHUD();
-  }
-}
-
-function endGauntlet(){
-  S.running = false;
-  clearInterval(S.timerHandle);
-  const pName = roster[S.playerIdx];
-  const passed = S.score >= S.quota;
-
-  $("verdictPlayer").textContent = pName;
-  $("verdictScore").textContent = `${S.score.toLocaleString()} PTS`;
-
-  if(passed){
-    $("passBox").style.display = "block";
-    $("forfeitBox").style.display = "none";
-  } else {
-    $("passBox").style.display = "none";
-    $("forfeitBox").style.display = "block";
-    const sips = Math.max(2, Math.min(6, Math.ceil(S.misses / 4)));
-    $("forfeitSips").textContent = `Take ${sips} penalty sips!`;
-    $("forfeitMisses").textContent = `Missed ${S.misses} notes & fell below target quota.`;
-  }
-  showScreen("scrVerdict");
-}
-
-/* ================= CONTROLS ================= */
-document.querySelectorAll(".lane-btn").forEach(btn => {
-  btn.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    btn.classList.add("active");
-    const lane = parseInt(btn.dataset.lane, 10);
-    handleLaneHit(lane);
-  });
-  btn.addEventListener("pointerup", () => btn.classList.remove("active"));
-  btn.addEventListener("pointercancel", () => btn.classList.remove("active"));
-});
-
-// Keyboard backup for desktop testing (D, F, J, K)
-window.addEventListener("keydown", e => {
-  const k = e.key.toLowerCase();
-  const map = { 'd': 0, 'f': 1, 'j': 2, 'k': 3 };
-  if(map[k] !== undefined) handleLaneHit(map[k]);
-});
-
-// Quota Select
-$("quotaGrid").onclick = e => {
-  const b = e.target.closest(".opt-btn"); if(!b) return;
-  document.querySelectorAll("#quotaGrid .opt-btn").forEach(x => x.classList.remove("is-active"));
-  b.classList.add("is-active");
-  S.quota = parseInt(b.dataset.q, 10);
-};
-
-// Roster
-function renderRoster(){
-  $("rosterList").innerHTML = roster.map((p, i) => `
-    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
-      <span>#${i+1} ${p}</span>
-      <span style="color:var(--accent);">60S BEAT</span>
-    </li>
-  `).join("");
-}
-
-$("btnStartTourney").onclick = () => {
-  S.playerIdx = 0;
-  startTurn();
-};
-
-function startTurn(){
-  const player = roster[S.playerIdx];
-  $("topSub").textContent = `${player}'s Session`;
-  $("hudPlayer").textContent = player;
-  openCurtain(player, () => {
+  $("btnStartBeat").onclick = () => {
+    Audio2.init();
+    S.score = 0; S.streak = 0; S.bestStreak = 0;
+    S.perfect = 0; S.good = 0; S.miss = 0;
+    S.feedback = null; S.lastBeatIdx = -1;
+    buildChart();
+    updateHud();
     showScreen("scrPlay");
-    resizeCanvas();
-    resetGame();
-    lastT = performance.now();
-    requestAnimationFrame(loop);
-  });
-}
+    requestAnimationFrame(() => {
+      resizeCanvas();
+      S.running = true;
+      S.startT = performance.now() + 1200; // lead-in
+      requestAnimationFrame(loop);
+    });
+  };
 
-$("btnNextRunner").onclick = () => {
-  S.playerIdx = (S.playerIdx + 1) % roster.length;
-  startTurn();
-};
+  $("btnRestartBeat").onclick = () => $("btnStartBeat").click();
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderRoster();
-});
+  window.addEventListener("resize", () => { if(S.running) resizeCanvas(); });
+  window.addEventListener("orientationchange", () => setTimeout(() => { if(S.running) resizeCanvas(); }, 220));
 })();
 </script>
-<script src="../../js/theme-sync.js"></script>
 </body>
 </html>

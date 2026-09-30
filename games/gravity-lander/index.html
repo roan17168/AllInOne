@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="nordic-slate">
 <head>
-    
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#0e1117" id="metaThemeColor" />
-<title>Lunar Thruster Gauntlet | PartyDeck</title>
+<title>Gravity Lander | PartyDeck</title>
 <script>
 (function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
@@ -16,17 +15,17 @@
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
   :root {
-    --bg-primary: #08090d; --bg-surface: #10141d; --bg-elevated: #18202d;
-    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #57657a;
+    --bg-primary: #0e1117; --bg-surface: #161b24; --bg-elevated: #1f2633;
+    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #627288;
     --accent: #38bdf8; --accent-glow: rgba(56,189,248,0.35); --accent-contrast: #031525;
-    --danger: #ff0055; --success: #00ff66; --warning: #ffd000;
-    --border-ui: rgba(56,189,248,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+    --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
+    --border-ui: rgba(148,163,184,0.16); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    min-height: 100dvh; display: flex; flex-direction: column;
+    min-height: 100%; height: 100dvh; display: flex; flex-direction: column;
     overflow: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
@@ -37,85 +36,52 @@
   .gm-idblock { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
   .gm-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 900; }
   .gm-sub { font-family: 'Space Mono', monospace; font-size: .62rem; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; }
-  .gm-actions { display: flex; gap: .4rem; }
   .btn-icon-only {
-    width: 44px; height: 44px; min-height: 44px; border-radius: var(--r-sm);
+    width: 40px; height: 40px; min-height: 40px; border-radius: var(--r-sm);
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
     color: var(--text-primary); display: flex; align-items: center; justify-content: center;
     cursor: pointer; text-decoration: none;
   }
-  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .stage { flex: 1; display: flex; flex-direction: column; position: relative; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .screen {
     display: none; flex-direction: column; gap: 1rem; padding: 1.1rem;
-    max-width: 600px; margin: 0 auto; width: 100%; height: 100%;
-    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    max-width: 600px; margin: 0 auto; width: 100%; min-height: 100%;
+    padding-bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1.2rem));
   }
   .screen.is-active { display: flex; }
+  #scrPlay { padding: 0; max-width: none; gap: 0; overflow: hidden; height: 100%; }
 
-  /* HUD */
-  .hud-strip {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: .35rem;
-    padding: .4rem .6rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+  .hud-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem;
+    padding: .4rem .7rem; background: var(--bg-surface); border-bottom: 1px solid var(--border-ui);
+    flex-shrink: 0; z-index: 20;
   }
   .hud-stat {
     display: flex; flex-direction: column; align-items: center;
     background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    border-radius: var(--r-sm); padding: .25rem .3rem;
+    border-radius: var(--r-sm); padding: .3rem .4rem;
   }
   .hud-lbl { font-family: 'Space Mono', monospace; font-size: .52rem; color: var(--text-muted); text-transform: uppercase; }
-  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: .95rem; font-weight: 800; color: var(--accent); }
-  .hud-val.danger { color: var(--danger); }
+  .hud-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 900; color: var(--accent); }
 
-  /* Canvas Stage */
-  .lander-viewport {
-    flex: 1; position: relative; width: 100%; height: 100%;
-    background: #040508; touch-action: none; overflow: hidden;
+  .canvas-stage-wrap {
+    flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
   }
-  #landerCanvas { width: 100%; height: 100%; display: block; }
+  #landerCanvas { width: 100%; height: 100%; display: block; touch-action: none; }
 
-  /* Control Grid Overlay */
-  .controls-bar {
-    position: absolute; bottom: 0; left: 0; right: 0; z-index: 10;
-    display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: .6rem;
-    padding: .7rem .8rem; padding-bottom: max(.7rem, env(safe-area-inset-bottom));
-    background: linear-gradient(to top, rgba(8,9,13,.95), rgba(8,9,13,0));
-    pointer-events: none;
+  /* Thruster Touch Controls */
+  .lander-controls-dock {
+    display: grid; grid-template-columns: 1fr 1.5fr 1fr; gap: 8px;
+    padding: 10px 14px; background: var(--bg-surface); border-top: 1px solid var(--border-ui);
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
   }
   .ctrl-btn {
-    pointer-events: auto; min-height: 64px; background: rgba(24,32,45,.85);
-    border: 1px solid var(--border-ui); border-radius: var(--r-md);
-    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .75rem;
-    font-weight: 800; display: flex; flex-direction: column; align-items: center;
-    justify-content: center; gap: 4px; touch-action: none;
+    min-height: 52px; background: var(--bg-elevated); border: 1.5px solid var(--border-ui);
+    border-radius: var(--r-sm); color: #fff; font-family: 'Space Mono', monospace;
+    font-size: .85rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center;
   }
-  .ctrl-btn:active, .ctrl-btn.pressed {
-    background: var(--accent); color: var(--accent-contrast);
-    box-shadow: 0 0 16px var(--accent-glow);
-  }
-  .ctrl-btn.thrust-main {
-    border-color: var(--accent);
-    background: rgba(56,189,248,.15);
-  }
+  .ctrl-btn:active, .ctrl-btn.pressed { background: var(--accent); color: var(--accent-contrast); border-color: var(--accent); }
 
-  /* Panels & Cards */
-  .panel {
-    background: var(--bg-surface); border: 1px solid var(--border-ui);
-    border-radius: var(--r-md); padding: 1rem; box-shadow: 0 10px 30px rgba(0,0,0,.6);
-  }
-  .panel-title {
-    font-family: 'Space Mono', monospace; font-size: .62rem;
-    letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: .6rem;
-  }
-  .opt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
-  .opt-btn {
-    min-height: 48px; background: var(--bg-elevated); border: 1px solid var(--border-ui);
-    border-radius: var(--r-sm); color: var(--text-secondary); font-family: 'Space Mono', monospace;
-    font-size: .78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-  .opt-btn.is-active {
-    background: var(--accent); color: var(--accent-contrast); border-color: var(--accent);
-    box-shadow: 0 0 14px var(--accent-glow);
-  }
   .btn {
     width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
     background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
@@ -123,604 +89,349 @@
     box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
   }
   .btn:active { transform: scale(.98); }
-
-  /* 3-Stage Privacy Curtain */
-  .curtain {
-    position: fixed; inset: 0; z-index: 100; background: rgba(8, 9, 13, 0.96);
-    backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; padding: 1.4rem;
-  }
-  .curtain.is-open { display: flex; }
-  .cur-card {
-    background: var(--bg-surface); border: 2px solid var(--accent); border-radius: var(--r-lg);
-    padding: 2rem 1.4rem; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 0 35px var(--accent-glow);
-  }
-  .hold-btn {
-    position: relative; overflow: hidden; width: 100%; min-height: 60px;
-    border-radius: var(--r-md); background: var(--bg-elevated); border: 1px solid var(--accent);
-    color: var(--text-primary); font-family: 'Space Mono', monospace; font-size: .86rem; font-weight: 800;
-    cursor: pointer; touch-action: none; margin-top: 1.2rem; display: flex; align-items: center; justify-content: center;
-  }
-  .hold-fill {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
-    background: var(--accent); opacity: .85; transition: width .04s linear;
-  }
-  .hold-label { position: relative; z-index: 2; pointer-events: none; }
-  .hold-btn.armed .hold-label { color: var(--accent-contrast); }
-
-  .ico { display: inline-flex; width: 18px; height: 18px; flex-shrink: 0; }
-  .ico svg { width: 100%; height: 100%; }
 </style>
-<script src="../../js/roster-normalize.js"></script>
 </head>
 <body>
-
-<header class="gm-top">
-  <div class="gm-idblock">
-    <span class="gm-title">Lunar Thruster Gauntlet</span>
-    <span class="gm-sub" id="topSub">Pilot Setup</span>
-  </div>
-  <div class="gm-actions">
-    <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-    </a>
-  </div>
-</header>
-
-<div class="stage">
-  <!-- SETUP -->
-  <section class="screen is-active" id="scrSetup">
-    <div class="panel">
-      <div class="panel-title">Gravity Environment</div>
-      <div class="opt-grid" id="gravGrid">
-        <button class="opt-btn is-active" data-g="1">Moon (1.0x)</button>
-        <button class="opt-btn" data-g="1.4">Mars (1.4x)</button>
-        <button class="opt-btn" data-g="2.0">Titan (2.0x)</button>
-      </div>
+<div class="gm-root">
+  <header class="gm-top">
+    <div class="gm-idblock">
+      <span class="gm-title">Gravity Lander</span>
+      <span class="gm-sub">Vector Radar Thruster</span>
     </div>
-    <div class="panel">
-      <div class="panel-title">Flight Directives</div>
-      <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
-        • Tap <strong>LEFT / RIGHT</strong> to rotate thrusters.<br>
-        • Hold <strong>MAIN THRUST</strong> to counteract gravity.<br>
-        • Touch down on flat glowing landing zones at $\le 1.8\text{ m/s}$ and upright angle ($\le 15^\circ$).<br>
-        • High velocity crash = Drink penalty scaled to impact speed!
-      </p>
+    <div class="gm-actions">
+      <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </a>
     </div>
-    <div class="panel">
-      <div class="panel-title">Active Flight Pilots</div>
-      <ul id="rosterList" style="list-style:none;display:flex;flex-direction:column;gap:.4rem;max-height:22vh;overflow-y:auto;font-family:'Space Mono',monospace;font-size:.82rem;"></ul>
-    </div>
-    <button class="btn" id="btnStartGauntlet" style="margin-top:auto;">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></span>
-      Launch Lander Mission
-    </button>
-  </section>
+  </header>
 
-  <!-- GAMEPLAY VIEWPORT -->
-  <section class="screen" id="scrPlay" style="padding:0;max-width:none;gap:0;">
-    <div class="hud-strip">
-      <div class="hud-stat">
-        <span class="hud-lbl">Pilot</span>
-        <span class="hud-val" id="hudPilot" style="font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Alex</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">Fuel</span>
-        <span class="hud-val" id="hudFuel">100%</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">V-Speed</span>
-        <span class="hud-val" id="hudVSpd">0.0</span>
-      </div>
-      <div class="hud-stat">
-        <span class="hud-lbl">Angle</span>
-        <span class="hud-val" id="hudAngle">0°</span>
-      </div>
-    </div>
-
-    <div class="lander-viewport">
-      <canvas id="landerCanvas"></canvas>
-      <div class="controls-bar">
-        <button class="ctrl-btn" id="btnLeft">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg></span>
-          ROTATE L
-        </button>
-        <button class="ctrl-btn thrust-main" id="btnMain">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 19 21 12 17 5 21 12 2"/></svg></span>
-          MAIN THRUST
-        </button>
-        <button class="ctrl-btn" id="btnRight">
-          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></span>
-          ROTATE R
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- VERDICT -->
-  <section class="screen" id="scrVerdict">
-    <div class="panel" style="text-align:center;padding:1.6rem 1rem;">
-      <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">TELEMETRY VERDICT</div>
-      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.4rem 0;" id="verdictPilot">Pilot</h2>
-      <div style="font-family:'Space Mono',monospace;font-size:1.8rem;font-weight:900;color:var(--accent);margin-bottom:.6rem;" id="verdictStatus">LANDED</div>
-
-      <div id="crashBox" style="background:rgba(255,0,85,.1);border:2px solid var(--danger);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
-        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--danger);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">HULL DESTROYED</span>
-        <p style="font-size:1rem;font-weight:800;color:#fff;margin-top:.4rem;" id="crashPenalty">Take 4 sips!</p>
-        <p style="font-size:.8rem;color:var(--text-secondary);margin-top:.3rem;" id="crashReason">Impact speed exceeded safe tolerance.</p>
+  <div class="stage">
+    <!-- SETUP -->
+    <section class="screen is-active" id="scrSetup">
+      <div style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Descent Protocol</div>
+        <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
+          • Fire <strong>Left / Right rotational thrusters</strong> to adjust pitch.<br>
+          • Fire <strong>Main Burst Thruster</strong> to decelerate descent against gravity.<br>
+          • Land softly on the green vector pad (Speed &lt; 25, Angle ±15°)!
+        </p>
       </div>
 
-      <div id="landBox" style="background:rgba(0,255,102,.1);border:2px solid var(--success);border-radius:var(--r-md);padding:1rem;margin:1rem 0;display:none;">
-        <span style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--success);font-weight:800;letter-spacing:.14em;text-transform:uppercase;">PERFECT TOUCHDOWN</span>
-        <p style="font-size:1rem;font-weight:800;color:#fff;margin-top:.4rem;">Smooth as silk! Give out 3 penalty sips.</p>
-      </div>
-    </div>
-    <button class="btn" id="btnNextPilot" style="margin-top:auto;">Next Gauntlet Pilot</button>
-  </section>
-</div>
+      <button type="button" class="btn" id="btnStartLander" style="margin-top:auto;">Initiate Descent</button>
+    </section>
 
-<!-- 4. PRIVACY CURTAIN -->
-<div class="curtain" id="curtain">
-  <div class="cur-card">
-    <div class="ico" style="width:36px;height:36px;color:var(--accent);margin-bottom:.5rem;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    </div>
-    <div style="font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;color:var(--accent);text-transform:uppercase;">NEXT FLIGHT PILOT</div>
-    <h2 style="font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:900;margin:.2rem 0 .8rem;" id="curName">Pilot</h2>
-    <p style="font-size:.82rem;color:var(--text-secondary);">Land softly on the vector pad.</p>
-    <button class="hold-btn" id="btnCurtainHold">
-      <span class="hold-fill" id="holdFill"></span>
-      <span class="hold-label">HOLD 700MS TO ENTER COCKPIT</span>
-    </button>
+    <!-- PLAY -->
+    <section class="screen" id="scrPlay">
+      <div class="hud-bar">
+        <div class="hud-stat">
+          <span class="hud-lbl">Fuel</span>
+          <span class="hud-val" id="hudFuel">100%</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Speed</span>
+          <span class="hud-val" id="hudSpeed">0</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-lbl">Altitude</span>
+          <span class="hud-val" id="hudAlt">450m</span>
+        </div>
+      </div>
+
+      <div class="canvas-stage-wrap" id="canvasWrap">
+        <canvas id="landerCanvas"></canvas>
+      </div>
+
+      <footer class="lander-controls-dock">
+        <button type="button" class="ctrl-btn" id="btnRotLeft">&larr; ROT</button>
+        <button type="button" class="ctrl-btn" id="btnMainThrust" style="background:#1e293b;border-color:var(--accent);">THRUST &uarr;</button>
+        <button type="button" class="ctrl-btn" id="btnRotRight">ROT &rarr;</button>
+      </footer>
+    </section>
+
+    <!-- VERDICT -->
+    <section class="screen" id="scrVerdict">
+      <div style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;" id="verdictKicker">MISSION RESULT</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictTitle">LANDING SUCCESSFUL</h2>
+        <p style="font-size:.85rem;color:var(--text-secondary);" id="verdictSub">Safe touchdown achieved with remaining fuel reserve!</p>
+      </div>
+
+      <button type="button" class="btn" id="btnRestartLander" style="margin-top:auto;">Launch Next Probe</button>
+    </section>
   </div>
 </div>
 
 <script>
 (function(){
-"use strict";
+  "use strict";
+  const $ = id => document.getElementById(id);
 
-/* ================= WEB AUDIO SYNTH ================= */
-const AudioSys = {
-  ctx: null,
-  thrustOsc: null,
-  thrustGain: null,
-  init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-  startThrust(){
-    try {
-      this.init();
-      if(this.thrustOsc) return;
-      this.thrustOsc = this.ctx.createOscillator();
-      this.thrustGain = this.ctx.createGain();
-      this.thrustOsc.type = "sawtooth";
-      this.thrustOsc.frequency.setValueAtTime(85, this.ctx.currentTime);
-      this.thrustGain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-      this.thrustOsc.connect(this.thrustGain);
-      this.thrustGain.connect(this.ctx.destination);
-      this.thrustOsc.start();
-    }catch(e){}
-  },
-  stopThrust(){
-    try {
-      if(this.thrustOsc){
-        this.thrustOsc.stop();
-        this.thrustOsc.disconnect();
-        this.thrustOsc = null;
-      }
-    }catch(e){}
-  },
-  rotateBeep(){
-    try {
-      this.init();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sine"; o.frequency.setValueAtTime(880, this.ctx.currentTime);
-      g.gain.setValueAtTime(0.04, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.04);
-    }catch(e){}
-  },
-  touchdown(){
-    try {
-      this.init();
-      this.stopThrust();
-      [440, 554, 659, 880].forEach((f, i) => {
-        setTimeout(() => {
-          const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-          o.type = "triangle"; o.frequency.setValueAtTime(f, this.ctx.currentTime);
-          g.gain.setValueAtTime(0.12, this.ctx.currentTime);
-          g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
-          o.connect(g); g.connect(this.ctx.destination);
-          o.start(); o.stop(this.ctx.currentTime + 0.2);
-        }, i * 70);
-      });
-    }catch(e){}
-  },
-  explosion(){
-    try {
-      this.init();
-      this.stopThrust();
-      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
-      o.type = "sawtooth"; o.frequency.setValueAtTime(140, this.ctx.currentTime);
-      o.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.5);
-      g.gain.setValueAtTime(0.35, this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.5);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime + 0.5);
-    }catch(e){}
-  }
-};
-
-/* ================= ROSTER & STATE ================= */
-let roster = [];
-try {
-  const raw = localStorage.getItem("partydeck_players");
-  roster = raw ? JSON.parse(raw) : [];
-} catch(e){}
-if(!Array.isArray(roster) || roster.length < 2) roster = ["Pilot 1", "Pilot 2"];
-
-const S = {
-  playerIdx: 0,
-  gravityMult: 1.0,
-  running: false,
-  fuel: 100,
-  ship: { x: 100, y: 50, vx: 0.5, vy: 0, angle: 0, r: 12 },
-  inputs: { left: false, right: false, thrust: false },
-  terrain: [],
-  pads: [],
-  particles: []
-};
-
-const $ = id => document.getElementById(id);
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
-}
-
-/* ================= PRIVACY CURTAIN ================= */
-let holdTimer = null, holdStart = 0;
-const HOLD_MS = 700;
-
-function openCurtain(pName, onUnlock){
-  $("curName").textContent = pName;
-  $("holdFill").style.width = "0%";
-  $("btnCurtainHold").classList.remove("armed");
-  $("curtain").classList.add("is-open");
-
-  const btn = $("btnCurtainHold");
-  const cancel = e => {
-    if(e) e.preventDefault();
-    if(holdTimer) cancelAnimationFrame(holdTimer);
-    holdTimer = null;
-    $("holdFill").style.width = "0%";
-    btn.classList.remove("armed");
-  };
-  const start = e => {
-    e.preventDefault();
-    btn.classList.add("armed");
-    holdStart = performance.now();
-    const tick = now => {
-      const el = now - holdStart;
-      const pct = Math.min(100, (el / HOLD_MS) * 100);
-      $("holdFill").style.width = pct + "%";
-      if(el >= HOLD_MS){
-        cancel();
-        $("curtain").classList.remove("is-open");
-        onUnlock();
-      } else {
-        holdTimer = requestAnimationFrame(tick);
-      }
-    };
-    holdTimer = requestAnimationFrame(tick);
-  };
-
-  btn.onpointerdown = start;
-  btn.onpointerup = cancel;
-  btn.onpointercancel = cancel;
-  btn.onpointerleave = cancel;
-}
-
-/* ================= CANVAS PHYSICS ENGINE ================= */
-const cvs = $("landerCanvas");
-const ctx = cvs.getContext("2d");
-let W = 360, H = 540, DPR = 1;
-
-function resizeCanvas(){
-  const wrap = cvs.parentElement;
-  DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-  W = wrap.clientWidth;
-  H = wrap.clientHeight;
-  cvs.width = W * DPR;
-  cvs.height = H * DPR;
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  generateTerrain();
-}
-window.addEventListener("resize", resizeCanvas);
-window.addEventListener("orientationchange", () => setTimeout(resizeCanvas, 200));
-
-function generateTerrain(){
-  S.terrain = [];
-  const points = 16;
-  const step = W / (points - 1);
-  const pad1Idx = 4;
-  const pad2Idx = 11;
-  S.pads = [];
-
-  for(let i = 0; i < points; i++){
-    const x = i * step;
-    let y = H * 0.72 + (Math.sin(i * 1.3) * 35) + (Math.random() * 20);
-    if(i === pad1Idx || i === pad1Idx + 1){
-      y = H * 0.8;
-    }
-    if(i === pad2Idx || i === pad2Idx + 1){
-      y = H * 0.75;
-    }
-    S.terrain.push({ x, y });
-  }
-
-  // Define Landing Platform bounds
-  S.pads.push({ x1: S.terrain[pad1Idx].x, x2: S.terrain[pad1Idx+1].x, y: H * 0.8 });
-  S.pads.push({ x1: S.terrain[pad2Idx].x, x2: S.terrain[pad2Idx+1].x, y: H * 0.75 });
-}
-
-function resetFlight(){
-  S.ship = { x: W * 0.2, y: 50, vx: 0.8, vy: 0, angle: 0, r: 12 };
-  S.fuel = 100;
-  S.particles = [];
-  S.inputs = { left: false, right: false, thrust: false };
-  generateTerrain();
-  S.running = true;
-}
-
-let lastT = performance.now();
-function loop(t){
-  if(!S.running) return;
-  const dt = Math.min((t - lastT) / 1000, 0.033);
-  lastT = t;
-
-  // Physics Update
-  const gravity = 55 * S.gravityMult;
-  S.ship.vy += gravity * dt;
-
-  // Steering
-  if(S.inputs.left){
-    S.ship.angle -= 2.8 * dt;
-  }
-  if(S.inputs.right){
-    S.ship.angle += 2.8 * dt;
-  }
-
-  // Main Thruster
-  if(S.inputs.thrust && S.fuel > 0){
-    const thrustPower = 135 * S.gravityMult;
-    S.ship.vx += Math.sin(S.ship.angle) * thrustPower * dt;
-    S.ship.vy -= Math.cos(S.ship.angle) * thrustPower * dt;
-    S.fuel = Math.max(0, S.fuel - 18 * dt);
-
-    // Thrust Flame Particles
-    for(let k = 0; k < 2; k++){
-      S.particles.push({
-        x: S.ship.x - Math.sin(S.ship.angle) * 14,
-        y: S.ship.y + Math.cos(S.ship.angle) * 14,
-        vx: -Math.sin(S.ship.angle) * 80 + (Math.random() - 0.5) * 30,
-        vy: Math.cos(S.ship.angle) * 80 + (Math.random() - 0.5) * 30,
-        life: 0.25,
-        maxLife: 0.25
-      });
-    }
-  }
-
-  S.ship.x += S.ship.vx * dt * 25;
-  S.ship.y += S.ship.vy * dt * 25;
-
-  // Screen wrap X
-  if(S.ship.x < 0) S.ship.x = W;
-  if(S.ship.x > W) S.ship.x = 0;
-
-  // Update HUD
-  const vSpd = (S.ship.vy * 0.35).toFixed(1);
-  const angDeg = Math.round((S.ship.angle * 180 / Math.PI) % 360);
-  $("hudFuel").textContent = `${Math.round(S.fuel)}%`;
-  $("hudVSpd").textContent = `${vSpd} m/s`;
-  $("hudAngle").textContent = `${Math.abs(angDeg)}°`;
-  $("hudVSpd").classList.toggle("danger", Math.abs(vSpd) > 1.8);
-  $("hudAngle").classList.toggle("danger", Math.abs(angDeg) > 15);
-
-  // Clear Vector Radar Surface
-  ctx.fillStyle = "#05070a";
-  ctx.fillRect(0, 0, W, H);
-
-  // Draw Grid Overlay
-  ctx.strokeStyle = "rgba(56, 189, 248, 0.06)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  for(let x = 0; x < W; x += 30){ ctx.moveTo(x, 0); ctx.lineTo(x, H); }
-  for(let y = 0; y < H; y += 30){ ctx.moveTo(0, y); ctx.lineTo(W, y); }
-  ctx.stroke();
-
-  // Draw Jagged Terrain
-  ctx.strokeStyle = "#38bdf8";
-  ctx.lineWidth = 2;
-  ctx.shadowColor = "#38bdf8"; ctx.shadowBlur = 6;
-  ctx.beginPath();
-  ctx.moveTo(S.terrain[0].x, S.terrain[0].y);
-  for(let i = 1; i < S.terrain.length; i++){
-    ctx.lineTo(S.terrain[i].x, S.terrain[i].y);
-  }
-  ctx.stroke();
-  ctx.shadowBlur = 0;
-
-  // Draw Glowing Landing Pads
-  S.pads.forEach(p => {
-    ctx.strokeStyle = "#00ff66";
-    ctx.lineWidth = 4;
-    ctx.shadowColor = "#00ff66"; ctx.shadowBlur = 10;
-    ctx.beginPath();
-    ctx.moveTo(p.x1, p.y);
-    ctx.lineTo(p.x2, p.y);
-    ctx.stroke();
-    ctx.shadowBlur = 0;
-  });
-
-  // Draw Particles
-  for(let i = S.particles.length - 1; i >= 0; i--){
-    const p = S.particles[i];
-    p.x += p.vx * dt;
-    p.y += p.vy * dt;
-    p.life -= dt;
-    if(p.life <= 0){ S.particles.splice(i, 1); continue; }
-    ctx.fillStyle = `rgba(255, 140, 0, ${p.life / p.maxLife})`;
-    ctx.beginPath(); ctx.arc(p.x, p.y, 2.5, 0, Math.PI*2); ctx.fill();
-  }
-
-  // Draw Lunar Module (Vector Ship)
-  ctx.save();
-  ctx.translate(S.ship.x, S.ship.y);
-  ctx.rotate(S.ship.angle);
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 2;
-  ctx.shadowColor = "#38bdf8"; ctx.shadowBlur = 8;
-  
-  // Capsule body
-  ctx.beginPath();
-  ctx.moveTo(0, -12);
-  ctx.lineTo(8, 6);
-  ctx.lineTo(-8, 6);
-  ctx.closePath();
-  ctx.stroke();
-
-  // Landing legs
-  ctx.beginPath();
-  ctx.moveTo(-8, 6); ctx.lineTo(-12, 12);
-  ctx.moveTo(8, 6); ctx.lineTo(12, 12);
-  ctx.stroke();
-  ctx.restore();
-  ctx.shadowBlur = 0;
-
-  // Collision Checking
-  checkCollision();
-
-  requestAnimationFrame(loop);
-}
-
-function checkCollision(){
-  const s = S.ship;
-  
-  // Check terrain line segment intersection
-  for(let i = 0; i < S.terrain.length - 1; i++){
-    const p1 = S.terrain[i], p2 = S.terrain[i+1];
-    if(s.x >= p1.x && s.x <= p2.x){
-      const t = (s.x - p1.x) / (p2.x - p1.x);
-      const groundY = p1.y + t * (p2.y - p1.y);
-
-      if(s.y + s.r >= groundY){
-        // Check if on a landing pad
-        let onPad = false;
-        S.pads.forEach(pad => {
-          if(s.x >= pad.x1 && s.x <= pad.x2 && Math.abs(groundY - pad.y) < 4){
-            onPad = true;
-          }
-        });
-
-        const vSpeed = Math.abs(s.vy * 0.35);
-        const ang = Math.abs((s.angle * 180 / Math.PI) % 360);
-
-        if(onPad && vSpeed <= 1.8 && ang <= 15){
-          finishFlight(true, vSpeed);
-        } else {
-          let reason = "Crashed into jagged rocks.";
-          if(onPad && vSpeed > 1.8) reason = `Hard impact! Vertical velocity was ${vSpeed.toFixed(1)} m/s (Limit 1.8).`;
-          if(onPad && ang > 15) reason = `Tipped over! Landing angle was ${ang.toFixed(0)}° (Limit 15°).`;
-          finishFlight(false, vSpeed, reason);
+  const AudioLander = {
+    ctx: null,
+    thrustOsc: null,
+    thrustGain: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    startThrust(){
+      try {
+        this.init();
+        if(this.thrustOsc) return;
+        this.thrustOsc = this.ctx.createOscillator();
+        this.thrustGain = this.ctx.createGain();
+        this.thrustOsc.type = "sawtooth";
+        this.thrustOsc.frequency.setValueAtTime(85, this.ctx.currentTime);
+        this.thrustGain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        this.thrustOsc.connect(this.thrustGain);
+        this.thrustGain.connect(this.ctx.destination);
+        this.thrustOsc.start();
+      }catch(e){}
+    },
+    stopThrust(){
+      try {
+        if(this.thrustOsc){
+          this.thrustOsc.stop();
+          this.thrustOsc.disconnect();
+          this.thrustOsc = null;
         }
-        return;
-      }
+      }catch(e){}
+    },
+    crash(){
+      try {
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.4);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.4);
+      }catch(e){}
+    },
+    touchdown(){
+      try {
+        this.init();
+        [523, 659, 784, 1046].forEach((f, i) => {
+          setTimeout(() => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.frequency.setValueAtTime(f, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + 0.12);
+          }, i * 70);
+        });
+      }catch(e){}
     }
+  };
+
+  const cvs = $("landerCanvas");
+  const ctx = cvs.getContext("2d");
+  const wrap = $("canvasWrap");
+
+  let W = 360, H = 550, DPR = 1;
+
+  const S = {
+    running: false,
+    x: 180,
+    y: 50,
+    vx: 0,
+    vy: 0,
+    angle: 0,
+    fuel: 100,
+    thrusting: false,
+    rotLeft: false,
+    rotRight: false,
+    padX: 130,
+    padW: 100,
+    terrain: []
+  };
+
+  function showScreen(id){
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
   }
-}
 
-function finishFlight(success, speed, reason=""){
-  S.running = false;
-  AudioSys.stopThrust();
-  const pilot = roster[S.playerIdx];
+  function resizeCanvas(){
+    const rect = wrap.getBoundingClientRect();
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    W = rect.width;
+    H = rect.height;
+    cvs.width = Math.round(W * DPR);
+    cvs.height = Math.round(H * DPR);
+    cvs.style.width = W + "px";
+    cvs.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-  $("verdictPilot").textContent = pilot;
-  if(success){
-    $("verdictStatus").textContent = "TOUCHDOWN!";
-    $("verdictStatus").style.color = "var(--success)";
-    $("landBox").style.display = "block";
-    $("crashBox").style.display = "none";
-    AudioSys.touchdown();
-  } else {
-    $("verdictStatus").textContent = "CRASH LANDING";
-    $("verdictStatus").style.color = "var(--danger)";
-    $("landBox").style.display = "none";
-    $("crashBox").style.display = "block";
-    const sips = Math.max(2, Math.min(6, Math.round(speed * 1.5)));
-    $("crashPenalty").textContent = `Take ${sips} penalty sips!`;
-    $("crashReason").textContent = reason;
-    AudioSys.explosion();
+    generateTerrain();
   }
-  showScreen("scrVerdict");
-}
 
-/* ================= CONTROLS ================= */
-const bL = $("btnLeft"), bR = $("btnRight"), bM = $("btnMain");
+  function generateTerrain(){
+    S.padW = W * 0.3;
+    S.padX = W * 0.35;
+    const groundY = H - 35;
 
-const bindBtn = (el, onDown, onUp) => {
-  el.addEventListener("pointerdown", e => { e.preventDefault(); el.classList.add("pressed"); onDown(); });
-  el.addEventListener("pointerup", e => { e.preventDefault(); el.classList.remove("pressed"); onUp(); });
-  el.addEventListener("pointercancel", e => { e.preventDefault(); el.classList.remove("pressed"); onUp(); });
-  el.addEventListener("pointerleave", e => { e.preventDefault(); el.classList.remove("pressed"); onUp(); });
-};
+    S.terrain = [
+      { x: 0, y: groundY - 20 },
+      { x: S.padX, y: groundY },
+      { x: S.padX + S.padW, y: groundY },
+      { x: W, y: groundY - 25 }
+    ];
+  }
 
-bindBtn(bL, () => { S.inputs.left = true; AudioSys.rotateBeep(); }, () => { S.inputs.left = false; });
-bindBtn(bR, () => { S.inputs.right = true; AudioSys.rotateBeep(); }, () => { S.inputs.right = false; });
-bindBtn(bM, () => { S.inputs.thrust = true; AudioSys.startThrust(); }, () => { S.inputs.thrust = false; AudioSys.stopThrust(); });
+  let lastT = performance.now();
+  function loop(t){
+    if(!S.running) return;
+    const dt = Math.min((t - lastT) / 1000, 0.033);
+    lastT = t;
 
-// Gravity Config
-$("gravGrid").onclick = e => {
-  const b = e.target.closest(".opt-btn"); if(!b) return;
-  document.querySelectorAll("#gravGrid .opt-btn").forEach(x => x.classList.remove("is-active"));
-  b.classList.add("is-active");
-  S.gravityMult = parseFloat(b.dataset.g);
-};
+    // Controls
+    if(S.rotLeft) S.angle -= 2.8 * dt;
+    if(S.rotRight) S.angle += 2.8 * dt;
 
-// Roster
-function renderRoster(){
-  $("rosterList").innerHTML = roster.map((p, i) => `
-    <li style="display:flex;justify-content:space-between;padding:.35rem .6rem;background:var(--bg-elevated);border-radius:var(--r-sm);border:1px solid var(--border-ui);">
-      <span>#${i+1} ${p}</span>
-      <span style="color:var(--accent);">PILOT</span>
-    </li>
-  `).join("");
-}
+    if(S.thrusting && S.fuel > 0){
+      S.fuel = Math.max(0, S.fuel - 18 * dt);
+      const power = 380;
+      S.vx += Math.sin(S.angle) * power * dt;
+      S.vy -= Math.cos(S.angle) * power * dt;
+      $("hudFuel").textContent = `${Math.round(S.fuel)}%`;
+    }
 
-$("btnStartGauntlet").onclick = () => {
-  S.playerIdx = 0;
-  startTurn();
-};
+    // Gravity
+    S.vy += 140 * dt;
+    S.x += S.vx * dt;
+    S.y += S.vy * dt;
 
-function startTurn(){
-  const p = roster[S.playerIdx];
-  $("topSub").textContent = `${p}'s Flight`;
-  $("hudPilot").textContent = p;
-  openCurtain(p, () => {
+    const groundY = H - 35;
+    const speed = Math.hypot(S.vx, S.vy);
+    const alt = Math.max(0, groundY - S.y);
+
+    $("hudSpeed").textContent = `${Math.round(speed)}`;
+    $("hudAlt").textContent = `${Math.round(alt)}m`;
+
+    // Clear Canvas
+    ctx.fillStyle = "#090c12";
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw Terrain
+    ctx.save();
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(S.terrain[0].x, S.terrain[0].y);
+    for(let i = 1; i < S.terrain.length; i++) ctx.lineTo(S.terrain[i].x, S.terrain[i].y);
+    ctx.stroke();
+
+    // Draw Landing Pad
+    ctx.strokeStyle = "#00ffaa";
+    ctx.lineWidth = 4;
+    ctx.shadowColor = "#00ffaa";
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.moveTo(S.padX, groundY);
+    ctx.lineTo(S.padX + S.padW, groundY);
+    ctx.stroke();
+    ctx.restore();
+
+    // Draw Lander Vessel
+    ctx.save();
+    ctx.translate(S.x, S.y);
+    ctx.rotate(S.angle);
+
+    ctx.strokeStyle = "#38bdf8";
+    ctx.lineWidth = 2;
+    ctx.fillStyle = "#1e293b";
+
+    // Cabin
+    ctx.beginPath();
+    ctx.moveTo(0, -14);
+    ctx.lineTo(10, 8);
+    ctx.lineTo(-10, 8);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Landing Legs
+    ctx.beginPath();
+    ctx.moveTo(-8, 8); ctx.lineTo(-14, 18);
+    ctx.moveTo(8, 8); ctx.lineTo(14, 18);
+    ctx.stroke();
+
+    // Exhaust Plume
+    if(S.thrusting && S.fuel > 0){
+      ctx.fillStyle = "#ff0055";
+      ctx.beginPath();
+      ctx.moveTo(-6, 10);
+      ctx.lineTo(0, 22 + Math.random() * 8);
+      ctx.lineTo(6, 10);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Landing / Crash Resolution
+    if(S.y >= groundY - 14){
+      S.running = false;
+      AudioLander.stopThrust();
+
+      const onPad = (S.x >= S.padX && S.x <= S.padX + S.padW);
+      const safeSpeed = speed < 65;
+      const safeAngle = Math.abs(S.angle) < 0.35;
+
+      if(onPad && safeSpeed && safeAngle){
+        AudioLander.touchdown();
+        $("verdictKicker").textContent = "TOUCHDOWN CONFIRMED";
+        $("verdictKicker").style.color = "var(--success)";
+        $("verdictTitle").textContent = "PERFECT LANDING!";
+        $("verdictSub").textContent = `Speed: ${Math.round(speed)} | Fuel Left: ${Math.round(S.fuel)}%`;
+      } else {
+        AudioLander.crash();
+        $("verdictKicker").textContent = "HULL CRUSHED";
+        $("verdictKicker").style.color = "var(--danger)";
+        $("verdictTitle").textContent = "LANDER DESTROYED";
+        $("verdictSub").textContent = !onPad ? "Missed the landing pad." : (!safeSpeed ? `Impact speed too high (${Math.round(speed)}).` : "Lander tilted beyond tolerance.");
+      }
+      showScreen("scrVerdict");
+      return;
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  // Bind Touch Controls
+  const btnL = $("btnRotLeft"), btnR = $("btnRotRight"), btnT = $("btnMainThrust");
+
+  btnL.addEventListener("pointerdown", () => S.rotLeft = true);
+  btnL.addEventListener("pointerup", () => S.rotLeft = false);
+  btnL.addEventListener("pointercancel", () => S.rotLeft = false);
+
+  btnR.addEventListener("pointerdown", () => S.rotRight = true);
+  btnR.addEventListener("pointerup", () => S.rotRight = false);
+  btnR.addEventListener("pointercancel", () => S.rotRight = false);
+
+  btnT.addEventListener("pointerdown", () => { S.thrusting = true; AudioLander.startThrust(); });
+  btnT.addEventListener("pointerup", () => { S.thrusting = false; AudioLander.stopThrust(); });
+  btnT.addEventListener("pointercancel", () => { S.thrusting = false; AudioLander.stopThrust(); });
+
+  $("btnStartLander").onclick = () => {
+    S.running = true;
+    S.x = W * 0.5;
+    S.y = 40;
+    S.vx = (Math.random() - 0.5) * 40;
+    S.vy = 0;
+    S.angle = 0;
+    S.fuel = 100;
+    $("hudFuel").textContent = "100%";
     showScreen("scrPlay");
     resizeCanvas();
-    resetFlight();
-    lastT = performance.now();
     requestAnimationFrame(loop);
-  });
-}
+  };
 
-$("btnNextPilot").onclick = () => {
-  S.playerIdx = (S.playerIdx + 1) % roster.length;
-  startTurn();
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-  renderRoster();
-});
+  $("btnRestartLander").onclick = () => {
+    $("btnStartLander").click();
+  };
 })();
 </script>
-<script src="../../js/theme-sync.js"></script>
 </body>
 </html>

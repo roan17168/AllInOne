@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="nordic-slate">
 <head>
-    
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#0e1117" id="metaThemeColor" />
-<title>Neon Pachinko Drop | PartyDeck</title>
+<title>Pachinko Drop | PartyDeck</title>
 <script>
 (function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/themes.css" />
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
@@ -23,14 +22,11 @@
     --border-ui: rgba(148,163,184,0.16); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    min-height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
+  body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    user-select: none; -webkit-user-select: none;
-  }
-  .gm-root {
-    display: flex; flex-direction: column; min-height: 100%; height: 100dvh; width: 100%; overflow: hidden;
+    min-height: 100%; height: 100dvh; display: flex; flex-direction: column;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
     position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
@@ -71,7 +67,8 @@
   .canvas-stage-wrap {
     flex: 1; width: 100%; height: 100%; position: relative; overflow: hidden; touch-action: none;
   }
-  #pachinkoCanvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+  #pachinkoCanvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: pointer; }
+
   .btn {
     width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
     background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
@@ -85,12 +82,12 @@
 <div class="gm-root">
   <header class="gm-top">
     <div class="gm-idblock">
-      <span class="gm-title">Neon Pachinko Drop</span>
-      <span class="gm-sub">Arcade Physics Pinboard</span>
+      <span class="gm-title">Pachinko Drop</span>
+      <span class="gm-sub">Arcade Pinboard Matrix</span>
     </div>
     <div class="gm-actions">
       <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </a>
     </div>
   </header>
@@ -98,22 +95,19 @@
   <div class="stage">
     <!-- SETUP -->
     <section class="screen is-active" id="scrSetup">
-      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
-        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Arcade Pinboard Protocol</div>
+      <div style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Pinboard Rules</div>
         <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
-          • <strong>5 Ball Drops</strong> per player run.<br>
-          • Drag and release at the top rail to set horizontal drop velocity.<br>
-          • Cascade through physics pegs and spinning kinetic bumpers.<br>
-          • Land inside high-multiplier bins at the base to build massive scores!
+          • <strong>Tap at the top</strong> of the board to launch gravity spheres.<br>
+          • Bounce balls across mechanical pins and spinning bumpers.<br>
+          • Land spheres into high-multiplier bins at the base (1x, 3x, 10x, 3x, 1x)!
         </p>
       </div>
 
-      <button class="btn" id="btnStartPachinko" style="margin-top:auto;">
-        Start Pachinko Drop
-      </button>
+      <button type="button" class="btn" id="btnStartPachinko" style="margin-top:auto;">Launch Pinboard</button>
     </section>
 
-    <!-- GAMEPLAY VIEWPORT -->
+    <!-- PLAY -->
     <section class="screen" id="scrPlay">
       <div class="hud-bar">
         <div class="hud-stat">
@@ -121,14 +115,15 @@
           <span class="hud-val" id="hudScore">0</span>
         </div>
         <div class="hud-stat">
-          <span class="hud-lbl">Balls Remaining</span>
+          <span class="hud-lbl">Balls Left</span>
           <span class="hud-val" id="hudBalls">5 / 5</span>
         </div>
         <div class="hud-stat">
           <span class="hud-lbl">Multiplier</span>
-          <span class="hud-val" id="hudMult">1x</span>
+          <span class="hud-val" id="hudMult" style="color:var(--warning);">1x</span>
         </div>
       </div>
+
       <div class="canvas-stage-wrap" id="canvasWrap">
         <canvas id="pachinkoCanvas"></canvas>
       </div>
@@ -136,351 +131,300 @@
 
     <!-- VERDICT -->
     <section class="screen" id="scrVerdict">
-      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
-        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);">DROP SESSION FINALE</div>
-        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:900;margin:.3rem 0;" id="verdictScore">0 PTS</h2>
-        <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:1rem;" id="verdictSub">Multiplier Peak: 10x</p>
+      <div style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
+        <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--success);">RUN COMPLETED</div>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictScore">0 PTS</h2>
+        <p style="font-size:.85rem;color:var(--text-secondary);">All 5 spheres dropped through the pinboard.</p>
       </div>
-      <button class="btn" id="btnRestartPachinko" style="margin-top:auto;">Drop Again</button>
+
+      <button type="button" class="btn" id="btnRestartPachinko" style="margin-top:auto;">Drop Again</button>
     </section>
   </div>
 </div>
 
 <script>
 (function(){
-"use strict";
+  "use strict";
+  const $ = id => document.getElementById(id);
 
-const $ = id => document.getElementById(id);
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
-}
-
-/* ================= WEB AUDIO SYNTH ================= */
-const AudioPachinko = {
-  ctx: null,
-  init(){
-    if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-  },
-  pegClack(){
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = "triangle";
-      osc.frequency.setValueAtTime(1200 + Math.random() * 400, now);
-      gain.gain.setValueAtTime(0.08, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.03);
-    }catch(e){}
-  },
-  bumperPop(){
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      [440, 880].forEach((f, idx) => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(f, now + idx * 0.03);
-        gain.gain.setValueAtTime(0.12, now + idx * 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.03 + 0.08);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(now + idx * 0.03);
-        osc.stop(now + idx * 0.03 + 0.08);
-      });
-    }catch(e){}
-  },
-  binScore(mult){
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      [523.25, 659.25, 783.99, 1046.50].forEach((f, idx) => {
+  const AudioPachinko = {
+    ctx: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    clack(){
+      try {
+        this.init();
+        const now = this.ctx.currentTime;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = "triangle";
-        osc.frequency.setValueAtTime(f, now + idx * 0.04);
-        gain.gain.setValueAtTime(0.1, now + idx * 0.04);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.1);
-        osc.connect(gain);
-        gain.connect(this.ctx.destination);
-        osc.start(now + idx * 0.04);
-        osc.stop(now + idx * 0.04 + 0.1);
-      });
-    }catch(e){}
+        osc.frequency.setValueAtTime(900 + Math.random() * 400, now);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.03);
+      }catch(e){}
+    },
+    binLand(mult){
+      try {
+        this.init();
+        const now = this.ctx.currentTime;
+        const freqs = mult >= 10 ? [523, 659, 784, 1046] : [392, 523];
+        freqs.forEach((f, i) => {
+          setTimeout(() => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(f, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + 0.12);
+          }, i * 60);
+        });
+      }catch(e){}
+    }
+  };
+
+  const cvs = $("pachinkoCanvas");
+  const ctx = cvs.getContext("2d");
+  const wrap = $("canvasWrap");
+
+  let W = 360, H = 550, DPR = 1;
+
+  const S = {
+    running: false,
+    score: 0,
+    ballsLeft: 5,
+    balls: [],     // { x, y, vx, vy, r: 8 }
+    pegs: [],      // { x, y, r: 4 }
+    spinners: [],  // { x, y, angle, r: 18 }
+    bins: []       // { x, w, mult, color }
+  };
+
+  function showScreen(id){
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
   }
-};
 
-/* ================= RESPONSIVE CANVAS & SIMULATION ================= */
-const cvs = $("pachinkoCanvas");
-const ctx = cvs.getContext("2d");
-
-let W = 360, H = 600, DPR = 1;
-
-function initResponsiveCanvas(canvas, context, onResizeCallback) {
-  const parent = canvas.parentElement;
-  function resize() {
+  function resizeCanvas(){
+    const rect = wrap.getBoundingClientRect();
     DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-    const rect = parent.getBoundingClientRect();
     W = rect.width;
     H = rect.height;
-    canvas.width = Math.round(W * DPR);
-    canvas.height = Math.round(H * DPR);
-    canvas.style.width = W + "px";
-    canvas.style.height = H + "px";
-    context.setTransform(DPR, 0, 0, DPR, 0, 0);
-    if (onResizeCallback) onResizeCallback(W, H, DPR);
+    cvs.width = Math.round(W * DPR);
+    cvs.height = Math.round(H * DPR);
+    cvs.style.width = W + "px";
+    cvs.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+    buildBoard();
   }
-  window.addEventListener("resize", resize);
-  window.addEventListener("orientationchange", () => setTimeout(resize, 200));
-  resize();
-}
 
-const S = {
-  running: false,
-  score: 0,
-  ballsLeft: 5,
-  activeBalls: [],
-  pegs: [],
-  bumpers: [],
-  bins: [],
-  sparks: [],
-  dropX: 180
-};
+  function buildBoard(){
+    S.pegs = [];
+    S.spinners = [];
+    S.bins = [];
 
-function setupBoardLayout(w, h){
-  S.pegs = [];
-  S.bumpers = [];
-  S.bins = [];
+    const rows = 9;
+    const startY = H * 0.18;
+    const spacingY = (H * 0.55) / rows;
 
-  const rows = 9;
-  const startY = h * 0.18;
-  const endY = h * 0.72;
-  const rowSpacing = (endY - startY) / rows;
+    for(let r = 0; r < rows; r++){
+      const cols = (r % 2 === 0) ? 7 : 8;
+      const spacingX = (W - 32) / cols;
+      const offsetX = (r % 2 === 0) ? 16 + spacingX / 2 : 16;
+      for(let c = 0; c < cols; c++){
+        S.pegs.push({
+          x: offsetX + c * spacingX,
+          y: startY + r * spacingY,
+          r: 4
+        });
+      }
+    }
 
-  for(let r = 0; r < rows; r++){
-    const cols = (r % 2 === 0) ? 7 : 8;
-    const colSpacing = (w - 40) / cols;
-    const offsetX = (r % 2 === 0) ? 20 + colSpacing / 2 : 20;
+    // Spinners
+    S.spinners.push(
+      { x: W * 0.3, y: H * 0.45, angle: 0, r: 18, speed: 3 },
+      { x: W * 0.7, y: H * 0.45, angle: 0, r: 18, speed: -3 }
+    );
 
-    for(let c = 0; c < cols; c++){
-      S.pegs.push({
-        x: offsetX + c * colSpacing,
-        y: startY + r * rowSpacing,
-        r: 4.5
+    // Multiplier Bins at Bottom
+    const binCount = 5;
+    const binW = (W - 16) / binCount;
+    const mults = [1, 3, 10, 3, 1];
+    const colors = ["#64748b", "#38bdf8", "#ffd000", "#38bdf8", "#64748b"];
+
+    for(let i = 0; i < binCount; i++){
+      S.bins.push({
+        x: 8 + i * binW,
+        w: binW,
+        mult: mults[i],
+        color: colors[i]
       });
     }
   }
 
-  // 2 Kinetic Bumpers
-  S.bumpers.push({ x: w * 0.32, y: h * 0.45, r: 18, color: "#ff007f" });
-  S.bumpers.push({ x: w * 0.68, y: h * 0.45, r: 18, color: "#ff007f" });
+  function spawnBall(clickX){
+    if(S.ballsLeft <= 0) return;
+    S.ballsLeft--;
+    $("hudBalls").textContent = `${S.ballsLeft} / 5`;
 
-  // 5 Collection Bins at Bottom
-  const binCount = 5;
-  const binWidth = w / binCount;
-  const multipliers = [10, 2, 1, 2, 10];
-  const colors = ["#ffd000", "#38bdf8", "#94a3b8", "#38bdf8", "#ffd000"];
-
-  for(let b = 0; b < binCount; b++){
-    S.bins.push({
-      x: b * binWidth,
-      y: h - 55,
-      w: binWidth,
-      h: 55,
-      mult: multipliers[b],
-      color: colors[b]
+    const x = Math.max(30, Math.min(W - 30, clickX));
+    S.balls.push({
+      x: x,
+      y: 20,
+      vx: (Math.random() - 0.5) * 30,
+      vy: 120,
+      r: 8
     });
   }
-}
 
-initResponsiveCanvas(cvs, ctx, (w, h) => {
-  setupBoardLayout(w, h);
-});
+  let lastT = performance.now();
+  function loop(t){
+    if(!S.running) return;
+    const dt = Math.min((t - lastT) / 1000, 0.033);
+    lastT = t;
 
-function spawnBall(x){
-  if(S.ballsLeft <= 0) return;
-  S.ballsLeft--;
-  S.activeBalls.push({
-    x: x,
-    y: 20,
-    vx: (Math.random() - 0.5) * 2,
-    vy: 1.5,
-    r: 8
-  });
-  updateHUD();
-}
+    ctx.fillStyle = "#090c12";
+    ctx.fillRect(0, 0, W, H);
 
-let lastT = performance.now();
-function loop(t){
-  if(!S.running) return;
-  const dt = Math.min((t - lastT) / 1000, 0.033);
-  lastT = t;
+    // Update & Draw Spinners
+    S.spinners.forEach(sp => {
+      sp.angle += sp.speed * dt;
+      ctx.save();
+      ctx.translate(sp.x, sp.y);
+      ctx.rotate(sp.angle);
+      ctx.strokeStyle = "#ff0055";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-sp.r, 0); ctx.lineTo(sp.r, 0);
+      ctx.moveTo(0, -sp.r); ctx.lineTo(0, sp.r);
+      ctx.stroke();
+      ctx.restore();
+    });
 
-  // Clear Canvas
-  ctx.fillStyle = "#0e1117";
-  ctx.fillRect(0, 0, W, H);
-
-  // 1. Draw Pegs
-  ctx.fillStyle = "#ffffff";
-  ctx.shadowColor = "#38bdf8";
-  ctx.shadowBlur = 8;
-  S.pegs.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  ctx.shadowBlur = 0;
-
-  // 2. Draw Bumpers
-  S.bumpers.forEach(bm => {
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(bm.x, bm.y, bm.r, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(255, 0, 127, 0.25)";
-    ctx.fill();
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = bm.color;
-    ctx.shadowColor = bm.color;
-    ctx.shadowBlur = 14;
-    ctx.stroke();
-    ctx.restore();
-  });
-
-  // 3. Draw Bins
-  S.bins.forEach(bin => {
-    ctx.save();
-    ctx.fillStyle = "rgba(31, 38, 51, 0.85)";
-    ctx.fillRect(bin.x + 2, bin.y, bin.w - 4, bin.h);
-    ctx.strokeStyle = bin.color;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(bin.x + 2, bin.y, bin.w - 4, bin.h);
-
-    ctx.fillStyle = bin.color;
-    ctx.font = "800 13px 'Space Mono', monospace";
-    ctx.textAlign = "center";
-    ctx.fillText(`${bin.mult}x`, bin.x + bin.w / 2, bin.y + 32);
-    ctx.restore();
-  });
-
-  // 4. Update & Draw Active Balls
-  for(let i = S.activeBalls.length - 1; i >= 0; i--){
-    const b = S.activeBalls[i];
-    b.vy += 980 * dt * 0.45; // Gravity
-    b.x += b.vx;
-    b.y += b.vy;
-
-    // Wall Bounce
-    if(b.x - b.r < 10){
-      b.x = 10 + b.r;
-      b.vx = -b.vx * 0.65;
-    } else if(b.x + b.r > W - 10){
-      b.x = W - 10 - b.r;
-      b.vx = -b.vx * 0.65;
-    }
-
-    // Peg Collisions
+    // Draw Pegs
+    ctx.fillStyle = "#94a3b8";
     S.pegs.forEach(p => {
-      const dx = b.x - p.x;
-      const dy = b.y - p.y;
-      const dist = Math.hypot(dx, dy);
-      if(dist < b.r + p.r){
-        const nx = dx / dist;
-        const ny = dy / dist;
-        b.x = p.x + nx * (b.r + p.r);
-        b.y = p.y + ny * (b.r + p.r);
-        b.vx = nx * 3.5 + (Math.random() - 0.5) * 1.5;
-        b.vy = Math.abs(ny * 2.5);
-        AudioPachinko.pegClack();
-      }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
     });
 
-    // Bumper Collisions
-    S.bumpers.forEach(bm => {
-      const dx = b.x - bm.x;
-      const dy = b.y - bm.y;
-      const dist = Math.hypot(dx, dy);
-      if(dist < b.r + bm.r){
-        const nx = dx / dist;
-        const ny = dy / dist;
-        b.vx = nx * 8;
-        b.vy = ny * 8;
-        AudioPachinko.bumperPop();
-        S.score += 250;
-        updateHUD();
-      }
+    // Draw Bins
+    const binH = 50;
+    const binY = H - binH - 6;
+    S.bins.forEach(bin => {
+      ctx.save();
+      ctx.fillStyle = "#12161f";
+      ctx.fillRect(bin.x + 2, binY, bin.w - 4, binH);
+      ctx.strokeStyle = bin.color;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(bin.x + 2, binY, bin.w - 4, binH);
+
+      ctx.fillStyle = bin.color;
+      ctx.font = "800 13px 'Space Mono', monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(`${bin.mult}x`, bin.x + bin.w / 2, binY + 30);
+      ctx.restore();
     });
 
-    // Bin Collection
-    if(b.y >= H - 55){
-      S.bins.forEach(bin => {
-        if(b.x >= bin.x && b.x < bin.x + bin.w){
-          const pts = 500 * bin.mult;
-          S.score += pts;
-          AudioPachinko.binScore(bin.mult);
-          if("vibrate" in navigator) navigator.vibrate(20);
+    // Update & Draw Balls
+    const gravity = 550;
+    for(let i = S.balls.length - 1; i >= 0; i--){
+      const b = S.balls[i];
+      b.vy += gravity * dt;
+      b.x += b.vx * dt;
+      b.y += b.vy * dt;
+
+      // Wall bounce
+      if(b.x - b.r < 8){ b.x = 8 + b.r; b.vx = -b.vx * 0.6; AudioPachinko.clack(); }
+      if(b.x + b.r > W - 8){ b.x = W - 8 - b.r; b.vx = -b.vx * 0.6; AudioPachinko.clack(); }
+
+      // Peg Collisions
+      S.pegs.forEach(p => {
+        const dx = b.x - p.x;
+        const dy = b.y - p.y;
+        const dist = Math.hypot(dx, dy);
+        if(dist < b.r + p.r){
+          const nx = dx / dist;
+          const ny = dy / dist;
+          b.x = p.x + nx * (b.r + p.r);
+          b.y = p.y + ny * (b.r + p.r);
+          const dot = b.vx * nx + b.vy * ny;
+          b.vx = (b.vx - 1.8 * dot * nx) + (Math.random() - 0.5) * 30;
+          b.vy = (b.vy - 1.8 * dot * ny) * 0.65;
+          AudioPachinko.clack();
         }
       });
-      S.activeBalls.splice(i, 1);
-      updateHUD();
-      continue;
+
+      // Spinner Collisions
+      S.spinners.forEach(sp => {
+        const d = Math.hypot(b.x - sp.x, b.y - sp.y);
+        if(d < b.r + sp.r){
+          b.vx += (b.x - sp.x) * 8;
+          b.vy = -180;
+          AudioPachinko.clack();
+        }
+      });
+
+      // Bin Landings
+      if(b.y >= binY){
+        S.bins.forEach(bin => {
+          if(b.x >= bin.x && b.x <= bin.x + bin.w){
+            const pts = 500 * bin.mult;
+            S.score += pts;
+            $("hudScore").textContent = S.score;
+            $("hudMult").textContent = `${bin.mult}x`;
+            AudioPachinko.binLand(bin.mult);
+          }
+        });
+        S.balls.splice(i, 1);
+
+        if(S.balls.length === 0 && S.ballsLeft === 0){
+          setTimeout(() => {
+            S.running = false;
+            $("verdictScore").textContent = `${S.score} PTS`;
+            showScreen("scrVerdict");
+          }, 800);
+        }
+        continue;
+      }
+
+      // Draw Ball
+      ctx.save();
+      ctx.fillStyle = "#38bdf8";
+      ctx.shadowColor = "#38bdf8";
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
-    // Draw Ball
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-    ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = "#38bdf8";
-    ctx.shadowBlur = 14;
-    ctx.fill();
-    ctx.restore();
+    requestAnimationFrame(loop);
   }
 
-  // Check Game Over
-  if(S.ballsLeft === 0 && S.activeBalls.length === 0){
-    S.running = false;
-    $("verdictScore").textContent = `${S.score.toLocaleString()} PTS`;
-    showScreen("scrVerdict");
-    return;
-  }
+  wrap.addEventListener("pointerdown", e => {
+    if(!S.running) return;
+    const rect = cvs.getBoundingClientRect();
+    spawnBall(e.clientX - rect.left);
+  });
 
-  requestAnimationFrame(loop);
-}
+  $("btnStartPachinko").onclick = () => {
+    S.running = true;
+    S.score = 0;
+    S.ballsLeft = 5;
+    S.balls = [];
+    $("hudScore").textContent = "0";
+    $("hudBalls").textContent = "5 / 5";
+    showScreen("scrPlay");
+    resizeCanvas();
+    requestAnimationFrame(loop);
+  };
 
-function updateHUD(){
-  $("hudScore").textContent = S.score.toLocaleString();
-  $("hudBalls").textContent = `${S.ballsLeft} / 5`;
-}
-
-/* ================= INPUTS ================= */
-cvs.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  if(!S.running) return;
-  const rect = cvs.getBoundingClientRect();
-  const px = e.clientX - rect.left;
-  spawnBall(px);
-});
-
-$("btnStartPachinko").onclick = () => {
-  S.running = true;
-  S.score = 0;
-  S.ballsLeft = 5;
-  S.activeBalls = [];
-  showScreen("scrPlay");
-  updateHUD();
-  lastT = performance.now();
-  requestAnimationFrame(loop);
-};
-
-$("btnRestartPachinko").onclick = () => {
-  showScreen("scrSetup");
-};
-
+  $("btnRestartPachinko").onclick = () => {
+    $("btnStartPachinko").click();
+  };
 })();
 </script>
 </body>

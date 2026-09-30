@@ -1,36 +1,32 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="nordic-slate">
+<html lang="en" data-theme="emerald-lounge">
 <head>
-    
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#0e1117" id="metaThemeColor" />
-<title>Arcade Tower Stacker | PartyDeck</title>
+<meta name="theme-color" content="#071712" id="metaThemeColor" />
+<title>Cyber Stacker | PartyDeck</title>
 <script>
 (function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../css/themes.css" />
 <link rel="stylesheet" href="../../css/base.css" />
 <style>
   :root {
-    --bg-primary: #0e1117; --bg-surface: #161b24; --bg-elevated: #1f2633;
-    --text-primary: #f0f4f8; --text-secondary: #94a3b8; --text-muted: #627288;
-    --accent: #00ffaa; --accent-glow: rgba(0,255,170,0.4); --accent-contrast: #031c14;
+    --bg-primary: #071712; --bg-surface: #0e241d; --bg-elevated: #16362c;
+    --text-primary: #ffffff; --text-secondary: #a3cfbe; --text-muted: #5e9481;
+    --accent: #00ffaa; --accent-glow: rgba(0,255,170,0.38); --accent-contrast: #031c14;
     --danger: #ff0055; --success: #00ffaa; --warning: #ffd000;
-    --border-ui: rgba(0,255,170,0.22); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
+    --border-ui: rgba(0,255,170,0.25); --r-sm: 8px; --r-md: 14px; --r-lg: 20px;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    min-height: 100%; height: 100dvh; margin: 0; padding: 0; overflow: hidden;
+  body {
     background: var(--bg-primary); color: var(--text-primary);
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    user-select: none; -webkit-user-select: none;
-  }
-  .gm-root {
-    display: flex; flex-direction: column; min-height: 100%; height: 100dvh; width: 100%; overflow: hidden;
+    min-height: 100%; height: 100dvh; display: flex; flex-direction: column;
+    overflow: hidden; user-select: none; -webkit-user-select: none;
   }
   .gm-top {
     position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: space-between;
@@ -73,28 +69,25 @@
   }
   #stackCanvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: pointer; }
 
-  .stack-dock {
-    display: flex; padding: .6rem .9rem; background: var(--bg-surface); border-top: 1px solid var(--border-ui);
-    padding-bottom: max(.7rem, calc(env(safe-area-inset-bottom) + .5rem)); flex-shrink: 0; z-index: 30;
+  .btn {
+    width: 100%; min-height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--accent); color: var(--accent-contrast); border: none; border-radius: var(--r-sm);
+    font-family: 'Space Mono', monospace; font-size: .88rem; font-weight: 800; text-transform: uppercase;
+    box-shadow: 0 0 16px var(--accent-glow); cursor: pointer; text-decoration: none;
   }
-  .btn-tap-stack {
-    width: 100%; min-height: 52px; background: var(--accent); color: var(--accent-contrast); border: none;
-    border-radius: var(--r-sm); font-family: 'Space Mono', monospace; font-size: .95rem; font-weight: 900;
-    text-transform: uppercase; cursor: pointer; box-shadow: 0 0 16px var(--accent-glow);
-  }
-  .btn-tap-stack:active { transform: scale(0.98); }
+  .btn:active { transform: scale(.98); }
 </style>
 </head>
 <body>
 <div class="gm-root">
   <header class="gm-top">
     <div class="gm-idblock">
-      <span class="gm-title">Arcade Tower Stacker</span>
+      <span class="gm-title">Cyber Stacker</span>
       <span class="gm-sub">15-Tier Precision Stacker</span>
     </div>
     <div class="gm-actions">
       <a class="btn-icon-only" href="../../index.html" aria-label="Exit to Hub">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       </a>
     </div>
   </header>
@@ -102,325 +95,272 @@
   <div class="stage">
     <!-- SETUP -->
     <section class="screen is-active" id="scrSetup">
-      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
-        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Stacker Rules</div>
+      <div style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.1rem;">
+        <div style="font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:.5rem;">Stacker Protocol</div>
         <p style="font-size:.85rem;color:var(--text-secondary);line-height:1.5;">
-          • 15 vertical tiers of accelerating horizontal blocks.<br>
-          • <strong>Tap LOCK TIER</strong> to stack precisely over the previous level.<br>
-          • Overhanging blocks get sliced off cleanly.<br>
-          • Tier 10 unlocks <strong>Minor Prize</strong>; Tier 15 claims <strong>Major Jackpot</strong>!
+          • Tap anywhere on screen to <strong>lock moving block tiers</strong>.<br>
+          • Misaligned blocks slice off, narrowing your tower!<br>
+          • Reach <strong>Tier 10</strong> for Minor Prize, <strong>Tier 15</strong> for Tower Champion!
         </p>
       </div>
 
-      <button class="btn-tap-stack" id="btnStartStack" style="margin-top:auto;">
-        Insert Token &amp; Stack
-      </button>
+      <button type="button" class="btn" id="btnStartStack" style="margin-top:auto;">Engage Stacker</button>
     </section>
 
-    <!-- GAMEPLAY VIEWPORT -->
+    <!-- PLAY -->
     <section class="screen" id="scrPlay">
       <div class="hud-bar">
         <div class="hud-stat">
           <span class="hud-lbl">Current Tier</span>
-          <span class="hud-val" id="hudTier">0 / 15</span>
+          <span class="hud-val" id="hudTier">1 / 15</span>
         </div>
         <div class="hud-stat">
           <span class="hud-lbl">Block Width</span>
-          <span class="hud-val" id="hudWidth">3</span>
+          <span class="hud-val" id="hudWidth">3 Blocks</span>
         </div>
         <div class="hud-stat">
           <span class="hud-lbl">Speed</span>
-          <span class="hud-val" id="hudSpeed">1.0x</span>
+          <span class="hud-val" id="hudSpeed" style="color:var(--warning);">1.0x</span>
         </div>
       </div>
+
       <div class="canvas-stage-wrap" id="canvasWrap">
         <canvas id="stackCanvas"></canvas>
       </div>
-      <footer class="stack-dock">
-        <button type="button" class="btn-tap-stack" id="btnLockTier">Lock Tier</button>
+
+      <footer style="padding:10px 14px;background:var(--bg-surface);border-top:1px solid var(--border-ui);">
+        <button type="button" class="btn" id="btnLockTier">Lock Tier (TAP)</button>
       </footer>
     </section>
 
     <!-- VERDICT -->
     <section class="screen" id="scrVerdict">
-      <div class="panel" style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
+      <div style="background:var(--bg-surface);border:1px solid var(--border-ui);border-radius:var(--r-md);padding:1.6rem 1rem;text-align:center;">
         <div style="font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);" id="verdictKicker">TOWER FINALE</div>
-        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2.2rem;font-weight:900;margin:.3rem 0;" id="verdictTier">TIER 0 REACHED</h2>
-        <p style="font-size:.85rem;color:var(--text-secondary);margin-bottom:1rem;" id="verdictDesc">Missed alignment on Tier 1</p>
+        <h2 style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:900;margin:.3rem 0;" id="verdictTitle">TIER 8 REACHED</h2>
+        <p style="font-size:.85rem;color:var(--text-secondary);" id="verdictSub">Solid effort! Aim for Tier 10 Minor Prize next run.</p>
       </div>
-      <button class="btn-tap-stack" id="btnRestartStack" style="margin-top:auto;">Stack Again</button>
+
+      <button type="button" class="btn" id="btnRestartStack" style="margin-top:auto;">Stack Again</button>
     </section>
   </div>
 </div>
 
 <script>
 (function(){
-"use strict";
+  "use strict";
+  const $ = id => document.getElementById(id);
 
-const $ = id => document.getElementById(id);
-function showScreen(id){
-  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
-}
+  const AudioStack = {
+    ctx: null,
+    init(){ if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    lock(tier){
+      try {
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(300 + tier * 45, now);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.05);
+      }catch(e){}
+    },
+    fail(){
+      try {
+        this.init();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(35, now + 0.4);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(now); osc.stop(now + 0.4);
+      }catch(e){}
+    }
+  };
 
-/* ================= WEB AUDIO SYNTH ================= */
-const AudioStacker = {
-  ctx: null,
-  init(){
-    if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-  },
-  tierLock(tier){
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(300 + tier * 45, now);
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.08);
-    }catch(e){}
-  },
-  sliceClang(){
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(600, now);
-      osc.frequency.exponentialRampToValueAtTime(150, now + 0.1);
-      gain.gain.setValueAtTime(0.14, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.1);
-    }catch(e){}
-  },
-  gameOver(){
-    try {
-      this.init();
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(140, now);
-      osc.frequency.exponentialRampToValueAtTime(35, now + 0.35);
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-      osc.connect(gain);
-      gain.connect(this.ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.35);
-    }catch(e){}
+  const cvs = $("stackCanvas");
+  const ctx = cvs.getContext("2d");
+  const wrap = $("canvasWrap");
+
+  let W = 360, H = 550, DPR = 1;
+  const TOTAL_TIERS = 15;
+  const GRID_COLS = 7;
+
+  const S = {
+    running: false,
+    currentTier: 0,
+    blockWidth: 3,
+    barCol: 0,
+    barDir: 1,
+    lastStepT: 0,
+    lockedGrid: Array.from({ length: TOTAL_TIERS }, () => Array(GRID_COLS).fill(false))
+  };
+
+  function showScreen(id){
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("is-active", s.id === id));
   }
-};
 
-/* ================= RESPONSIVE CANVAS & SIMULATION ================= */
-const cvs = $("stackCanvas");
-const ctx = cvs.getContext("2d");
-
-let W = 360, H = 550, DPR = 1;
-
-function initResponsiveCanvas(canvas, context, onResizeCallback) {
-  const parent = canvas.parentElement;
-  function resize() {
+  function resizeCanvas(){
+    const rect = wrap.getBoundingClientRect();
     DPR = Math.min(window.devicePixelRatio || 1, 2.5);
-    const rect = parent.getBoundingClientRect();
     W = rect.width;
     H = rect.height;
-    canvas.width = Math.round(W * DPR);
-    canvas.height = Math.round(H * DPR);
-    canvas.style.width = W + "px";
-    canvas.style.height = H + "px";
-    context.setTransform(DPR, 0, 0, DPR, 0, 0);
-    if (onResizeCallback) onResizeCallback(W, H, DPR);
+    cvs.width = Math.round(W * DPR);
+    cvs.height = Math.round(H * DPR);
+    cvs.style.width = W + "px";
+    cvs.style.height = H + "px";
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
-  window.addEventListener("resize", resize);
-  window.addEventListener("orientationchange", () => setTimeout(resize, 200));
-  resize();
-}
 
-const TOTAL_TIERS = 15;
-const COLS = 7;
+  function handleLock(){
+    if(!S.running || S.currentTier >= TOTAL_TIERS) return;
 
-const S = {
-  running: false,
-  tier: 0,
-  blockWidth: 3,
-  barCol: 0,
-  barDir: 1,
-  speed: 1.0,
-  lockedGrid: Array.from({ length: TOTAL_TIERS }, () => Array(COLS).fill(false)),
-  lastMoveT: 0
-};
+    const r = S.currentTier;
+    let placed = 0;
 
-initResponsiveCanvas(cvs, ctx, (w, h) => {});
-
-function triggerLock(){
-  if(!S.running) return;
-
-  let newWidth = 0;
-  if(S.tier === 0){
-    for(let c = 0; c < S.blockWidth; c++){
-      S.lockedGrid[0][S.barCol + c] = true;
-    }
-    newWidth = S.blockWidth;
-  } else {
-    const prevRow = S.lockedGrid[S.tier - 1];
-    for(let c = 0; c < S.blockWidth; c++){
-      const colIdx = S.barCol + c;
-      if(prevRow[colIdx]){
-        S.lockedGrid[S.tier][colIdx] = true;
-        newWidth++;
+    if(r === 0){
+      for(let c = 0; c < S.blockWidth; c++){
+        const col = S.barCol + c;
+        if(col < GRID_COLS){
+          S.lockedGrid[0][col] = true;
+          placed++;
+        }
+      }
+    } else {
+      const prevRow = S.lockedGrid[r - 1];
+      for(let c = 0; c < S.blockWidth; c++){
+        const col = S.barCol + c;
+        if(col < GRID_COLS && prevRow[col]){
+          S.lockedGrid[r][col] = true;
+          placed++;
+        }
       }
     }
-  }
 
-  if(newWidth === 0){
-    // Missed completely -> Game Over
-    S.running = false;
-    AudioStacker.gameOver();
-    if("vibrate" in navigator) navigator.vibrate([60, 60]);
-    $("verdictTier").textContent = `TIER ${S.tier} REACHED`;
-    $("verdictDesc").textContent = S.tier >= 10 ? "Won Minor Prize!" : "Fell short of prize line!";
-    showScreen("scrVerdict");
-    return;
-  }
-
-  if(newWidth < S.blockWidth){
-    AudioStacker.sliceClang();
-    if("vibrate" in navigator) navigator.vibrate(25);
-  } else {
-    AudioStacker.tierLock(S.tier);
-    if("vibrate" in navigator) navigator.vibrate(15);
-  }
-
-  S.blockWidth = newWidth;
-  S.tier++;
-
-  if(S.tier >= TOTAL_TIERS){
-    // Major Jackpot Cleared
-    S.running = false;
-    $("verdictTier").textContent = "MAJOR JACKPOT!";
-    $("verdictDesc").textContent = "Perfect 15-tier tower built!";
-    showScreen("scrVerdict");
-    return;
-  }
-
-  S.barCol = 0;
-  S.barDir = 1;
-  S.speed = 1.0 + S.tier * 0.12;
-  updateHUD();
-}
-
-let lastT = performance.now();
-function loop(t){
-  if(!S.running) return;
-  const now = performance.now();
-  const stepInterval = Math.max(70, 200 - S.speed * 12);
-
-  if(now - S.lastMoveT >= stepInterval){
-    S.barCol += S.barDir;
-    if(S.barCol + S.blockWidth > COLS){
-      S.barCol = COLS - S.blockWidth;
-      S.barDir = -1;
-    } else if(S.barCol < 0){
-      S.barCol = 0;
-      S.barDir = 1;
-    }
-    S.lastMoveT = now;
-  }
-
-  // Clear Canvas
-  ctx.fillStyle = "#0e1117";
-  ctx.fillRect(0, 0, W, H);
-
-  const cellMargin = 3;
-  const cellW = (W - 32) / COLS;
-  const cellH = (H - 20) / TOTAL_TIERS;
-  const startX = 16;
-  const startY = H - 10;
-
-  // Draw Grid Lines & Prize Lines
-  for(let r = 0; r < TOTAL_TIERS; r++){
-    const y = startY - (r + 1) * cellH;
-
-    if(r === 9){
-      ctx.strokeStyle = "rgba(255, 208, 0, 0.4)";
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(startX, y, cellW * COLS, cellH);
-    } else if(r === 14){
-      ctx.strokeStyle = "rgba(0, 255, 170, 0.6)";
-      ctx.lineWidth = 2;
-      ctx.strokeRect(startX, y, cellW * COLS, cellH);
+    if(placed === 0){
+      AudioStack.fail();
+      S.running = false;
+      $("verdictKicker").textContent = "TOWER COLLAPSED";
+      $("verdictTitle").textContent = `TIER ${r + 1} FAILED`;
+      $("verdictSub").textContent = `Missed the alignment! Try again.`;
+      showScreen("scrVerdict");
+      return;
     }
 
-    for(let c = 0; c < COLS; c++){
-      const x = startX + c * cellW;
-      const isLocked = S.lockedGrid[r][c];
+    AudioStack.lock(r);
+    S.blockWidth = placed;
+    S.currentTier++;
 
-      if(isLocked){
-        ctx.fillStyle = r >= 14 ? "#00ffaa" : (r >= 9 ? "#ffd000" : "#38bdf8");
-        ctx.shadowColor = ctx.fillStyle;
+    if(S.currentTier >= TOTAL_TIERS){
+      S.running = false;
+      $("verdictKicker").textContent = "CHAMPION ACHIEVED";
+      $("verdictTitle").textContent = "TIER 15 MASTER!";
+      $("verdictSub").textContent = "Flawless stack! Major Prize Cleared.";
+      showScreen("scrVerdict");
+      return;
+    }
+
+    $("hudTier").textContent = `${S.currentTier + 1} / 15`;
+    $("hudWidth").textContent = `${S.blockWidth} Block${S.blockWidth === 1 ? '' : 's'}`;
+    $("hudSpeed").textContent = `${(1 + S.currentTier * 0.12).toFixed(1)}x`;
+  }
+
+  function loop(t){
+    if(!S.running) return;
+    const now = performance.now();
+    const stepInterval = Math.max(55, 180 - S.currentTier * 9);
+
+    if(now - S.lastStepT >= stepInterval){
+      S.barCol += S.barDir;
+      if(S.barCol + S.blockWidth > GRID_COLS){
+        S.barCol = GRID_COLS - S.blockWidth;
+        S.barDir = -1;
+      } else if(S.barCol < 0){
+        S.barCol = 0;
+        S.barDir = 1;
+      }
+      S.lastStepT = now;
+    }
+
+    ctx.fillStyle = "#071712";
+    ctx.fillRect(0, 0, W, H);
+
+    const cellMargin = 3;
+    const cellW = (W - 24) / GRID_COLS;
+    const cellH = (H - 24) / TOTAL_TIERS;
+    const startX = 12;
+    const startY = H - 12;
+
+    // Draw Locked Blocks
+    for(let r = 0; r < TOTAL_TIERS; r++){
+      const y = startY - (r + 1) * cellH;
+
+      // Prize Lines
+      if(r === 9){
+        ctx.strokeStyle = "rgba(255, 208, 0, 0.5)";
+        ctx.strokeRect(startX - 2, y, cellW * GRID_COLS + 4, cellH);
+      } else if(r === 14){
+        ctx.strokeStyle = "rgba(0, 255, 170, 0.8)";
+        ctx.strokeRect(startX - 2, y, cellW * GRID_COLS + 4, cellH);
+      }
+
+      for(let c = 0; c < GRID_COLS; c++){
+        const x = startX + c * cellW;
+        if(S.lockedGrid[r][c]){
+          ctx.fillStyle = r >= 14 ? "#00ffaa" : (r >= 9 ? "#ffd000" : "#38bdf8");
+          ctx.fillRect(x + cellMargin/2, y + cellMargin/2, cellW - cellMargin, cellH - cellMargin);
+        } else {
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+          ctx.strokeRect(x + cellMargin/2, y + cellMargin/2, cellW - cellMargin, cellH - cellMargin);
+        }
+      }
+    }
+
+    // Draw Moving Active Tier Blocks
+    if(S.currentTier < TOTAL_TIERS){
+      const activeY = startY - (S.currentTier + 1) * cellH;
+      for(let c = 0; c < S.blockWidth; c++){
+        const blockX = startX + (S.barCol + c) * cellW;
+        ctx.save();
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "#00ffaa";
         ctx.shadowBlur = 10;
-        ctx.fillRect(x + cellMargin, y + cellMargin, cellW - cellMargin * 2, cellH - cellMargin * 2);
-        ctx.shadowBlur = 0;
-      } else {
-        ctx.fillStyle = "rgba(31, 38, 51, 0.4)";
-        ctx.fillRect(x + cellMargin, y + cellMargin, cellW - cellMargin * 2, cellH - cellMargin * 2);
+        ctx.fillRect(blockX + cellMargin/2, activeY + cellMargin/2, cellW - cellMargin, cellH - cellMargin);
+        ctx.restore();
       }
     }
+
+    requestAnimationFrame(loop);
   }
 
-  // Draw Active Moving Bar
-  const curY = startY - (S.tier + 1) * cellH;
-  for(let b = 0; b < S.blockWidth; b++){
-    const bx = startX + (S.barCol + b) * cellW;
-    ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = "#00ffaa";
-    ctx.shadowBlur = 12;
-    ctx.fillRect(bx + cellMargin, curY + cellMargin, cellW - cellMargin * 2, cellH - cellMargin * 2);
-    ctx.shadowBlur = 0;
-  }
+  wrap.addEventListener("pointerdown", handleLock);
+  $("btnLockTier").addEventListener("click", handleLock);
 
-  requestAnimationFrame(loop);
-}
+  $("btnStartStack").onclick = () => {
+    S.running = true;
+    S.currentTier = 0;
+    S.blockWidth = 3;
+    S.barCol = 0;
+    S.barDir = 1;
+    S.lockedGrid = Array.from({ length: TOTAL_TIERS }, () => Array(GRID_COLS).fill(false));
+    $("hudTier").textContent = "1 / 15";
+    $("hudWidth").textContent = "3 Blocks";
+    $("hudSpeed").textContent = "1.0x";
+    showScreen("scrPlay");
+    resizeCanvas();
+    requestAnimationFrame(loop);
+  };
 
-function updateHUD(){
-  $("hudTier").textContent = `${S.tier} / 15`;
-  $("hudWidth").textContent = S.blockWidth;
-  $("hudSpeed").textContent = `${S.speed.toFixed(1)}x`;
-}
-
-$("btnLockTier").onclick = triggerLock;
-cvs.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  triggerLock();
-});
-
-$("btnStartStack").onclick = () => {
-  S.running = true;
-  S.tier = 0;
-  S.blockWidth = 3;
-  S.barCol = 0;
-  S.barDir = 1;
-  S.speed = 1.0;
-  S.lockedGrid = Array.from({ length: TOTAL_TIERS }, () => Array(COLS).fill(false));
-  S.lastMoveT = performance.now();
-  showScreen("scrPlay");
-  updateHUD();
-  requestAnimationFrame(loop);
-};
-
-$("btnRestartStack").onclick = () => {
-  showScreen("scrSetup");
-};
-
+  $("btnRestartStack").onclick = () => {
+    $("btnStartStack").click();
+  };
 })();
 </script>
 </body>
