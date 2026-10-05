@@ -113,7 +113,7 @@
         </div>
         <div class="hub-brand-text">
           <span class="hub-title">PARTYDECK</span>
-          <span class="hub-subtitle" id="hubModuleCount">67 OFFLINE MODULES</span>
+          <span class="hub-subtitle" id="hubModuleCount">43 OFFLINE MODULES</span>
         </div>
       </div>
       <div class="hub-actions-cluster">
@@ -142,7 +142,7 @@
   <section class="search-wrapper">
     <div class="search-input-box">
       <svg class="search-ico-lens" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input type="text" id="hubSearchInput" class="search-input" placeholder="Search 67 games, tags or aliases (e.g. Spyfall, Osu)..." autocomplete="off" autocorrect="off" spellcheck="false" />
+      <input type="text" id="hubSearchInput" class="search-input" placeholder="Search 43 games, tags or aliases (e.g. Spyfall, Osu)..." autocomplete="off" autocorrect="off" spellcheck="false" />
       <button type="button" class="search-clear-btn" id="btnSearchClear" aria-label="Clear search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -274,20 +274,14 @@
   ];
 
   /* ==================================================================
-     MASTER GAME REGISTRY (Exactly 67 Verified Local Directories)
+     MASTER GAME REGISTRY (Exactly 43 Verified Local Directories)
      Format: [id, title, category, minP, maxP, isDrinking, tag, iconKey, desc]
      ================================================================== */
   const RAW = [
     /* ---- STIM & FIDGET FLOW (10) ---- */
-    ["stim-osu-tap","Reflex 2.0","stim",1,4,0,"Rhythm","ring","Musical approach-circle reflex flow with pentatonic hit chimes."],
     ["stim-orbit-fidget","Orbit Tap","stim",1,4,0,"Flow","orbit","Infinite orbital gravity-flip runner. The original stim benchmark."],
     ["stim-liquid-sand","Neon Sand","stim",1,2,0,"Physics","grains","Cellular-automata falling sand with gyro tilt and flow-chamber puzzles."],
-    ["stim-lockpick-tumbler","Cyber Pick","stim",1,2,0,"Tactile","lock","Multi-pin tumbler with shear-line hunting and false gates."],
     ["stim-blade-slice","Vector Blade","stim",1,4,0,"Slicer","blade","Five-wave polygon slicing gauntlet with real cut math."],
-    ["stim-neon-flux","Neon Flux","stim",1,4,0,"Polarity","bolt","Cyan and magenta polarity switching photon absorber."],
-    ["stim-laser-prism","Prism Reflex","stim",1,4,0,"Optics","hex","Rotate prism nodes to route a live laser through crystals."],
-    ["stim-gyro-core","Reactor Core","stim",1,2,0,"Gyro","reactor","Magnetic plasma stabiliser with radiation spike deflection."],
-    ["stim-pulse-weave","Pulse Weave","stim",1,2,0,"Helix","wave","Dual-helix sine dodger. Hold to contract, release to expand."],
     ["stim-gravity-sling","Gravity Sling","stim",1,2,0,"Cosmic","sling","Tether planetary cores and release at the perfect tangent."],
 
     /* ---- TRENDING & STARTERS (12) ---- */
@@ -303,21 +297,15 @@
     ["wheel-of-forfeits","Forfeit Wheel","trending",2,12,1,"Wheel","wheel","Physics-driven spinning forfeit wheel."],
 
     /* ---- ARCADE REFLEX & GAUNTLETS (17) ---- */
-    ["pachinko-drop","Pachinko","arcade",1,6,1,"Physics","peg","Pinboard drop with spinning bumpers and multiplier bins."],
     ["cyber-stacker","Tower Stacker","arcade",1,6,1,"Precision","stack","Fifteen-tier prize block alignment stacker."],
     ["flappy-penalty","Flappy Flight","arcade",2,8,1,"Arcade","bird","Single-tap flight gauntlet tournament."],
-    ["pinball-plunger","Neon Pinball","arcade",1,4,1,"Pinball","pinball","Spring plunger pinball with multiball."],
     ["gravity-lander","Lunar Lander","arcade",1,4,1,"Physics","lander","Vector thruster terrain landing simulator."],
-    ["neon-snake-survival","Neon Snake","arcade",1,6,1,"Tournament","snake","Fast-turn snake with per-player length quotas."],
     ["cyber-mole-smash","Mole Smasher","arcade",1,4,1,"Reflex","mole","Multi-touch reflex smashing grid."],
     ["neon-shuffleboard","Shuffleboard","arcade",2,6,1,"Friction","puck","Touch-slide puck hanger challenge."],
-    ["brick-breaker-blitz","Brick Blitz","arcade",1,4,1,"Breakout","brick","Paddle breakout with power-up drops."],
     ["rhythm-beat-smasher","Beat Smasher","arcade",1,4,1,"Highway","note","Four-lane note highway rhythm trial."],
     ["laser-bullet-hell","Bullet Hell","arcade",1,4,1,"Dodger","bolt","Geometric projectile dodging arena."],
     ["gyro-tilt-maze","Gyro Maze","arcade",1,4,1,"Sensors","maze","Accelerometer rolling marble maze."],
-    ["retro-lane-racer","Lane Racer","arcade",1,4,1,"Speed","car","Three-lane highway drift speed run."],
     ["quick-draw-duel","Quick-Draw","arcade",2,2,1,"Reaction","bolt","Split-screen two-player lift-speed duel."],
-    ["finger-guillotine","Guillotine","arcade",2,2,1,"Showdown","guillo","Reaction trap blade pull showdown."],
     ["finger-roulette","Finger Roulette","arcade",2,6,1,"Touch","ring","Multi-touch electric finger chooser."],
     ["five-second-blitz","5-Sec Blitz","arcade",2,10,1,"Marble","clock","Descending marble three-answer timer."],
 
@@ -327,7 +315,6 @@
     ["decrypto-blitz","Decrypto","deduction",4,10,0,"Cipher","cipher","Three-digit keyword encryption race."],
     ["cheat-bullshit","Bullshit Cheat","deduction",2,8,1,"Shedding","cards","Card shedding bluff with a giant call buzzer."],
     ["liars-dice-3d","Liars Dice 3D","deduction",2,6,0,"Pocket","dice","Enhanced 3D cup variant with dice loss tracking."],
-    ["medusa-360-gaze","Medusa 360 Gaze","deduction",3,10,1,"Radial","eye","Center-table radial eye contact showdown."],
     ["two-rooms-lite","Two Rooms Lite","deduction",6,16,0,"Hostages","rooms","President vs Bomber hostage split on one phone."],
     ["radio-morse-intercept","Morse Intercept","deduction",2,8,0,"Audio","radio","Web Audio coded transmission decoding."],
     ["wave-length-pocket","Wavelength","deduction",2,12,0,"Spectrum","dial","Binary psychic spectrum dial tuning."],
@@ -611,7 +598,7 @@
           html += `<div class="v-row v-bad">${esc(r.g.path)} [${r.code}]</div>`;
         });
       } else {
-        html += `<h3 class="v-ok">All 67 routes successfully resolved!</h3>`;
+        html += `<h3 class="v-ok">All 43 routes successfully resolved!</h3>`;
       }
 
       body.innerHTML = html;
@@ -663,7 +650,8 @@
       </div>
     </div>
 
-    <!-- Right: QA Control & Bug Inspector Panel -->
+
+    <!-- Right: QA Control & Bug Inspector Panel 
     <div style="width:340px;background:#12161f;border-radius:12px;border:1px solid #1e293b;padding:14px;box-sizing:border-box;display:flex;flex-direction:column;gap:10px;overflow-y:auto;">
       <div style="font-family:monospace;font-size:11px;color:#94a3b8;text-transform:uppercase;">Flaw Checklist</div>
       <div style="display:grid;grid-template-columns:1fr;gap:6px;font-size:12px;">
@@ -695,6 +683,7 @@
     </div>
   </div>
 </div>
+-->
 
 <script>
 (function() {
