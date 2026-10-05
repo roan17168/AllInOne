@@ -1,5 +1,5 @@
 /* ==========================================================================
-   PARTYDECK — THEME TOKEN CONTRACT
+   AllInOne — THEME TOKEN CONTRACT
    Every game consumes these variables. Nothing else.
    Specificity note: :root holds the DEFAULT set. Each [data-theme] block
    overrides it. They are never combined in one selector (that was the bug).

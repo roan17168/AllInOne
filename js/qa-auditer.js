@@ -1,13 +1,13 @@
 /**
- * PARTYDECK IN-GAME QA AUDIT & ERROR COMPILER (Bulletproof Mounting)
+ * AllInOne IN-GAME QA AUDIT & ERROR COMPILER (Bulletproof Mounting)
  * File: js/qa-auditor.js
  */
 (function (window, document) {
   "use strict";
 
-  console.log("🐞 [PartyDeck QA Auditor] Initializing...");
+  console.log("🐞 [AllInOne QA Auditor] Initializing...");
 
-  const STORAGE_KEY = "partydeck_qa_audit_log";
+  const STORAGE_KEY = "AllInOne_qa_audit_log";
   const sessionErrors = [];
 
   /* Error trapping */
@@ -272,7 +272,7 @@
     modal.innerHTML = `
       <div class="pd-qa-card">
         <div class="pd-qa-header">
-          <div class="pd-qa-title">🐞 PartyDeck Bug Logger</div>
+          <div class="pd-qa-title">🐞 AllInOne Bug Logger</div>
           <button type="button" class="pd-qa-close" id="pd-qa-btn-close">&times;</button>
         </div>
         <div class="pd-qa-body">
@@ -357,7 +357,7 @@
     document.getElementById("pd-qa-btn-export").addEventListener("click", () => {
       const logs = getAuditLog();
       if (!logs.length) return alert("No games flagged yet!");
-      let md = `# 🛠️ PARTYDECK COMPREHENSIVE QA AUDIT & FIX REPORT\n\n`;
+      let md = `# 🛠️ AllInOne COMPREHENSIVE QA AUDIT & FIX REPORT\n\n`;
       logs.forEach((item, i) => {
         md += `### ${i + 1}. \`${item.path}\` (ID: ${item.gameId})\n`;
         md += `- **Flaws:** ${item.categories.join(", ") || "General"}\n`;
@@ -370,7 +370,7 @@
       const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = `PARTYDECK_BUG_AUDIT_${Date.now()}.md`;
+      a.download = `AllInOne_BUG_AUDIT_${Date.now()}.md`;
       a.click();
     });
 
@@ -384,7 +384,7 @@
     });
 
     updatePillBadge();
-    console.log("🐞 [PartyDeck QA Auditor] Button mounted successfully!");
+    console.log("🐞 [AllInOne QA Auditor] Button mounted successfully!");
   }
 
   // Self-executing bootstrap

@@ -1,4 +1,4 @@
-# PartyDeck (Arcade Edition) 🕹️
+# AllInOne (Arcade Edition) 🕹️
 
 A zero-backend, 100% static party game hub engineered for offline mobile browsers and tabletop group play. Features a custom SVG vector HUD aesthetic with zero system emojis.
 

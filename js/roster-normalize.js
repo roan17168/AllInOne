@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const KEY = "partydeck_players";
+  const KEY = "AllInOne_players";
 
   try {
     const raw = localStorage.getItem(KEY);

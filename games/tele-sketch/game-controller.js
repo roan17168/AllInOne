@@ -31,7 +31,7 @@
 
   /* =====================================================================
      0 · SAFE DEPENDENCY SHIMS
-     The module must run even if icons.js / partydeck-sdk.js are absent.
+     The module must run even if icons.js / AllInOne-sdk.js are absent.
      ===================================================================== */
 
   const LOCAL_ICONS = {
@@ -59,14 +59,14 @@
     return LOCAL_ICONS[name] || LOCAL_ICONS.palette;
   }
 
-  const SDK = window.PartyDeck || {};
+  const SDK = window.AllInOne || {};
   const PD = {
     getPlayers: SDK.getPlayers || function () {
-      try { return JSON.parse(localStorage.getItem("partydeck_players") || "[]"); }
+      try { return JSON.parse(localStorage.getItem("AllInOne_players") || "[]"); }
       catch (e) { return []; }
     },
     setPlayers: SDK.setPlayers || function (arr) {
-      try { localStorage.setItem("partydeck_players", JSON.stringify(arr)); } catch (e) {}
+      try { localStorage.setItem("AllInOne_players", JSON.stringify(arr)); } catch (e) {}
     },
     vibrate: SDK.vibrate || function (p) {
       if (navigator.vibrate) { try { navigator.vibrate(p); } catch (e) {} }
@@ -77,7 +77,7 @@
   /* Apply the saved theme immediately (also covers a missing theme-engine). */
   (function applyTheme() {
     let t = "cyber-neon";
-    try { t = localStorage.getItem("partydeck_theme") || t; } catch (e) {}
+    try { t = localStorage.getItem("AllInOne_theme") || t; } catch (e) {}
     document.documentElement.setAttribute("data-theme", t);
     const meta = document.getElementById("metaThemeColor");
     const map = { "cyber-neon": "#08090c", "sunset-rave": "#0f071d", "retro-arcade": "#12131c", "minimal-light": "#f4f6f9" };
@@ -630,7 +630,7 @@
     g.fillText("TELE-SKETCH", PAD, 52);
     g.fillStyle = "#8b9bb4";
     g.font = "700 16px 'Space Mono', Courier, monospace";
-    g.fillText("CHAIN OF " + chain.owner.toUpperCase() + "  \u00B7  PARTYDECK", PAD, 80);
+    g.fillText("CHAIN OF " + chain.owner.toUpperCase() + "  \u00B7  AllInOne", PAD, 80);
     g.strokeStyle = "rgba(0,255,204,.3)";
     g.lineWidth = 2;
     g.beginPath(); g.moveTo(PAD, 92); g.lineTo(W - PAD, 92); g.stroke();

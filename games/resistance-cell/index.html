@@ -5,9 +5,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#08090c" />
-<title>Resistance: Mini-Cell | PartyDeck</title>
+<title>Resistance: Mini-Cell | AllInOne</title>
 <script>
-(function(){try{var t=localStorage.getItem("partydeck_theme");if(!/^(nordic-slate|tokyo-sunset|terracotta-clay|emerald-lounge|alpine-mist|synthwave-84)$/.test(t||""))t="nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","nordic-slate");}})();
+(function(){try{var t=localStorage.getItem("AllInOne_theme");if(!/^(nordic-slate|tokyo-sunset|terracotta-clay|emerald-lounge|alpine-mist|synthwave-84)$/.test(t||""))t="nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","nordic-slate");}})();
 </script>
 <link rel="stylesheet" href="../../css/themes.css" />
 <link rel="stylesheet" href="../../css/base.css" />
@@ -195,11 +195,11 @@ lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2
 close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'};
 function ICO(k){return LOCAL[k]||'';}
 document.querySelectorAll('[data-ic]').forEach(function(el){el.innerHTML=ICO(el.getAttribute('data-ic'));});
-var PD={getPlayers:function(){try{return JSON.parse(localStorage.getItem("partydeck_players")||"[]");}catch(e){return[];}},
-setPlayers:function(a){try{localStorage.setItem("partydeck_players",JSON.stringify(a));}catch(e){}},
+var PD={getPlayers:function(){try{return JSON.parse(localStorage.getItem("AllInOne_players")||"[]");}catch(e){return[];}},
+setPlayers:function(a){try{localStorage.setItem("AllInOne_players",JSON.stringify(a));}catch(e){}},
 exitToHub:function(){window.location.href="../../index.html";},
 vibrate:function(p){if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}};
-(function(){var t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}document.documentElement.setAttribute("data-theme",t);})();
+(function(){var t="cyber-neon";try{t=localStorage.getItem("AllInOne_theme")||t;}catch(e){}document.documentElement.setAttribute("data-theme",t);})();
 var Sfx={ctx:null,ok:function(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume();return !!this.ctx;},
 t:function(f,d,type,vol,delay){if(!this.ok())return;var c=this.ctx,t0=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();o.type=type||"square";o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(vol||.14,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d);},
 play:function(n){if(n==="click")this.t(880,.045,"square",.1);else if(n==="reveal")this.t(360,.18,"sine",.14);else if(n==="approve"){this.t(523,.08,"triangle",.15);this.t(659,.1,"triangle",.13,.06);}else if(n==="reject")this.t(220,.16,"sawtooth",.15);else if(n==="win"){this.t(523,.08,"triangle",.15);this.t(659,.08,"triangle",.15,.07);this.t(784,.14,"triangle",.15,.14);}else if(n==="lose")this.t(160,.3,"sawtooth",.18);}};

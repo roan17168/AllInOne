@@ -1,11 +1,11 @@
 /**
- * PARTYDECK Universal Theme Engine
+ * AllInOne Universal Theme Engine
  * Syncs and persists 4 arcade themes across Hub & all 20 game modules.
  */
 (function () {
   "use strict";
 
-  const THEME_KEY = "partydeck_theme";
+  const THEME_KEY = "AllInOne_theme";
   const DEFAULT_THEME = "cyber-neon";
   const THEME_COLORS = {
     "cyber-neon": "#08090c",
@@ -49,8 +49,8 @@
       themeSelector.value = savedTheme;
       themeSelector.addEventListener("change", (e) => {
         applyTheme(e.target.value);
-        if (window.PartyDeck && PartyDeck.playSound) {
-          PartyDeck.playSound("click");
+        if (window.AllInOne && AllInOne.playSound) {
+          AllInOne.playSound("click");
         }
       });
     }

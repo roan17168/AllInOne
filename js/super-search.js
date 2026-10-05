@@ -1,8 +1,8 @@
 /**
- * PARTYDECK SUPER-SEARCH & ALIAS ENGINE
+ * AllInOne SUPER-SEARCH & ALIAS ENGINE
  * File: js/super-search.js
  * 
- * Provides client-side fuzzy searching against PartyDeck games, tags, descriptions,
+ * Provides client-side fuzzy searching against AllInOne games, tags, descriptions,
  * and a built-in knowledge bank of 60+ popular commercial and classic game aliases.
  */
 
@@ -86,7 +86,7 @@
       .replace(/[^a-z0-9]/g, "");
   }
 
-  const PartyDeckSearch = {
+  const AllInOneSearch = {
     getAliasBank: function () {
       return ALIAS_BANK.slice();
     },
@@ -159,5 +159,5 @@
     }
   };
 
-  window.PartyDeckSearch = PartyDeckSearch;
+  window.AllInOneSearch = AllInOneSearch;
 })(window);

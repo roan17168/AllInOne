@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const THEME_KEY = "partydeck_theme";
+  const THEME_KEY = "AllInOne_theme";
   const VALID_THEMES = new Set([
     "nordic-slate",
     "tokyo-sunset",

@@ -1,6 +1,6 @@
 /* ==========================================================================
    TELE-SKETCH — self-contained arcade module styles
-   Inherits PartyDeck theme tokens when themes.css is present; the :root block
+   Inherits AllInOne theme tokens when themes.css is present; the :root block
    below is a fallback so the module always renders correctly standalone.
    ========================================================================== */
 

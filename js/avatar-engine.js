@@ -1,5 +1,5 @@
 /**
- * PARTYDECK AVATAR & ROSTER DUAL-ENGINE
+ * AllInOne AVATAR & ROSTER DUAL-ENGINE
  * File: js/avatar-engine.js
  * 
  * Features:
@@ -196,7 +196,7 @@
   /* ==========================================================================
      4. ROSTER STORE & NORMALIZER
      ========================================================================== */
-  const STORAGE_KEY = "partydeck_players";
+  const STORAGE_KEY = "AllInOne_players";
 
   function normalizePlayer(p, idx) {
     if (typeof p === "string") {
@@ -267,7 +267,7 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(activeRoster));
     } catch (e) {}
 
-    const ev = new CustomEvent("partydeck:rosterupdated", {
+    const ev = new CustomEvent("AllInOne:rosterupdated", {
       detail: { roster: activeRoster.slice() }
     });
     window.dispatchEvent(ev);
@@ -574,7 +574,7 @@
   /* ==========================================================================
      6. PUBLIC API SPECIFICATION
      ========================================================================== */
-  const PartyDeckAvatars = {
+  const AllInOneAvatars = {
     getAll() {
       return MASCOTS.slice();
     },
@@ -620,5 +620,5 @@
     }
   };
 
-  window.PartyDeckAvatars = PartyDeckAvatars;
+  window.AllInOneAvatars = AllInOneAvatars;
 })(window);

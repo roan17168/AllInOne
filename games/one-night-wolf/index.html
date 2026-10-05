@@ -5,9 +5,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta name="theme-color" content="#08090c" />
-<title>One Night Werewolf | PartyDeck</title>
+<title>One Night Werewolf | AllInOne</title>
 <script>
-(function(){try{var t=localStorage.getItem("partydeck_theme");if(!/^(nordic-slate|tokyo-sunset|terracotta-clay|emerald-lounge|alpine-mist|synthwave-84)$/.test(t||""))t="nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","nordic-slate");}})();
+(function(){try{var t=localStorage.getItem("AllInOne_theme");if(!/^(nordic-slate|tokyo-sunset|terracotta-clay|emerald-lounge|alpine-mist|synthwave-84)$/.test(t||""))t="nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","nordic-slate");}})();
 </script>
 <link rel="stylesheet" href="../../css/themes.css" />
 <link rel="stylesheet" href="../../css/base.css" />
@@ -219,11 +219,11 @@ lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2
 close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>'};
 function ICO(k){return LOCAL[k]||'';}
 document.querySelectorAll('[data-ic]').forEach(function(el){el.innerHTML=ICO(el.getAttribute('data-ic'));});
-var PD={getPlayers:function(){try{return JSON.parse(localStorage.getItem("partydeck_players")||"[]");}catch(e){return[];}},
-setPlayers:function(a){try{localStorage.setItem("partydeck_players",JSON.stringify(a));}catch(e){}},
+var PD={getPlayers:function(){try{return JSON.parse(localStorage.getItem("AllInOne_players")||"[]");}catch(e){return[];}},
+setPlayers:function(a){try{localStorage.setItem("AllInOne_players",JSON.stringify(a));}catch(e){}},
 exitToHub:function(){window.location.href="../../index.html";},
 vibrate:function(p){if(navigator.vibrate)try{navigator.vibrate(p);}catch(e){}}};
-(function(){var t="cyber-neon";try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}document.documentElement.setAttribute("data-theme",t);})();
+(function(){var t="cyber-neon";try{t=localStorage.getItem("AllInOne_theme")||t;}catch(e){}document.documentElement.setAttribute("data-theme",t);})();
 
 var Sfx={ctx:null,ok:function(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(this.ctx&&this.ctx.state==="suspended")this.ctx.resume();return !!this.ctx;},
 t:function(f,d,type,vol,delay){if(!this.ok())return;var c=this.ctx,t0=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();o.type=type||"square";o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(vol||.14,t0);g.gain.exponentialRampToValueAtTime(.0001,t0+d);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d);},
@@ -390,7 +390,7 @@ function showActionScreen(role, playerIdx, onContinue){
    var h='';
    for(var c=0;c<3;c++) h+='<button class="tile" type="button" data-c="'+c+'">Center '+(c+1)+'</button>';
    grid.innerHTML=h;
-  grid.onclick=function(e){var b=e.target.closest('[data-c]');if(b){ showPartyDeckMessage('Center '+((+b.dataset.c)+1)+' is: '+S.centerCards[+b.dataset.c]); b.classList.add('is-on'); $('btnActionDone').disabled=false; Sfx.play('click'); }};
+  grid.onclick=function(e){var b=e.target.closest('[data-c]');if(b){ showAllInOneMessage('Center '+((+b.dataset.c)+1)+' is: '+S.centerCards[+b.dataset.c]); b.classList.add('is-on'); $('btnActionDone').disabled=false; Sfx.play('click'); }};
   } else { $('btnActionDone').disabled=false; }
  }
  else if(role==='Seer'){
@@ -401,10 +401,10 @@ function showActionScreen(role, playerIdx, onContinue){
   grid.innerHTML=h;
   grid.onclick=function(e){
    var pb=e.target.closest('[data-p]'); var cb=e.target.closest('[data-c]');
-  if(pb){ showPartyDeckMessage(roster[+pb.dataset.p]+"'s card is: "+S.currentRoles[+pb.dataset.p]); pb.classList.add('is-on'); $('btnActionDone').disabled=false; Sfx.play('click'); }
+  if(pb){ showAllInOneMessage(roster[+pb.dataset.p]+"'s card is: "+S.currentRoles[+pb.dataset.p]); pb.classList.add('is-on'); $('btnActionDone').disabled=false; Sfx.play('click'); }
    else if(cb){
     cb.classList.add('is-on'); selected.push(+cb.dataset.c);
-    showPartyDeckMessage('Center '+((+cb.dataset.c)+1)+' is: '+S.centerCards[+cb.dataset.c]);
+    showAllInOneMessage('Center '+((+cb.dataset.c)+1)+' is: '+S.centerCards[+cb.dataset.c]);
     Sfx.play('click');
     if(selected.length>=1) $('btnActionDone').disabled=false;
    }
@@ -419,7 +419,7 @@ function showActionScreen(role, playerIdx, onContinue){
    var b=e.target.closest('[data-p]'); if(!b)return;
    var targetIdx=+b.dataset.p;
    var tmp=S.currentRoles[playerIdx]; S.currentRoles[playerIdx]=S.currentRoles[targetIdx]; S.currentRoles[targetIdx]=tmp;
-  showPartyDeckMessage("You swapped with "+roster[targetIdx]+". Your new role is: "+S.currentRoles[playerIdx]);
+  showAllInOneMessage("You swapped with "+roster[targetIdx]+". Your new role is: "+S.currentRoles[playerIdx]);
    grid.querySelectorAll('.tile').forEach(function(t){t.classList.remove('is-on');}); b.classList.add('is-on');
    $('btnActionDone').disabled=false; Sfx.play('click');
   };

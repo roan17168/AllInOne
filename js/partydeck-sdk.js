@@ -1,22 +1,22 @@
 /**
- * PARTYDECK SDK
+ * AllInOne SDK
  * Lightweight shared bridge for standalone games.
  */
-const PartyDeck = {
+const AllInOne = {
   // Theme helpers
-  getTheme: () => localStorage.getItem("partydeck_theme") || "cyber-neon",
+  getTheme: () => localStorage.getItem("AllInOne_theme") || "cyber-neon",
   
   // Player roster helpers
   getPlayers: () => {
     try {
-      return JSON.parse(localStorage.getItem("partydeck_players") || "[]");
+      return JSON.parse(localStorage.getItem("AllInOne_players") || "[]");
     } catch (e) {
       return [];
     }
   },
   
   setPlayers: (playersArray) => {
-    localStorage.setItem("partydeck_players", JSON.stringify(playersArray));
+    localStorage.setItem("AllInOne_players", JSON.stringify(playersArray));
   },
 
   // Haptic feedback
@@ -72,6 +72,6 @@ const PartyDeck = {
 
 // Auto-sync theme on load for standalone pages
 (function() {
-  const currentTheme = PartyDeck.getTheme();
+  const currentTheme = AllInOne.getTheme();
   document.documentElement.setAttribute("data-theme", currentTheme);
 })();

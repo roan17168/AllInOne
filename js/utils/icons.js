@@ -1,5 +1,5 @@
 /**
- * PARTYDECK Vector Icon Engine
+ * AllInOne Vector Icon Engine
  * Crisp 24x24 SVG icons with stroke="currentColor" and stroke-width="2".
  * Zero unicode emojis across the entire platform.
  */

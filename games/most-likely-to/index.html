@@ -7,10 +7,10 @@
 <meta name="theme-color" content="#0e1117" id="metaThemeColor" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<title>Most Likely To... | PartyDeck</title>
+<title>Most Likely To... | AllInOne</title>
 
 <script>
-(function(){try{var t=localStorage.getItem("partydeck_theme")||"nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+(function(){try{var t=localStorage.getItem("AllInOne_theme")||"nordic-slate";document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -224,7 +224,7 @@
 
   let roster = ["Alex", "Jordan", "Taylor", "Sam"];
   try {
-    const raw = localStorage.getItem("partydeck_players");
+    const raw = localStorage.getItem("AllInOne_players");
     if(raw) { const arr = JSON.parse(raw); if(Array.isArray(arr) && arr.length >= 2) roster = arr; }
   } catch(e){}
 

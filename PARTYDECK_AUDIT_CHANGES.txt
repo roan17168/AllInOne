@@ -1,4 +1,4 @@
-PartyDeck audit change inventory
+AllInOne audit change inventory
 Generated: 2026-09-28
 
 Hub and shared files

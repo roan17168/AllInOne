@@ -4,7 +4,7 @@
   let dialog;
   let message;
 
-  function showPartyDeckMessage(text) {
+  function showAllInOneMessage(text) {
     if (!dialog) {
       dialog = document.createElement("dialog");
       dialog.className = "pd-feedback-dialog";
@@ -12,7 +12,7 @@
 
       const heading = document.createElement("h2");
       heading.id = "pdFeedbackTitle";
-      heading.textContent = "PartyDeck";
+      heading.textContent = "AllInOne";
 
       message = document.createElement("p");
       message.setAttribute("aria-live", "polite");
@@ -32,5 +32,5 @@
     if (!dialog.open) dialog.showModal();
   }
 
-  window.showPartyDeckMessage = showPartyDeckMessage;
+  window.showAllInOneMessage = showAllInOneMessage;
 })();

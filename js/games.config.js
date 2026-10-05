@@ -1,5 +1,5 @@
 /**
- * PARTYDECK Master Game Catalog Configuration
+ * AllInOne Master Game Catalog Configuration
  * Zero-emoji vector metadata configuration.
  */
 const PARTY_GAMES = [

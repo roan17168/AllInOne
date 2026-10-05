@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="nordic-slate">
 <head>
-  <!-- ================= PARTYDECK BRAND FAVICON & IOS TOUCH ICON ================= -->
+  <!-- ================= AllInOne BRAND FAVICON & IOS TOUCH ICON ================= -->
 <!-- 1. Desktop & Android Vector Favicon (Header 3-Tier Stack Logo) -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e1117'/%3E%3Cg fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='16 4 3 10.5 16 17 29 10.5 16 4' fill='%231f2633'/%3E%3Cpolyline points='3 17 16 23.5 29 17' stroke='%23ff0055'/%3E%3Cpolyline points='3 23.5 16 30 29 23.5' stroke='%2300ffaa'/%3E%3C/g%3E%3C/svg%3E">
 
 <!-- 2. iOS Home Screen Touch Icon Generator (Auto-converts Stack SVG to PNG for iOS Safari) -->
 <link id="pd-apple-touch-icon" rel="apple-touch-icon" href="" />
-<meta name="apple-mobile-web-app-title" content="PartyDeck" />
+<meta name="apple-mobile-web-app-title" content="AllInOne" />
 
 <script>
 (function() {
@@ -67,8 +67,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="PartyDeck" />
-  <title>PartyDeck | All-in-One Offline Party Studio</title>
+  <meta name="apple-mobile-web-app-title" content="AllInOne" />
+  <title>AllInOne | All-in-One Offline Party Studio</title>
 
   <!-- Technical Contract: Google Fonts Only -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,7 +112,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
         </div>
         <div class="hub-brand-text">
-          <span class="hub-title">PARTYDECK</span>
+          <span class="hub-title">AllInOne</span>
           <span class="hub-subtitle" id="hubModuleCount">43 OFFLINE MODULES</span>
         </div>
       </div>
@@ -358,7 +358,7 @@
     return { total: ALL_GAMES.length, dupIds, badCat };
   })();
 
-  if (AUDIT.dupIds.length) console.error("[PartyDeck] Duplicate IDs:", AUDIT.dupIds);
+  if (AUDIT.dupIds.length) console.error("[AllInOne] Duplicate IDs:", AUDIT.dupIds);
   $("hubModuleCount").textContent = `${AUDIT.total} OFFLINE MODULES`;
 
   /* ==================================================================
@@ -495,7 +495,7 @@
      ================================================================== */
   (() => {
     let saved = null;
-    try { saved = localStorage.getItem("partydeck_theme"); } catch (e) {}
+    try { saved = localStorage.getItem("AllInOne_theme"); } catch (e) {}
     if (!saved) return;
     document.documentElement.setAttribute("data-theme", saved);
     document.querySelectorAll(".theme-chip").forEach(chip => {
@@ -510,7 +510,7 @@
     chip.classList.add("is-active");
     const theme = chip.dataset.theme;
     document.documentElement.setAttribute("data-theme", theme);
-    try { localStorage.setItem("partydeck_theme", theme); } catch (err) {}
+    try { localStorage.setItem("AllInOne_theme", theme); } catch (err) {}
     showToast(`Theme: ${chip.textContent.trim()}`);
   });
 
@@ -545,20 +545,20 @@
      ROSTER BRIDGE
      ================================================================== */
   function updateRosterBadge() {
-    if (!window.PartyDeckAvatars) return;
-    const r = window.PartyDeckAvatars.getRoster() || [];
+    if (!window.AllInOneAvatars) return;
+    const r = window.AllInOneAvatars.getRoster() || [];
     $("rosterBadgeCount").textContent = r.length;
   }
 
   $("btnOpenRoster").onclick = () => {
-    if (!window.PartyDeckAvatars) { showToast("Avatar engine not loaded."); return; }
-    window.PartyDeckAvatars.openRosterModal(roster => {
+    if (!window.AllInOneAvatars) { showToast("Avatar engine not loaded."); return; }
+    window.AllInOneAvatars.openRosterModal(roster => {
       updateRosterBadge();
       showToast(`${roster.length} players ready.`);
     });
   };
 
-  window.addEventListener("partydeck:rosterupdated", updateRosterBadge);
+  window.addEventListener("AllInOne:rosterupdated", updateRosterBadge);
   updateRosterBadge();
 
   /* ==================================================================
@@ -568,7 +568,7 @@
     const overlay = $("verifyOverlay");
     const body = $("verifyBody");
     overlay.classList.add("is-open");
-    body.innerHTML = `<h3>PartyDeck Registry Report</h3><div class="v-dim">Probing ${ALL_GAMES.length} routes...</div>`;
+    body.innerHTML = `<h3>AllInOne Registry Report</h3><div class="v-dim">Probing ${ALL_GAMES.length} routes...</div>`;
 
     const results = [];
     let done = 0;
@@ -587,7 +587,7 @@
       const missing = res.filter(r => !r.ok);
       const live = res.filter(r => r.ok);
 
-      let html = "<h3>PartyDeck Registry Report</h3>";
+      let html = "<h3>AllInOne Registry Report</h3>";
       html += `<div class="v-row">Registered modules: <strong>${AUDIT.total}</strong></div>`;
       html += `<div class="v-row">Duplicate IDs: <span class="${AUDIT.dupIds.length ? 'v-bad' : 'v-ok'}">${AUDIT.dupIds.length ? AUDIT.dupIds.join(", ") : "none"}</span></div>`;
       html += `<div class="v-row">Reachable routes: <span class="v-ok">${live.length}</span> of ${res.length}</div>`;
@@ -612,7 +612,7 @@
   }
 })();
 </script>
-<!-- ================= PARTYDECK CENTRAL QA RIG ================= 
+<!-- ================= AllInOne CENTRAL QA RIG ================= 
 <div id="pd-qa-fab" style="position:fixed;bottom:20px;right:20px;z-index:999999;background:#ff0055;color:#fff;padding:12px 18px;border-radius:999px;font-family:monospace;font-size:12px;font-weight:900;cursor:pointer;box-shadow:0 0 25px rgba(255,0,85,0.8);border:2px solid #fff;display:flex;align-items:center;gap:8px;text-transform:uppercase;">
   🐞 <span>QA Test Studio</span>
   <span id="pd-qa-badge" style="background:rgba(0,0,0,0.35);padding:2px 8px;border-radius:10px;font-size:10px;">0 Flagged</span>
@@ -625,7 +625,7 @@
   <!-- Studio Top Bar -->
   <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#12161f;border-radius:10px;border:1px solid #1e293b;margin-bottom:10px;gap:10px;flex-wrap:wrap;">
     <div style="display:flex;align-items:center;gap:10px;">
-      <strong style="color:#ff0055;font-family:monospace;font-size:14px;letter-spacing:1px;">PARTYDECK QA RIG</strong>
+      <strong style="color:#ff0055;font-family:monospace;font-size:14px;letter-spacing:1px;">AllInOne QA RIG</strong>
       <select id="pd-rig-game-select" style="background:#090c12;color:#38bdf8;border:1px solid #334155;padding:6px 10px;border-radius:6px;font-family:monospace;font-size:12px;outline:none;max-width:240px;"></select>
       <button type="button" id="pd-rig-btn-reload" style="background:#1e293b;color:#cbd5e1;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-family:monospace;font-size:11px;">🔄 Reload</button>
     </div>
@@ -688,7 +688,7 @@
 
 <script>
 (function() {
-  const STORAGE_KEY = "partydeck_qa_audit_log";
+  const STORAGE_KEY = "AllInOne_qa_audit_log";
   let frameErrors = [];
 
   function getLogs() {
@@ -821,11 +821,11 @@
     const logs = getLogs();
     if (!logs.length) return alert("No games flagged yet! Select broken games and click 'Flag Game'.");
 
-    let md = `# 🛠️ PARTYDECK COMPREHENSIVE QA AUDIT & FIX REPORT\n`;
+    let md = `# 🛠️ AllInOne COMPREHENSIVE QA AUDIT & FIX REPORT\n`;
     md += `**Date:** ${new Date().toLocaleString()}\n`;
     md += `**Total Flagged Games:** ${logs.length}\n\n`;
     md += `## 📋 DIRECTIVES FOR LLM FIXES\n`;
-    md += `Please rewrite the following broken PartyDeck games in full single-file implementations.\n`;
+    md += `Please rewrite the following broken AllInOne games in full single-file implementations.\n`;
     md += `Ensure:\n`;
     md += `1. Root mobile container uses \`min-height: 100%; height: 100dvh; overflow-y: auto\`.\n`;
     md += `2. Canvas DPR scaling is active.\n`;
@@ -846,7 +846,7 @@
     const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `PARTYDECK_BUG_AUDIT_${Date.now()}.md`;
+    a.download = `AllInOne_BUG_AUDIT_${Date.now()}.md`;
     a.click();
   };
 

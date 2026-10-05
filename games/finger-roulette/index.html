@@ -7,10 +7,10 @@
 <meta name="theme-color" content="#0e1117" id="metaThemeColor"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<title>Finger Roulette | PartyDeck</title>
+<title>Finger Roulette | AllInOne</title>
 
 <script>
-(function(){try{var t=localStorage.getItem("partydeck_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+(function(){try{var t=localStorage.getItem("AllInOne_theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
 </script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -210,7 +210,7 @@
 <script>
 "use strict";
 /* ==========================================================================
-   FINGER ROULETTE — PartyDeck Module (self-contained)
+   FINGER ROULETTE — AllInOne Module (self-contained)
    ========================================================================== */
 (function(){
 
@@ -300,10 +300,10 @@ function applyTheme(t){
 }
 function initTheme(){
   let t="nordic-slate";
-  try{t=localStorage.getItem("partydeck_theme")||t;}catch(e){}
+  try{t=localStorage.getItem("AllInOne_theme")||t;}catch(e){}
   applyTheme(t);
-  window.addEventListener("storage",e=>{if(e.key==="partydeck_theme")applyTheme(e.newValue);});
-  document.addEventListener("visibilitychange",()=>{if(!document.hidden){try{applyTheme(localStorage.getItem("partydeck_theme"));}catch(e){}}});
+  window.addEventListener("storage",e=>{if(e.key==="AllInOne_theme")applyTheme(e.newValue);});
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden){try{applyTheme(localStorage.getItem("AllInOne_theme"));}catch(e){}}});
 }
 let PAL=null;
 function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}

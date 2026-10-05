@@ -1,11 +1,11 @@
 /**
- * PARTYDECK Hub UI Controller
+ * AllInOne Hub UI Controller
  * Vector icon binding, filtering, and modal launchers.
  */
 document.addEventListener("DOMContentLoaded", () => {
-  // Universal PartyDeck Theme Switcher Fix
+  // Universal AllInOne Theme Switcher Fix
   const themeSelector = document.getElementById("themeSelect") || document.getElementById("themeSelector");
-  const THEME_STORAGE_KEY = "partydeck_theme";
+  const THEME_STORAGE_KEY = "AllInOne_theme";
   const VALID_THEMES = ["cyber-neon", "sunset-rave", "retro-arcade", "minimal-light"];
 
   function applyGlobalTheme(themeName) {
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     themeSelector.addEventListener("change", (e) => {
       applyGlobalTheme(e.target.value);
-      if (window.PartyDeck && PartyDeck.playSound) PartyDeck.playSound("click");
+      if (window.AllInOne && AllInOne.playSound) AllInOne.playSound("click");
     });
   }
 
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const previewTags = document.getElementById("previewTags");
 
   let activeCategory = "all";
-  let activeRoster = PartyDeck.getPlayers();
+  let activeRoster = AllInOne.getPlayers();
 
   function renderGames(category = "all") {
     if (countAll) countAll.textContent = PARTY_GAMES.length;
@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function openGameModal(game) {
-    PartyDeck.playSound("click");
+    AllInOne.playSound("click");
     previewIconBox.innerHTML = Icons.get(game.iconKey);
     previewCategory.textContent = `MODULE // ${game.category.toUpperCase()}`;
     previewTitle.textContent = game.title;
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   filterPills.forEach(pill => {
     pill.addEventListener("click", () => {
-      PartyDeck.playSound("click");
+      AllInOne.playSound("click");
       filterPills.forEach(p => p.classList.remove("active"));
       pill.classList.add("active");
       activeCategory = pill.dataset.category;
@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
       rosterList.appendChild(li);
     });
 
-    PartyDeck.setPlayers(activeRoster);
+    AllInOne.setPlayers(activeRoster);
   }
 
   addPlayerForm.addEventListener("submit", (e) => {
@@ -189,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (name && !activeRoster.includes(name)) {
       activeRoster.push(name);
       newPlayerName.value = "";
-      PartyDeck.playSound("click");
+      AllInOne.playSound("click");
       updateRosterUI();
     }
   });
@@ -199,19 +199,19 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btn) {
       const idx = parseInt(btn.dataset.idx, 10);
       activeRoster.splice(idx, 1);
-      PartyDeck.playSound("click");
+      AllInOne.playSound("click");
       updateRosterUI();
     }
   });
 
   btnClearRoster.addEventListener("click", () => {
     activeRoster = [];
-    PartyDeck.playSound("click");
+    AllInOne.playSound("click");
     updateRosterUI();
   });
 
   btnEditRoster.addEventListener("click", () => {
-    PartyDeck.playSound("click");
+    AllInOne.playSound("click");
     rosterModal.showModal();
   });
 
